@@ -7,6 +7,8 @@ import Sidebar from "@/components/Sidebar";
 import LinksList from "@/components/LinksList";
 import LivePreview from "@/components/LivePreview";
 import ProfileHeader from "@/components/ProfileHeader";
+import LinkForm from "@/components/LinkForm";
+import PageAppearance from "@/components/PageAppearance";
 
 const supabase = createClient();
 
@@ -17,7 +19,7 @@ export default function Dashboard() {
   const [links, setLinks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState("links");
+  const [activeTab, setActiveTab] = useState("manage-links");
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -87,22 +89,29 @@ export default function Dashboard() {
     }
   };
 
-  const addLink = async () => {
+  const addLink = async (linkData = {}) => {
     if (!user) return;
 
     const nextPosition = links.length > 0 
       ? Math.max(...links.map(l => l.position || 0)) + 1 
       : 0;
 
-    const { error } = await supabase.from("links").insert([
-      {
-        user_id: user.id,
-        title: "New Link",
-        url: "https://example.com",
-        position: nextPosition,
-        enabled: true
-      }
-    ]);
+    const newLink = {
+      user_id: user.id,
+      title: linkData.title || "New Link",
+      url: linkData.url || "https://example.com",
+      position: nextPosition,
+      enabled: true,
+      icon: linkData.icon || null,
+      thumbnail_url: linkData.thumbnail_url || null,
+      bg_type: linkData.bg_type || "color",
+      bg_color: linkData.bg_color || "#FFFFFF",
+      bg_image: linkData.bg_image || null,
+      text_color: linkData.text_color || "#1F2937",
+      font: linkData.font || "sans",
+    };
+
+    const { error } = await supabase.from("links").insert([newLink]);
 
     if (error) {
       console.error("Error adding link:", error);
@@ -111,6 +120,7 @@ export default function Dashboard() {
     }
 
     await fetchLinks(user.id);
+    setActiveTab("manage-links"); // Switch to manage links after creating
   };
 
   const updateLink = async (linkId, updates) => {
@@ -219,7 +229,9 @@ export default function Dashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </button>
-                <h1 className="text-xl sm:text-2xl font-bold text-white">Links</h1>
+                <h1 className="text-xl sm:text-2xl font-bold text-white">
+                  {activeTab === "create-link" ? "Create New Link" : activeTab === "appearance" ? "Appearance" : "Manage Links"}
+                </h1>
               </div>
               
               <div className="flex items-center gap-2">
@@ -259,23 +271,6 @@ export default function Dashboard() {
               </svg>
             </a>
 
-            {/* Profile Header Card */}
-            <ProfileHeader 
-              profile={profile}
-              updateProfile={updateProfile}
-            />
-
-            {/* Add Button */}
-            <button
-              onClick={addLink}
-              className="w-full py-3 sm:py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full mb-6 transition-all flex items-center justify-center gap-2"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Add
-            </button>
-
             {/* Error Message */}
             {error && (
               <div className="p-4 bg-red-500/20 text-red-400 rounded-lg mb-6 text-sm">
@@ -283,12 +278,44 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Links List */}
-            <LinksList 
-              links={links}
-              updateLink={updateLink}
-              deleteLink={deleteLink}
-            />
+            {/* Tab Content */}
+            {activeTab === "create-link" ? (
+              <LinkForm 
+                onSubmit={addLink}
+                onCancel={() => setActiveTab("manage-links")}
+              />
+            ) : activeTab === "appearance" ? (
+              <PageAppearance 
+                profile={profile}
+                updateProfile={updateProfile}
+              />
+            ) : (
+              <>
+                {/* Profile Header Card */}
+                <ProfileHeader 
+                  profile={profile}
+                  updateProfile={updateProfile}
+                />
+
+                {/* Create New Link Button */}
+                <button
+                  onClick={() => setActiveTab("create-link")}
+                  className="w-full py-3 sm:py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full mb-6 transition-all flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create New Link
+                </button>
+
+                {/* Links List */}
+                <LinksList 
+                  links={links}
+                  updateLink={updateLink}
+                  deleteLink={deleteLink}
+                />
+              </>
+            )}
           </div>
         </div>
 

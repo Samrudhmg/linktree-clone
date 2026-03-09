@@ -1,4 +1,43 @@
 import { supabase } from "@/lib/supabase";
+import PublicLinkItem from "@/components/PublicLinkItem";
+import Link from "next/link";
+
+// Helper functions for page styling
+const getPageBackgroundStyle = (profile) => {
+    const bgType = profile?.page_bg_type || "gradient";
+    if (bgType === "image" && profile?.page_bg_image) {
+        return { 
+            backgroundImage: `url(${profile.page_bg_image})`, 
+            backgroundSize: "cover", 
+            backgroundPosition: "center" 
+        };
+    }
+    if (bgType === "color") {
+        return { backgroundColor: profile?.page_bg_color || "#6366F1" };
+    }
+    return { 
+        background: `linear-gradient(135deg, ${profile?.page_bg_gradient_from || "#6366F1"} 0%, ${profile?.page_bg_gradient_to || "#A855F7"} 100%)` 
+    };
+};
+
+const getFontClass = (profile) => {
+    const fonts = {
+        sans: "font-sans",
+        serif: "font-serif",
+        mono: "font-mono",
+    };
+    return fonts[profile?.page_font] || "font-sans";
+};
+
+const getCardBorderRadius = (profile) => {
+    const radiusMap = {
+        none: "rounded-none",
+        sm: "rounded-lg",
+        rounded: "rounded-xl",
+        full: "rounded-full",
+    };
+    return radiusMap[profile?.card_border_radius] || "rounded-xl";
+};
 
 export default async function UserProfile({ params }) {
     const { username } = await params;
@@ -33,8 +72,15 @@ export default async function UserProfile({ params }) {
         console.error("Error fetching links:", linksError);
     }
 
+    const pageStyle = getPageBackgroundStyle(profile);
+    const fontClass = getFontClass(profile);
+    const borderRadiusClass = getCardBorderRadius(profile);
+
     return (
-        <div className="min-h-screen px-4 py-8 sm:p-8 bg-gradient-to-br from-indigo-500 to-purple-600 flex flex-col items-center">
+        <div 
+            className={`min-h-screen px-4 py-8 sm:p-8 flex flex-col items-center ${fontClass}`}
+            style={pageStyle}
+        >
             <div className="max-w-md w-full text-center">
                 {/* Profile Header */}
                 <div className="mb-6 sm:mb-8">
@@ -54,15 +100,12 @@ export default async function UserProfile({ params }) {
                         <p className="text-white/70 text-sm sm:text-base">No links available</p>
                     ) : (
                         links.map((link) => (
-                            <a
-                                key={link.id}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block p-3 sm:p-4 bg-white rounded-xl text-gray-800 font-medium text-sm sm:text-base hover:scale-[1.02] hover:shadow-lg transition-all duration-200"
-                            >
-                                {link.title}
-                            </a>
+                            <PublicLinkItem 
+                                key={link.id} 
+                                link={link} 
+                                profile={profile}
+                                borderRadiusClass={borderRadiusClass}
+                            />
                         ))
                     )}
                 </div>
@@ -72,12 +115,12 @@ export default async function UserProfile({ params }) {
                     <p className="text-white/50 text-xs sm:text-sm mb-2">
                         Powered by ELTLINKTREE
                     </p>
-                    <a 
+                    <Link
                         href="/login"
                         className="text-white/70 text-xs hover:text-white transition-all"
                     >
                         Create your own ELTLINKTREE
-                    </a>
+                    </Link>
                 </div>
             </div>
         </div>
