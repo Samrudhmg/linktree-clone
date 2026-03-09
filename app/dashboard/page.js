@@ -27,30 +27,49 @@ export default function Dashboard() {
     checkUser();
   }, []);
 
+  // Supabase Realtime: keep live preview in sync
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("links-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "links",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => fetchLinks(user.id)
+      )
+      .subscribe();
+    return () => supabase.removeChannel(channel);
+  }, [user]);
+
   const checkUser = async () => {
     try {
       const { data: { user }, error } = await supabase.auth.getUser();
-      
+
       if (error || !user) {
         router.push("/login");
         return;
       }
-      
+
       setUser(user);
-      
+
       // Check if user has a profile
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
         .single();
-      
+
       if (profileError || !profileData) {
         // No profile, redirect to setup
         router.push("/setup");
         return;
       }
-      
+
       setProfile(profileData);
       await fetchLinks(user.id);
     } catch (err) {
@@ -68,19 +87,19 @@ export default function Dashboard() {
         .select("*")
         .eq("user_id", userId)
         .order("position", { ascending: true });
-      
+
       if (error) {
         console.error("Error fetching links:", error);
         setError("Failed to load links");
         return;
       }
-      
+
       // Ensure enabled field has a boolean value
       const normalizedLinks = (data || []).map(link => ({
         ...link,
         enabled: link.enabled === true || link.enabled === null || link.enabled === undefined ? true : false
       }));
-      
+
       setLinks(normalizedLinks);
       setError(null);
     } catch (err) {
@@ -92,23 +111,16 @@ export default function Dashboard() {
   const addLink = async (linkData = {}) => {
     if (!user) return;
 
-    const nextPosition = links.length > 0 
-      ? Math.max(...links.map(l => l.position || 0)) + 1 
+    const nextPosition = links.length > 0
+      ? Math.max(...links.map(l => l.position || 0)) + 1
       : 0;
 
+    // Only insert columns present in the new schema
     const newLink = {
       user_id: user.id,
       title: linkData.title || "New Link",
       url: linkData.url || "https://example.com",
       position: nextPosition,
-      enabled: true,
-      icon: linkData.icon || null,
-      thumbnail_url: linkData.thumbnail_url || null,
-      bg_type: linkData.bg_type || "color",
-      bg_color: linkData.bg_color || "#FFFFFF",
-      bg_image: linkData.bg_image || null,
-      text_color: linkData.text_color || "#1F2937",
-      font: linkData.font || "sans",
     };
 
     const { error } = await supabase.from("links").insert([newLink]);
@@ -119,21 +131,31 @@ export default function Dashboard() {
       return;
     }
 
+    // Realtime subscription will refresh list automatically,
+    // but do a manual fetch as fallback for immediate feedback.
     await fetchLinks(user.id);
     setActiveTab("manage-links"); // Switch to manage links after creating
   };
 
   const updateLink = async (linkId, updates) => {
-    // Optimistically update UI first
-    setLinks(prevLinks => 
-      prevLinks.map(link => 
+    // Optimistically update UI first (includes local-only fields like enabled)
+    setLinks(prevLinks =>
+      prevLinks.map(link =>
         link.id === linkId ? { ...link, ...updates } : link
       )
     );
 
+    // Only persist columns that exist in the schema
+    const SCHEMA_FIELDS = ["title", "url", "position"];
+    const dbUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => SCHEMA_FIELDS.includes(key))
+    );
+
+    if (Object.keys(dbUpdates).length === 0) return; // nothing to persist
+
     const { error } = await supabase
       .from("links")
-      .update(updates)
+      .update(dbUpdates)
       .eq("id", linkId)
       .eq("user_id", user.id);
 
@@ -187,23 +209,23 @@ export default function Dashboard() {
     );
   }
 
-  const enabledLinks = links.filter(l => l.enabled === true);
+  // New schema has no 'enabled' column — track visibility locally only
+  const enabledLinks = links.filter(l => l.enabled !== false);
 
   return (
     <div className="min-h-screen bg-gray-900 flex">
       {/* Mobile Overlay */}
       {showSidebar && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setShowSidebar(false)}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed lg:relative z-50 lg:z-auto transition-transform duration-300 ${
-        showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      }`}>
-        <Sidebar 
+      <div className={`fixed lg:relative z-50 lg:z-auto transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}>
+        <Sidebar
           profile={profile}
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -233,7 +255,7 @@ export default function Dashboard() {
                   {activeTab === "create-link" ? "Create New Link" : activeTab === "appearance" ? "Appearance" : "Manage Links"}
                 </h1>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 {/* Mobile Preview Toggle */}
                 <button
@@ -245,8 +267,8 @@ export default function Dashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </button>
-                
-                <a 
+
+                <a
                   href={`/${profile?.username || "user"}`}
                   target="_blank"
                   className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-gray-300 rounded-full hover:bg-gray-700 transition-all text-xs sm:text-sm"
@@ -260,7 +282,7 @@ export default function Dashboard() {
             </div>
 
             {/* Mobile Link to Profile */}
-            <a 
+            <a
               href={`/${profile?.username || "user"}`}
               target="_blank"
               className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-all text-sm"
@@ -280,19 +302,19 @@ export default function Dashboard() {
 
             {/* Tab Content */}
             {activeTab === "create-link" ? (
-              <LinkForm 
+              <LinkForm
                 onSubmit={addLink}
                 onCancel={() => setActiveTab("manage-links")}
               />
             ) : activeTab === "appearance" ? (
-              <PageAppearance 
+              <PageAppearance
                 profile={profile}
                 updateProfile={updateProfile}
               />
             ) : (
               <>
                 {/* Profile Header Card */}
-                <ProfileHeader 
+                <ProfileHeader
                   profile={profile}
                   updateProfile={updateProfile}
                 />
@@ -309,7 +331,7 @@ export default function Dashboard() {
                 </button>
 
                 {/* Links List */}
-                <LinksList 
+                <LinksList
                   links={links}
                   updateLink={updateLink}
                   deleteLink={deleteLink}
@@ -321,7 +343,7 @@ export default function Dashboard() {
 
         {/* Live Preview - Desktop */}
         <div className="hidden lg:block w-80 bg-gray-800 p-6">
-          <LivePreview 
+          <LivePreview
             profile={profile}
             links={enabledLinks}
           />
@@ -339,7 +361,7 @@ export default function Dashboard() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <LivePreview 
+              <LivePreview
                 profile={profile}
                 links={enabledLinks}
               />
@@ -358,7 +380,7 @@ export default function Dashboard() {
 //             </div>
 
 //             {/* Profile Header Card */}
-//             <ProfileHeader 
+//             <ProfileHeader
 //               profile={profile}
 //               updateProfile={updateProfile}
 //             />
@@ -382,7 +404,7 @@ export default function Dashboard() {
 //             )}
 
 //             {/* Links List */}
-//             <LinksList 
+//             <LinksList
 //               links={links}
 //               updateLink={updateLink}
 //               deleteLink={deleteLink}
@@ -392,7 +414,7 @@ export default function Dashboard() {
 
 //         {/* Live Preview */}
 //         <div className="w-80 bg-gray-800 p-6 hidden lg:block">
-//           <LivePreview 
+//           <LivePreview
 //             profile={profile}
 //             links={enabledLinks}
 //           />
