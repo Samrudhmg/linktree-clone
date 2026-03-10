@@ -1,8 +1,10 @@
 // @ts-nocheck
-﻿// @ts-nocheck
+// @ts-nocheck
 "use client";
 
 import { useState, useRef } from "react";
+import { LinkIcon } from "./LinkForm";
+import { createClient } from "@/lib/supabase-browser";
 
 export default function LinksList({ links, updateLink, deleteLink }) {
   const [editingId, setEditingId] = useState(null);
@@ -38,20 +40,72 @@ const FONT_OPTIONS = [
   { value: "mono", label: "Mono", class: "font-mono" },
 ];
 
+const ICON_OPTIONS = [
+  { value: "", label: "No Icon" },
+  { value: "link", label: "Link" },
+  { value: "globe", label: "Globe" },
+  { value: "mail", label: "Email" },
+  { value: "phone", label: "Phone" },
+  { value: "twitter", label: "Twitter/X" },
+  { value: "instagram", label: "Instagram" },
+  { value: "youtube", label: "YouTube" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "linkedin", label: "LinkedIn" },
+  { value: "github", label: "GitHub" },
+  { value: "spotify", label: "Spotify" },
+  { value: "discord", label: "Discord" },
+  { value: "twitch", label: "Twitch" },
+  { value: "shopping", label: "Shopping" },
+  { value: "document", label: "Document" },
+  { value: "calendar", label: "Calendar" },
+  { value: "heart", label: "Heart" },
+  { value: "star", label: "Star" },
+  { value: "music", label: "Music" },
+];
+
 function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
   const [title, setTitle] = useState(link.title);
   const [url, setUrl] = useState(link.url);
+  const [icon, setIcon] = useState(link.icon || "");
+  const [thumbnailUrl, setThumbnailUrl] = useState(link.thumbnail_url || "");
   const [bgColor, setBgColor] = useState(link.bg_color || "#FFFFFF");
   const [textColor, setTextColor] = useState(link.text_color || "#1F2937");
   const [font, setFont] = useState(link.font || "sans");
   const [showAppearance, setShowAppearance] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const [isEnabled, setIsEnabled] = useState(link.enabled);
+  const [isUploading, setIsUploading] = useState(false);
   const isToggling = useRef(false);
+  const supabase = createClient();
+
+  const handleImageUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { alert("Please upload an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { alert("Image must be less than 5MB"); return; }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const { error } = await supabase.storage.from("link_images").upload(fileName, file);
+      if (error) throw error;
+      const { data: publicUrlData } = supabase.storage.from("link_images").getPublicUrl(fileName);
+      setThumbnailUrl(publicUrlData.publicUrl);
+      setIcon(""); // clear preset icon when custom image is uploaded
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      alert(error.message || "Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = () => {
-    updateLink(link.id, { title, url, bg_color: bgColor, text_color: textColor, font });
+    updateLink(link.id, { title, url, icon, thumbnail_url: thumbnailUrl, bg_color: bgColor, text_color: textColor, font });
     setEditing(false);
     setShowAppearance(false);
+    setShowIconPicker(false);
   };
 
   const handleToggle = () => {
@@ -97,6 +151,88 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
                 placeholder="URL"
                 className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
               />
+
+              {/* Icon Section */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowIconPicker(!showIconPicker)}
+                  className="flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-all text-sm"
+                >
+                  {thumbnailUrl ? (
+                    <img src={thumbnailUrl} alt="" className="w-5 h-5 rounded object-cover" />
+                  ) : icon ? (
+                    <LinkIcon icon={icon} color="#9CA3AF" size="w-5 h-5" />
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  Icon / Image
+                  <svg className={`w-3 h-3 transition-transform ${showIconPicker ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {showIconPicker && (
+                  <div className="mt-2 bg-gray-750 rounded-lg p-3 space-y-3 border border-gray-700">
+                    {/* Custom Image Upload */}
+                    <div>
+                      <label className="block text-gray-400 text-xs mb-1.5">Upload Custom Icon</label>
+                      <div className="flex items-center gap-2">
+                        {thumbnailUrl && (
+                          <div className="relative">
+                            <img src={thumbnailUrl} alt="" className="w-10 h-10 rounded-md object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => setThumbnailUrl("")}
+                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center"
+                            >
+                              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                        <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-700 border border-gray-600 border-dashed rounded-lg cursor-pointer hover:border-purple-500 transition-all">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                          <span className="text-gray-400 text-xs">{isUploading ? "Uploading..." : "Upload image"}</span>
+                          <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Preset Icons */}
+                    <div>
+                      <label className="block text-gray-400 text-xs mb-1.5">Or choose a preset icon</label>
+                      <div className="grid grid-cols-6 gap-1.5">
+                        {ICON_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => { setIcon(opt.value); if (opt.value) setThumbnailUrl(""); }}
+                            className={`p-2 rounded-lg border transition-all flex items-center justify-center ${icon === opt.value && !thumbnailUrl
+                                ? "bg-purple-600 border-purple-500"
+                                : "bg-gray-700 border-gray-600 hover:border-gray-500"
+                              }`}
+                            title={opt.label}
+                          >
+                            {opt.value ? (
+                              <LinkIcon icon={opt.value} color={icon === opt.value && !thumbnailUrl ? "#FFFFFF" : "#9CA3AF"} size="w-4 h-4" />
+                            ) : (
+                              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Appearance Toggle */}
               <button
@@ -207,14 +343,18 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
           ) : (
             <div>
               <div className="flex items-center gap-2">
-                {/* Color indicator dot */}
-                {link.bg_color && link.bg_color !== "#FFFFFF" && (
-                  <div
-                    className="w-3 h-3 rounded-full flex-shrink-0 border border-gray-600"
-                    style={{ backgroundColor: link.bg_color }}
-                    title={`BG: ${link.bg_color}`}
+                {/* Link Icon / Thumbnail */}
+                {link.thumbnail_url ? (
+                  <img
+                    src={link.thumbnail_url}
+                    alt=""
+                    className="w-6 h-6 rounded object-cover shrink-0"
                   />
-                )}
+                ) : link.icon ? (
+                  <div className="shrink-0">
+                    <LinkIcon icon={link.icon} color="#9CA3AF" size="w-5 h-5" />
+                  </div>
+                ) : null}
                 <h3 className="text-white font-medium text-sm sm:text-base truncate">{link.title}</h3>
                 <button
                   onClick={() => setEditing(true)}
