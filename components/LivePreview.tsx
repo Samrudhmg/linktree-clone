@@ -2,12 +2,16 @@
 // @ts-nocheck
 "use client";
 
-import { LinkPreviewItem } from "./LinkForm";
+import { useState } from "react";
+import { LinkPreviewItem, LinkIcon } from "./LinkForm";
 import { FONT_OPTIONS, BORDER_RADIUS_OPTIONS, CARD_STYLES } from "@/lib/themes";
+import ShareModal from "./ShareModal";
 
 // 'appearance' prop: live/unsaved appearance state from PageAppearance editor
 // Falls back to 'page' (saved DB state), then to defaults
 export default function LivePreview({ profile, page, links, appearance }) {
+  const [shareLink, setShareLink] = useState(null);
+
   // Merge: live appearance > saved page data > defaults
   const a = {
     page_bg_type: appearance?.page_bg_type ?? page?.page_bg_type ?? "gradient",
@@ -140,7 +144,15 @@ export default function LivePreview({ profile, page, links, appearance }) {
 
                         {/* Right Side: Share Button */}
                         <div className="absolute right-0 pr-1 flex items-center justify-center">
-                          <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShareLink(link);
+                            }}
+                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
+                          >
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                             </svg>
@@ -178,22 +190,15 @@ export default function LivePreview({ profile, page, links, appearance }) {
           </button>
         </div>
       </div>
+
+      <ShareModal
+        isOpen={!!shareLink}
+        onClose={() => setShareLink(null)}
+        link={shareLink}
+      />
     </div>
   );
 }
 
-// Simple Link Icon component for preview
-function LinkIcon({ icon, color = "#1F2937" }) {
-  const icons = {
-    link: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />,
-    globe: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />,
-    instagram: <><rect x="2" y="2" width="20" height="20" rx="5" strokeWidth={2} /><circle cx="12" cy="12" r="4" strokeWidth={2} /></>,
-  };
 
-  return (
-    <svg className="w-4 h-4" fill="none" stroke={color} viewBox="0 0 24 24">
-      {icons[icon] || icons.link}
-    </svg>
-  );
-}
 
