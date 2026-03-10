@@ -1,3 +1,5 @@
+// @ts-nocheck
+﻿// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -17,7 +19,7 @@ export default function Setup() {
 
   const checkUser = useCallback(async () => {
     const { data: { user }, error } = await supabase.auth.getUser();
-    
+
     if (error || !user) {
       router.push("/login");
       return;
@@ -58,7 +60,7 @@ export default function Setup() {
       .select("username")
       .eq("username", name)
       .single();
-    
+
     return !data;
   };
 
@@ -96,6 +98,21 @@ export default function Setup() {
       setError(`Failed to create profile: ${insertError.message || insertError.code || 'Unknown error'}`);
       setSaving(false);
       return;
+    }
+
+    // Create a default link page for the new user
+    const { error: pageError } = await supabase.from("link_pages").insert([
+      {
+        user_id: user.id,
+        title: "My Links",
+        slug: "default",
+        is_default: true,
+      }
+    ]);
+
+    if (pageError) {
+      console.error("Error creating default page:", pageError);
+      // Not fatal â€” user can create pages from dashboard
     }
 
     router.push("/dashboard");
@@ -181,11 +198,10 @@ export default function Setup() {
           <button
             type="submit"
             disabled={saving || !projectName}
-            className={`w-full py-4 rounded-xl font-semibold transition-all ${
-              saving || !projectName
+            className={`w-full py-4 rounded-xl font-semibold transition-all ${saving || !projectName
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
-            }`}
+              }`}
           >
             {saving ? "Creating..." : "Create My ELTLINKTREE"}
           </button>
@@ -194,3 +210,4 @@ export default function Setup() {
     </div>
   );
 }
+

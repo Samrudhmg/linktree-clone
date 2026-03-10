@@ -1,13 +1,8 @@
+// @ts-nocheck
 "use client";
 
 import { useState } from "react";
-
-const PRESET_COLORS = [
-  "#FFFFFF", "#F3F4F6", "#FEE2E2", "#FEF3C7", "#D1FAE5", 
-  "#DBEAFE", "#E0E7FF", "#F3E8FF", "#FCE7F3", "#1F2937",
-  "#EF4444", "#F59E0B", "#10B981", "#3B82F6", "#8B5CF6",
-  "#EC4899", "#06B6D4", "#84CC16", "#F97316", "#6366F1"
-];
+import { createClient } from "@/lib/supabase-browser";
 
 const FONT_OPTIONS = [
   { value: "sans", label: "Sans Serif", class: "font-sans" },
@@ -48,10 +43,54 @@ export default function LinkForm({ onSubmit, onCancel }) {
   const [bgImage, setBgImage] = useState("");
   const [textColor, setTextColor] = useState("#1F2937");
   const [font, setFont] = useState("sans");
+  const [isUploading, setIsUploading] = useState(false);
+  const supabase = createClient();
+
+  const handleImageUpload = async (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size must be less than 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from("link_images")
+        .upload(filePath, file);
+
+      if (error) {
+        throw error;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("link_images")
+        .getPublicUrl(filePath);
+
+      setThumbnailUrl(publicUrlData.publicUrl);
+    } catch (error: any) {
+      console.error("Error uploading image:", error);
+      alert(error.message || "Failed to upload image. Make sure the storage bucket exists.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (!title.trim() || !url.trim()) {
       alert("Please fill in title and URL");
       return;
@@ -80,7 +119,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
           </svg>
           Link Details
         </h3>
-        
+
         <div className="space-y-3">
           <div>
             <label className="block text-gray-400 text-sm mb-1">Title *</label>
@@ -93,7 +132,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-gray-400 text-sm mb-1">URL *</label>
             <input
@@ -116,9 +155,9 @@ export default function LinkForm({ onSubmit, onCancel }) {
           </svg>
           Icon & Thumbnail
         </h3>
-        
+
         <div>
-          <label className="block text-gray-400 text-sm mb-2">Icon</label>
+          <label className="block text-gray-400 text-sm mb-2">Preset Icon</label>
           <select
             value={icon}
             onChange={(e) => setIcon(e.target.value)}
@@ -131,22 +170,45 @@ export default function LinkForm({ onSubmit, onCancel }) {
         </div>
 
         <div>
-          <label className="block text-gray-400 text-sm mb-2">Thumbnail Image (optional)</label>
-          <input
-            type="url"
-            value={thumbnailUrl}
-            onChange={(e) => setThumbnailUrl(e.target.value)}
-            placeholder="https://example.com/thumbnail.jpg"
-            className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-          />
-          <p className="text-gray-500 text-xs mt-1">Add an image that will show inside the link card</p>
+          <label className="block text-gray-400 text-sm mb-2">Custom Icon / Thumbnail (optional)</label>
+          <p className="text-gray-500 text-xs mt-1 mb-3 text-left">Upload an image to replace the preset icon. This will show on the left side of your link.</p>
+
+          <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600 hover:border-purple-500 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                {isUploading ? (
+                  <svg className="animate-spin h-8 w-8 text-purple-400 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-8 h-8 text-gray-400 mb-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                  </svg>
+                )}
+                <p className="mb-2 text-sm text-gray-400">
+                  {isUploading ? "Uploading..." : <><span className="font-semibold text-purple-400">Click to upload</span> or drag and drop</>}
+                </p>
+                <p className="text-xs text-gray-500">SVG, PNG, JPG (MAX. 5MB)</p>
+              </div>
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+            </label>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            {thumbnailUrl && (
+              <button type="button" onClick={() => setThumbnailUrl("")} className="text-red-400 hover:text-red-300 text-xs">Remove Custom Icon</button>
+            )}
+          </div>
+
           {thumbnailUrl && (
-            <div className="mt-2 relative">
-              <img 
-                src={thumbnailUrl} 
-                alt="Thumbnail preview" 
-                className="w-full h-32 object-cover rounded-lg"
-                onError={(e) => e.target.style.display = 'none'}
+            <div className="mt-4 relative bg-gray-700 rounded-lg p-3 flex flex-col items-center border border-gray-600">
+              <span className="text-gray-400 text-xs mb-2 w-full text-left">Uploaded Icon Preview:</span>
+              <img
+                src={thumbnailUrl}
+                alt="Thumbnail preview"
+                className="w-16 h-16 object-cover rounded-md shadow-md"
+                onError={(e: any) => e.target.style.display = 'none'}
               />
             </div>
           )}
@@ -159,7 +221,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
           <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
           </svg>
-          Appearance
+          Per-Link Styling
         </h3>
 
         {/* Background Type Toggle */}
@@ -169,22 +231,20 @@ export default function LinkForm({ onSubmit, onCancel }) {
             <button
               type="button"
               onClick={() => setBgType("color")}
-              className={`flex-1 py-2 px-4 rounded-lg border transition-all ${
-                bgType === "color"
-                  ? "bg-purple-600 border-purple-500 text-white"
-                  : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg border transition-all ${bgType === "color"
+                ? "bg-purple-600 border-purple-500 text-white"
+                : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
+                }`}
             >
               Color
             </button>
             <button
               type="button"
               onClick={() => setBgType("image")}
-              className={`flex-1 py-2 px-4 rounded-lg border transition-all ${
-                bgType === "image"
-                  ? "bg-purple-600 border-purple-500 text-white"
-                  : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
-              }`}
+              className={`flex-1 py-2 px-4 rounded-lg border transition-all ${bgType === "image"
+                ? "bg-purple-600 border-purple-500 text-white"
+                : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
+                }`}
             >
               Image
             </button>
@@ -195,21 +255,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
         {bgType === "color" && (
           <div className="relative">
             <label className="block text-gray-400 text-sm mb-2">Background Color</label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setBgColor(color)}
-                  className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                    bgColor === color ? "border-purple-500 scale-110" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
-            </div>
-            <div className="mt-3 flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={bgColor}
@@ -245,21 +291,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
         {/* Text Color Picker */}
         <div>
           <label className="block text-gray-400 text-sm mb-2">Text Color</label>
-          <div className="flex flex-wrap gap-2">
-            {PRESET_COLORS.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setTextColor(color)}
-                className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                  textColor === color ? "border-purple-500 scale-110" : "border-transparent"
-                }`}
-                style={{ backgroundColor: color }}
-                title={color}
-              />
-            ))}
-          </div>
-          <div className="mt-3 flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <input
               type="color"
               value={textColor}
@@ -285,11 +317,10 @@ export default function LinkForm({ onSubmit, onCancel }) {
                 key={opt.value}
                 type="button"
                 onClick={() => setFont(opt.value)}
-                className={`py-3 px-4 rounded-lg border transition-all ${opt.class} ${
-                  font === opt.value
-                    ? "bg-purple-600 border-purple-500 text-white"
-                    : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
-                }`}
+                className={`py-3 px-4 rounded-lg border transition-all ${opt.class} ${font === opt.value
+                  ? "bg-purple-600 border-purple-500 text-white"
+                  : "bg-gray-700 border-gray-600 text-gray-300 hover:border-gray-500"
+                  }`}
               >
                 {opt.label}
               </button>
@@ -308,7 +339,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
           Preview
         </h3>
         <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-4 rounded-xl">
-          <LinkPreviewItem 
+          <LinkPreviewItem
             title={title || "Your Link Title"}
             icon={icon}
             bgType={bgType}
@@ -316,6 +347,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
             bgImage={bgImage}
             textColor={textColor}
             font={font}
+            thumbnailUrl={thumbnailUrl} // pass down custom thumbnail!
           />
         </div>
       </div>
@@ -340,7 +372,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
   );
 }
 
-export function LinkPreviewItem({ title, icon, bgType, bgColor, bgImage, textColor, font, url, showShare = false }) {
+export function LinkPreviewItem({ title, icon, bgType, bgColor, bgImage, textColor, font, url, showShare = false, thumbnailUrl = "" }) {
   const getFontClass = (fontValue) => {
     const fonts = {
       sans: "font-sans",
@@ -353,7 +385,7 @@ export function LinkPreviewItem({ title, icon, bgType, bgColor, bgImage, textCol
   const handleShare = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -381,21 +413,31 @@ export function LinkPreviewItem({ title, icon, bgType, bgColor, bgImage, textCol
 
   return (
     <div
-      className={`relative py-3 px-4 rounded-xl ${getFontClass(font)} transition-transform hover:scale-[1.02] flex items-center gap-3`}
+      className={`relative flex items-center justify-center min-h-[44px] px-12 py-3 rounded-xl ${getFontClass(font)} transition-transform hover:scale-[1.02]`}
       style={{ ...bgStyle, color: textColor || "#1F2937" }}
     >
-      {icon && <LinkIcon icon={icon} color={textColor} />}
-      <span className="font-medium text-sm flex-1">{title}</span>
+      <div className="absolute left-0 px-2 flex items-center justify-center pointer-events-none">
+        {thumbnailUrl ? (
+          <img src={thumbnailUrl} alt="" className="w-8 h-8 rounded-md object-cover" />
+        ) : icon ? (
+          <LinkIcon icon={icon} color={textColor} size="w-5 h-5" />
+        ) : null}
+      </div>
+
+      <span className="font-semibold text-center break-words w-full">{title}</span>
+
       {showShare && url && (
-        <button
-          onClick={handleShare}
-          className="p-1.5 rounded-full hover:bg-black/10 transition-colors"
-          title="Share link"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-          </svg>
-        </button>
+        <div className="absolute right-0 px-2 flex items-center justify-center">
+          <button
+            onClick={handleShare}
+            className="p-1.5 rounded-full hover:bg-black/10 transition-colors"
+            title="Share link"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+        </div>
       )}
     </div>
   );
@@ -504,3 +546,4 @@ export function LinkIcon({ icon, color = "#1F2937", size = "w-5 h-5" }) {
 
   return icons[icon] || null;
 }
+

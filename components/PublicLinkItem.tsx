@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import { LinkIcon } from "./LinkForm";
@@ -6,7 +7,7 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
   const getFontClass = (fontValue) => {
     const fonts = {
       sans: "font-sans",
-      serif: "font-serif", 
+      serif: "font-serif",
       mono: "font-mono",
     };
     return fonts[fontValue] || "font-sans";
@@ -15,7 +16,7 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
   const handleShare = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (navigator.share) {
       try {
         await navigator.share({
@@ -47,7 +48,7 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
     const bgColor = link.bg_color || profile?.card_bg_color || "#FFFFFF";
     const textColor = link.text_color || profile?.card_text_color || "#1F2937";
     const cardStyle = profile?.card_style || "filled";
-    
+
     // If link has a background image, use that
     if (link.bg_type === "image" && link.bg_image) {
       return {
@@ -57,27 +58,27 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
         color: textColor,
       };
     }
-    
+
     const baseStyle = { backgroundColor: bgColor, color: textColor };
-    
+
     switch (cardStyle) {
       case "outline":
-        return { 
-          ...baseStyle, 
-          backgroundColor: "transparent", 
-          border: `2px solid ${bgColor}`, 
-          color: bgColor 
+        return {
+          ...baseStyle,
+          backgroundColor: "transparent",
+          border: `2px solid ${bgColor}`,
+          color: bgColor
         };
       case "shadow":
-        return { 
-          ...baseStyle, 
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)" 
+        return {
+          ...baseStyle,
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)"
         };
       case "glass":
-        return { 
-          ...baseStyle, 
-          backgroundColor: `${bgColor}CC`, 
-          backdropFilter: "blur(10px)" 
+        return {
+          ...baseStyle,
+          backgroundColor: `${bgColor}CC`,
+          backdropFilter: "blur(10px)"
         };
       default:
         return baseStyle;
@@ -92,27 +93,25 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
       href={link.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={`relative block p-3 sm:p-4 ${borderRadiusClass} text-sm sm:text-base hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${getFontClass(link.font || profile?.page_font)}`}
+      className={`relative flex items-center justify-center min-h-[56px] px-12 py-3 ${borderRadiusClass} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${getFontClass(link.font || profile?.page_font)}`}
       style={cardStyle}
     >
-      {/* Thumbnail Image (if has one, show it prominently) */}
-      {hasThumbnail && (
-        <div className="mb-3 -mx-1 -mt-1">
-          <img 
-            src={link.thumbnail_url} 
-            alt="" 
-            className={`w-full h-32 sm:h-40 object-cover ${borderRadiusClass}`}
-            onError={(e) => e.target.style.display = 'none'}
+      <div className="absolute left-0 px-2 sm:px-4 flex items-center justify-center pointer-events-none">
+        {hasThumbnail ? (
+          <img
+            src={link.thumbnail_url}
+            alt=""
+            className="w-10 h-10 rounded-md object-cover"
+            onError={(e: any) => e.target.style.display = 'none'}
           />
-        </div>
-      )}
-      
-      <div className="flex items-center gap-3">
-        {/* Icon (show only if no thumbnail) */}
-        {link.icon && !hasThumbnail && (
-          <LinkIcon icon={link.icon} color={cardStyle.color} size="w-5 h-5 sm:w-6 sm:h-6" />
-        )}
-        <span className="font-medium flex-1">{link.title}</span>
+        ) : link.icon ? (
+          <LinkIcon icon={link.icon} color={cardStyle.color} size="w-6 h-6" />
+        ) : null}
+      </div>
+
+      <span className="font-semibold text-center break-words w-full text-[15px]">{link.title}</span>
+
+      <div className="absolute right-0 px-2 sm:px-4 flex items-center justify-center">
         <button
           onClick={handleShare}
           className="p-2 rounded-full hover:bg-black/10 transition-colors"

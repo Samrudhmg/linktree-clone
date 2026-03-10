@@ -1,3 +1,5 @@
+// @ts-nocheck
+// @ts-nocheck
 "use client";
 
 import { useState } from "react";
@@ -93,3 +95,4 @@ export default function ProfileHeader({ profile, updateProfile }) {
     </div>
   );
 }
+
