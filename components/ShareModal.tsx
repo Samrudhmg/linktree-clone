@@ -113,77 +113,77 @@ export default function ShareModal({ isOpen, onClose, link }) {
             {/* Modal dialog */}
             <div className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
                 <div
-                    className="w-full sm:w-[500px] bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto transition-transform sm:transform-none transform translate-y-0"
+                    className="w-full max-w-[360px] mx-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto transition-transform sm:transform-none transform translate-y-0"
                     role="dialog"
                     aria-modal="true"
                 >
                     {/* Header */}
-                    <div className="relative flex items-center justify-center px-6 py-4 border-b border-gray-100">
-                        <h2 className="text-lg font-bold text-gray-900">Share link</h2>
+                    <div className="relative flex items-center justify-center px-5 py-3 border-b border-gray-100">
+                        <h2 className="text-base font-bold text-gray-900">Share link</h2>
                         <button
                             onClick={onClose}
-                            className="absolute right-4 p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+                            className="absolute right-3 p-1.5 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
                             aria-label="Close"
                         >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-4 bg-gray-50 h-full flex flex-col justify-center">
                         {/* Link Preview Card (Dark style from image) */}
-                        <div className="bg-[#3A332C] rounded-[32px] p-8 flex flex-col items-center text-center shadow-lg relative overflow-hidden mb-8 max-w-[340px] mx-auto">
+                        <div className="bg-[#3A332C] rounded-[24px] p-5 flex flex-col items-center text-center shadow-md relative overflow-hidden mb-5 max-w-[260px] mx-auto w-full">
 
                             {/* Box around icon/thumbnail */}
-                            <div className="w-28 h-28 mb-4 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-2">
+                            <div className="w-16 h-16 mb-3 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-1.5 shrink-0">
                                 {link.thumbnail_url ? (
                                     <img src={link.thumbnail_url} alt="" className="w-full h-full rounded-xl object-cover" />
                                 ) : (
                                     <>
-                                        <LinkIcon icon={link.icon || "link"} color={link.icon === "whatsapp" ? "#25D366" : "#4ade80"} size="w-12 h-12" />
+                                        <LinkIcon icon={link.icon || "link"} color={link.icon === "whatsapp" ? "#25D366" : "#4ade80"} size="w-8 h-8" />
                                         {link.icon === "whatsapp" && (
-                                            <span className="text-[#25D366] font-bold text-sm mt-1">WhatsApp</span>
+                                            <span className="text-[#25D366] font-bold text-[10px] mt-0.5">WhatsApp</span>
                                         )}
                                     </>
                                 )}
                             </div>
 
-                            <h3 className="text-white font-extrabold text-xl leading-snug mb-3">
+                            <h3 className="text-white font-extrabold text-base leading-snug mb-1.5 w-full truncate px-2">
                                 {link.title}
                             </h3>
 
-                            <p className="text-white/80 text-sm truncate w-full mb-4">
+                            <p className="text-white/80 text-[11px] truncate w-full mb-3 px-2">
                                 {link.url.replace(/^https?:\/\//, '')}
                             </p>
 
                             {link.url.includes('whatsapp.com') && (
-                                <p className="text-white/90 text-sm font-semibold">
-                                    WhatsApp Group Invite
+                                <p className="text-white/90 text-[10px] font-semibold tracking-wide uppercase">
+                                    Group Invite
                                 </p>
                             )}
                         </div>
 
                         {/* Share Options Row */}
-                        <div className="flex overflow-x-auto pb-4 pt-1 -mx-6 px-6 gap-5 hide-scrollbar justify-start sm:justify-center">
+                        <div className="flex overflow-x-auto pb-4 pt-1 snap-x snap-mandatory hide-scrollbar justify-start -mx-4 px-4 w-[calc(100%+32px)] gap-4">
                             {shareOptions.map((option) => (
-                                <div key={option.id} className="flex flex-col items-center gap-2 min-w-[72px]">
+                                <div key={option.id} className="flex flex-col items-center gap-1.5 shrink-0 snap-center w-[56px]">
                                     <button
                                         onClick={option.action}
-                                        className={`w-[60px] h-[60px] rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition-transform active:scale-95 ${option.color} ${option.textColor}`}
+                                        className={`w-[48px] h-[48px] rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition-transform active:scale-95 ${option.color} ${option.textColor}`}
                                         aria-label={`Share on ${option.name}`}
                                     >
                                         {option.id === "copy" && copied ? (
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                             </svg>
                                         ) : (
-                                            <div className="scale-125">
+                                            <div className="scale-100">
                                                 {option.icon}
                                             </div>
                                         )}
                                     </button>
-                                    <span className="text-gray-700 text-xs font-medium text-center">
+                                    <span className="text-gray-700 text-[10px] font-medium text-center truncate w-full">
                                         {option.id === "copy" && copied ? "Copied!" : option.name}
                                     </span>
                                 </div>
