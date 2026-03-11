@@ -29,6 +29,14 @@ export default function Dashboard() {
   const [newPageSlug, setNewPageSlug] = useState("");
   // Live appearance for real-time preview
   const [liveAppearance, setLiveAppearance] = useState<any>(null);
+  // Profile editing
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState("");
+  // Page URL editing
+  const [editingPageSlug, setEditingPageSlug] = useState(false);
+  const [editPageSlug, setEditPageSlug] = useState("");
+  // Auto-edit profile for new pages
+  const [autoEditProfile, setAutoEditProfile] = useState(false);
 
 
   useEffect(() => {
@@ -201,16 +209,12 @@ export default function Dashboard() {
       setActivePage(data);
       setLinks([]);
       setActiveTab("links");
+      setAutoEditProfile(true); // Auto-open edit mode for new page
     }
   };
 
   const deletePage = async (pageId: string) => {
     if (!user) return;
-    const page = pages.find(p => p.id === pageId);
-    if (page?.is_default && pages.length > 1) {
-      setError("Cannot delete the default page. Set another page as default first.");
-      return;
-    }
 
     const { error } = await supabase
       .from("link_pages")
@@ -306,8 +310,35 @@ export default function Dashboard() {
     if (activePage) await fetchLinks(activePage.id);
   };
 
+  const reorderLinks = async (newOrderedLinks: any[]) => {
+    // Update local state immediately for responsive UI
+    setLinks(newOrderedLinks);
+
+    // Update positions in database
+    const updates = newOrderedLinks.map((link, index) => ({
+      id: link.id,
+      position: index,
+    }));
+
+    // Update each link's position in the database
+    for (const update of updates) {
+      const { error } = await supabase
+        .from("links")
+        .update({ position: update.position })
+        .eq("id", update.id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error updating link position:", error);
+        // Refetch to restore correct order if there's an error
+        if (activePage) await fetchLinks(activePage.id);
+        return;
+      }
+    }
+  };
+
   const updateProfile = async (updates: any) => {
-    if (!user) return;
+    if (!user) return { error: "No user" };
     const { error } = await supabase
       .from("profiles")
       .update(updates)
@@ -315,14 +346,15 @@ export default function Dashboard() {
 
     if (error) {
       console.error("Error updating profile:", error);
-      return;
+      return { error };
     }
 
     setProfile({ ...profile, ...updates });
+    return { success: true };
   };
 
   const updatePage = async (updates: any) => {
-    if (!activePage) return;
+    if (!activePage) return { error: "No active page" };
 
     const { error } = await supabase
       .from("link_pages")
@@ -332,11 +364,65 @@ export default function Dashboard() {
 
     if (error) {
       console.error("Error updating page:", error);
-      return;
+      return { error };
     }
 
     setActivePage({ ...activePage, ...updates });
     // Refresh pages list
+    await fetchPages(user.id);
+    return { success: true };
+  };
+
+  const saveEditProfile = async () => {
+    if (!user || !editDisplayName.trim()) return;
+    
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        display_name: editDisplayName
+      })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error updating profile:", error);
+      setError("Failed to update profile");
+      return;
+    }
+
+    setProfile({ ...profile, display_name: editDisplayName });
+    setShowEditProfile(false);
+  };
+
+  const savePageSlug = async () => {
+    if (!activePage || !editPageSlug.trim()) return;
+    
+    // Check if slug is available globally (not just for this user)
+    const { data } = await supabase
+      .from("link_pages")
+      .select("slug")
+      .eq("slug", editPageSlug)
+      .neq("id", activePage.id)
+      .single();
+    
+    if (data) {
+      setError("This URL is already taken. Please choose a different one.");
+      return;
+    }
+    
+    const { error } = await supabase
+      .from("link_pages")
+      .update({ slug: editPageSlug })
+      .eq("id", activePage.id)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Error updating page slug:", error);
+      setError("Failed to update page URL");
+      return;
+    }
+
+    setActivePage({ ...activePage, slug: editPageSlug });
+    setEditingPageSlug(false);
     await fetchPages(user.id);
   };
 
@@ -396,6 +482,10 @@ export default function Dashboard() {
           onCreatePage={handleCreatePage}
           onLogout={handleLogout}
           onClose={() => setShowSidebar(false)}
+          onEditProfile={() => {
+            setEditDisplayName(profile?.display_name || "");
+            setShowEditProfile(true);
+          }}
         />
       </div>
 
@@ -433,11 +523,11 @@ export default function Dashboard() {
                 </button>
 
                 <a
-                  href={activePage ? `/${profile?.username}/${activePage.slug}` : `/`}
+                  href={activePage ? `/${activePage.slug}` : `/`}
                   target="_blank"
                   className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-gray-300 rounded-full hover:bg-gray-700 transition-all text-xs sm:text-sm"
                 >
-                  <span className="truncate max-w-[180px] sm:max-w-none">{activePage ? `/${profile?.username}/${activePage.slug}` : `/`}</span>
+                  <span className="truncate max-w-[180px] sm:max-w-none">{activePage ? `/${activePage.slug}` : `/`}</span>
                   <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
@@ -447,11 +537,11 @@ export default function Dashboard() {
 
             {/* Mobile Link to Profile */}
             <a
-              href={activePage ? `/${profile?.username}/${activePage.slug}` : `/`}
+              href={activePage ? `/${activePage.slug}` : `/`}
               target="_blank"
               className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-all text-sm"
             >
-              <span>View: {activePage ? `/${profile?.username}/${activePage.slug}` : `/`}</span>
+              <span>View: {activePage ? `/${activePage.slug}` : `/`}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
@@ -493,9 +583,9 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-gray-400 text-sm mb-1">Hosted Name (URL) *</label>
+                  <label className="block text-gray-400 text-sm mb-1">Page URL *</label>
                   <div className="flex items-center bg-gray-700 rounded-lg border border-gray-600 focus-within:border-purple-500 overflow-hidden">
-                    <span className="px-3 text-gray-400 text-sm whitespace-nowrap border-r border-gray-600">/{profile?.username}/</span>
+                    <span className="px-3 text-gray-400 text-sm whitespace-nowrap border-r border-gray-600">/</span>
                     <input
                       type="text"
                       value={newPageSlug}
@@ -512,7 +602,7 @@ export default function Dashboard() {
                   <div className="bg-gray-700/50 rounded-lg p-3">
                     <p className="text-gray-400 text-xs mb-1">Your page will be hosted at:</p>
                     <p className="text-green-400 text-sm font-mono">
-                      {typeof window !== "undefined" ? window.location.origin : ""}/{profile?.username}/{newPageSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "")}
+                      {typeof window !== "undefined" ? window.location.origin : ""}/{newPageSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "")}
                     </p>
                   </div>
                 )}
@@ -538,14 +628,14 @@ export default function Dashboard() {
               <div className="space-y-4">
                 {pages.length === 0 ? (
                   <div className="text-center py-16">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg className="w-16 h-16 mx-auto mb-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
-                    <h3 className="text-white text-lg font-semibold mb-2">No Link Pages Yet</h3>
-                    <p className="text-gray-400 mb-6">Create your first link page to get started!</p>
+                    <h3 className="text-white text-xl font-semibold mb-2">Start Creating Links!</h3>
+                    <p className="text-gray-400 mb-6">Create your first page and add links to share with the world</p>
                     <button
                       onClick={handleCreatePage}
-                      className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full transition-all"
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-full transition-all shadow-lg"
                     >
                       Create Your First Page
                     </button>
@@ -619,7 +709,51 @@ export default function Dashboard() {
                   Back to Pages
                 </button>
 
-
+                {/* Page Info Card */}
+                <div className="bg-gray-800 rounded-xl p-4 mb-6">
+                  <h2 className="text-white font-semibold text-lg mb-2">{activePage.title}</h2>
+                  <div className="flex items-center gap-2">
+                    {editingPageSlug ? (
+                      <div className="flex-1 flex items-center gap-2">
+                        <div className="flex items-center bg-gray-700 rounded-lg border border-gray-600 focus-within:border-purple-500 overflow-hidden flex-1">
+                          <span className="px-2 text-gray-400 text-xs whitespace-nowrap border-r border-gray-600">/</span>
+                          <input
+                            type="text"
+                            value={editPageSlug}
+                            onChange={(e) => setEditPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                            className="flex-1 bg-transparent text-white px-2 py-1.5 text-sm focus:outline-none"
+                            autoFocus
+                          />
+                        </div>
+                        <button
+                          onClick={savePageSlug}
+                          className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-all"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingPageSlug(false)}
+                          className="px-3 py-1.5 bg-gray-700 text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-600 transition-all"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <p className="text-gray-400 text-sm flex-1">/{activePage.slug}</p>
+                        <button
+                          onClick={() => { setEditPageSlug(activePage.slug); setEditingPageSlug(true); }}
+                          className="text-gray-500 hover:text-purple-400 transition-all p-1"
+                          title="Edit URL"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
 
                 {/* Tab Content */}
                 {activeTab === "create-link" ? (
@@ -631,8 +765,10 @@ export default function Dashboard() {
                   <>
                     {/* Profile Header Card */}
                     <ProfileHeader
-                      profile={profile}
-                      updateProfile={updateProfile}
+                      page={activePage}
+                      updatePage={updatePage}
+                      autoEdit={autoEditProfile}
+                      onEditComplete={() => setAutoEditProfile(false)}
                     />
 
                     {/* Page Appearance (collapsible, inline) */}
@@ -658,6 +794,7 @@ export default function Dashboard() {
                       links={links}
                       updateLink={updateLink}
                       deleteLink={deleteLink}
+                      reorderLinks={reorderLinks}
                     />
                   </>
                 )}
@@ -700,6 +837,48 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Edit Profile Modal */}
+      {showEditProfile && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md space-y-4">
+            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
+              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit Profile
+            </h3>
+
+            <div>
+              <label className="block text-gray-400 text-sm mb-1">Display Name</label>
+              <input
+                type="text"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                placeholder="Your Name"
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="flex-1 py-3 px-6 bg-gray-700 text-gray-300 font-semibold rounded-full hover:bg-gray-600 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEditProfile}
+                disabled={!editDisplayName.trim()}
+                className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

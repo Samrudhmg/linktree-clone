@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS link_pages (
   card_style TEXT DEFAULT 'filled',
   page_font TEXT DEFAULT 'sans',
   theme_preset TEXT DEFAULT 'default',
+  avatar_shape TEXT DEFAULT 'rounded',
   
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
@@ -96,6 +97,14 @@ CREATE POLICY "Users can update their own pages" ON link_pages
 
 CREATE POLICY "Users can delete their own pages" ON link_pages
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Add avatar_shape column if it doesn't exist
+ALTER TABLE link_pages ADD COLUMN IF NOT EXISTS avatar_shape TEXT DEFAULT 'rounded';
+
+-- Add per-page identity columns
+ALTER TABLE link_pages ADD COLUMN IF NOT EXISTS display_name TEXT DEFAULT '';
+ALTER TABLE link_pages ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT '';
+ALTER TABLE link_pages ADD COLUMN IF NOT EXISTS avatar_url TEXT DEFAULT '';
 
 
 -- =============================================

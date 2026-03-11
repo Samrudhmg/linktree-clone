@@ -1,8 +1,8 @@
 // @ts-nocheck
-﻿// @ts-nocheck
+// @ts-nocheck
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { THEME_PRESETS, FONT_OPTIONS, CARD_STYLES, BORDER_RADIUS_OPTIONS } from "@/lib/themes";
 
 export default function PageAppearance({ page, updatePage, onAppearanceChange }) {
@@ -26,7 +26,28 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
   // Font
   const [pageFont, setPageFont] = useState(page?.page_font || "sans");
 
+  // Avatar shape
+  const [avatarShape, setAvatarShape] = useState(page?.avatar_shape || "rounded");
+
   const [saving, setSaving] = useState(false);
+  const [uploadingBgImage, setUploadingBgImage] = useState(false);
+  const bgImageInputRef = useRef(null);
+
+  // Handle background image file upload
+  const handleBgImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingBgImage(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result;
+      setBgImage(dataUrl);
+      setSelectedTheme("custom");
+      setUploadingBgImage(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Build current appearance state
   const getCurrentAppearance = useCallback(() => ({
@@ -41,7 +62,8 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
     card_style: cardStyle,
     card_border_radius: borderRadius,
     page_font: pageFont,
-  }), [selectedTheme, bgType, bgColor, gradientFrom, gradientTo, bgImage, cardBgColor, cardTextColor, cardStyle, borderRadius, pageFont]);
+    avatar_shape: avatarShape,
+  }), [selectedTheme, bgType, bgColor, gradientFrom, gradientTo, bgImage, cardBgColor, cardTextColor, cardStyle, borderRadius, pageFont, avatarShape]);
 
   // Notify parent of appearance changes for real-time preview
   useEffect(() => {
@@ -64,6 +86,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
       setCardStyle(page.card_style || "filled");
       setBorderRadius(page.card_border_radius || "rounded");
       setPageFont(page.page_font || "sans");
+      setAvatarShape(page.avatar_shape || "rounded");
     }
   }, [page?.id]);
 
@@ -118,6 +141,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
               { id: "background", label: "Box BG" },
               { id: "cards", label: "Cards" },
               { id: "fonts", label: "Fonts" },
+              { id: "avatar", label: "Avatar" },
             ].map((section) => (
               <button
                 key={section.id}
@@ -223,15 +247,67 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
 
               {/* Background Image */}
               {bgType === "image" && (
-                <div>
-                  <label className="block text-gray-400 text-xs mb-1.5">Image URL</label>
+                <div className="space-y-3">
+                  {/* Upload Button */}
+                  <button
+                    onClick={() => bgImageInputRef.current?.click()}
+                    disabled={uploadingBgImage}
+                    className="w-full py-2.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
+                  >
+                    {uploadingBgImage ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Upload Image
+                      </>
+                    )}
+                  </button>
                   <input
-                    type="url"
-                    value={bgImage}
-                    onChange={(e) => { setBgImage(e.target.value); setSelectedTheme("custom"); }}
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 text-sm"
+                    ref={bgImageInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBgImageUpload}
+                    className="hidden"
                   />
+
+                  {/* Or URL Input */}
+                  <div className="space-y-1.5">
+                    <label className="block text-gray-400 text-xs">Or paste Image URL:</label>
+                    <input
+                      type="url"
+                      value={bgImage}
+                      onChange={(e) => { setBgImage(e.target.value); setSelectedTheme("custom"); }}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 text-sm"
+                    />
+                  </div>
+
+                  {/* Preview */}
+                  {bgImage && (
+                    <div className="space-y-1.5">
+                      <label className="block text-gray-400 text-xs">Preview:</label>
+                      <div className="relative w-full h-24 rounded-lg overflow-hidden bg-gray-700">
+                        <img src={bgImage} alt="Background preview" className="w-full h-full object-cover" />
+                        <button
+                          onClick={() => { setBgImage(""); setSelectedTheme("custom"); }}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-600 hover:bg-red-700 rounded-full flex items-center justify-center text-white transition-colors"
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -314,6 +390,35 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
                     <span className="text-xs text-gray-300">{font.label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* Avatar Section */}
+          {activeSection === "avatar" && (
+            <div className="space-y-3">
+              <p className="text-gray-400 text-sm">Choose the shape for your profile avatar</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => { setAvatarShape("rounded"); setSelectedTheme("custom"); }}
+                  className={`flex-1 p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${avatarShape === "rounded"
+                    ? "bg-purple-600/20 border-purple-500"
+                    : "bg-gray-700 border-gray-600 hover:border-gray-500"
+                    }`}
+                >
+                  <div className="w-12 h-12 bg-gray-500 rounded-full" />
+                  <span className="text-xs text-gray-300">Rounded</span>
+                </button>
+                <button
+                  onClick={() => { setAvatarShape("square"); setSelectedTheme("custom"); }}
+                  className={`flex-1 p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${avatarShape === "square"
+                    ? "bg-purple-600/20 border-purple-500"
+                    : "bg-gray-700 border-gray-600 hover:border-gray-500"
+                    }`}
+                >
+                  <div className="w-12 h-12 bg-gray-500 rounded-lg" />
+                  <span className="text-xs text-gray-300">Square</span>
+                </button>
               </div>
             </div>
           )}

@@ -39,7 +39,6 @@ export default function Setup() {
     }
 
     setUser(user);
-    setDisplayName(user.email?.split("@")[0] || "");
     setLoading(false);
   }, [router]);
 
@@ -87,7 +86,7 @@ export default function Setup() {
       {
         id: user.id,
         username: projectName,
-        display_name: displayName || projectName,
+        display_name: displayName || "",
         bio: "",
         avatar_url: ""
       }
@@ -100,20 +99,6 @@ export default function Setup() {
       return;
     }
 
-    // Create a default link page for the new user
-    const { error: pageError } = await supabase.from("link_pages").insert([
-      {
-        user_id: user.id,
-        title: "My Links",
-        slug: "default",
-        is_default: true,
-      }
-    ]);
-
-    if (pageError) {
-      console.error("Error creating default page:", pageError);
-      // Not fatal â€” user can create pages from dashboard
-    }
 
     router.push("/dashboard");
   };
@@ -164,7 +149,7 @@ export default function Setup() {
           {/* Display Name */}
           <div>
             <label className="block text-gray-700 font-medium mb-2 text-sm">
-              Display Name
+              Display Name (optional)
             </label>
             <input
               type="text"
@@ -172,10 +157,9 @@ export default function Setup() {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your Name"
               className="w-full bg-gray-100 py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
-              required
             />
             <p className="text-gray-400 text-xs mt-1">
-              This is how visitors will see your name
+              You can add this later
             </p>
           </div>
 

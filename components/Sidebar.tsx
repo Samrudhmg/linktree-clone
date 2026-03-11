@@ -2,7 +2,7 @@
 // @ts-nocheck
 "use client";
 
-export default function Sidebar({ profile, pages, activePage, activeTab, setActiveTab, onSelectPage, onCreatePage, onLogout, onClose }) {
+export default function Sidebar({ profile, pages, activePage, activeTab, setActiveTab, onSelectPage, onCreatePage, onLogout, onClose, onEditProfile }) {
   return (
     <div className="w-56 h-screen bg-gray-900 border-r border-gray-800 flex flex-col">
       {/* Logo with Close Button for Mobile */}
@@ -29,10 +29,16 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
             <p className="text-white font-medium truncate text-sm">
               {profile?.display_name || "User"}
             </p>
-            <p className="text-gray-500 text-xs truncate">
-              @{profile?.username || "user"}
-            </p>
           </div>
+          <button
+            onClick={onEditProfile}
+            className="text-gray-500 hover:text-purple-400 transition-all p-1"
+            title="Edit Profile"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -56,24 +62,36 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
           {pages && pages.length > 0 ? (
             <div className="space-y-1">
               {pages.map((page) => (
-                <button
-                  key={page.id}
-                  onClick={() => onSelectPage(page)}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all ${activePage?.id === page.id
-                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
-                    : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
-                    }`}
-                >
-                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span className="text-sm font-medium truncate">{page.title}</span>
-
-                </button>
+                <div key={page.id} className="group">
+                  <button
+                    onClick={() => onSelectPage(page)}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all ${activePage?.id === page.id
+                      ? "bg-purple-600/20 text-purple-300 border border-purple-500/30"
+                      : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                      }`}
+                  >
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm font-medium truncate flex-1">{page.title}</span>
+                    <a
+                      href={`/${page.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-purple-400 transition-all"
+                      title="Open hosted page"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  </button>
+                </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-600 text-xs px-3 py-2">No pages yet</p>
+            <p className="text-gray-500 text-xs px-3 py-2 italic">Create your first page to get started!</p>
           )}
         </div>
 

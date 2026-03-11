@@ -84,32 +84,37 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
         href={link.url}
         target="_blank"
         rel="noopener noreferrer"
-        className={`relative flex items-center justify-center min-h-[56px] px-12 py-3 ${borderRadiusClass} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${getFontClass(link.font || profile?.page_font)}`}
+        className={`block py-3 px-4 ${borderRadiusClass} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${getFontClass(link.font || profile?.page_font)}`}
         style={cardStyle}
       >
-        <div className="absolute left-0 px-2 sm:px-4 flex items-center justify-center pointer-events-none">
-          {hasThumbnail ? (
-            <img
-              src={link.thumbnail_url}
-              alt=""
-              className="w-10 h-10 rounded-md object-cover"
-              onError={(e: any) => e.target.style.display = 'none'}
-            />
-          ) : link.icon ? (
-            <LinkIcon icon={link.icon} color={cardStyle.color} size="w-6 h-6" />
-          ) : null}
-        </div>
+        <div className="flex items-center gap-3">
+          {/* Left Side: Thumbnail or Icon */}
+          {(hasThumbnail || link.icon) && (
+            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
+              {hasThumbnail ? (
+                <img
+                  src={link.thumbnail_url}
+                  alt=""
+                  className="w-10 h-10 rounded-lg object-cover"
+                  onError={(e: any) => e.target.style.display = 'none'}
+                />
+              ) : link.icon ? (
+                <LinkIcon icon={link.icon} color={cardStyle.color} size="w-6 h-6" />
+              ) : null}
+            </div>
+          )}
 
-        <span className="font-semibold text-center break-words w-full text-[15px]">{link.title}</span>
+          {/* Center: Title */}
+          <span className="font-semibold text-center break-words flex-1 text-[15px]">{link.title}</span>
 
-        <div className="absolute right-0 px-2 sm:px-4 flex items-center justify-center">
+          {/* Right Side: Three dots menu */}
           <button
             onClick={handleShare}
-            className="p-2 rounded-full hover:bg-black/10 transition-colors"
-            title="Share link"
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
+            title="More options"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
             </svg>
           </button>
         </div>

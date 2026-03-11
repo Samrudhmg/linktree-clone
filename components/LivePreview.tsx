@@ -24,6 +24,7 @@ export default function LivePreview({ profile, page, links, appearance }) {
     card_border_radius: appearance?.card_border_radius ?? page?.card_border_radius ?? "rounded",
     card_style: appearance?.card_style ?? page?.card_style ?? "filled",
     page_font: appearance?.page_font ?? page?.page_font ?? "sans",
+    avatar_shape: appearance?.avatar_shape ?? page?.avatar_shape ?? "rounded",
   };
 
   const getPageBackground = () => {
@@ -65,30 +66,48 @@ export default function LivePreview({ profile, page, links, appearance }) {
     return FONT_OPTIONS.find(f => f.value === a.page_font)?.class || "font-sans";
   };
 
+  // Check if there's any meaningful content to display
+  const hasContent = (page?.avatar_url && page.avatar_url !== "") || 
+                     (page?.display_name && page.display_name !== "") || 
+                     (page?.bio && page.bio !== "") || 
+                     (links && links.length > 0);
+
+  // Empty state - just show empty phone frame
+  if (!hasContent) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-4 lg:p-8 overflow-hidden">
+          <div className="relative w-full max-w-[320px] aspect-[9/19.5] flex items-center justify-start flex-col">
+            <div
+              className="absolute inset-[3%] z-10"
+              style={{ borderRadius: '2rem' }}
+            >
+              <div
+                className="w-full min-h-full rounded-2xl overflow-hidden"
+                style={{
+                  ...getPageBackground(),
+                  boxShadow: "0 8px 30px -6px rgba(0, 0, 0, 0.4)",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Phone Frame Layout */}
       <div className="flex-1 flex items-center justify-center p-4 lg:p-8 overflow-hidden">
         {/* Core Screen Container - Represents the bright screen size */}
-        <div className="relative w-full max-w-[340px] aspect-[505/1059] flex items-center justify-start flex-col rounded-[2.5rem] shadow-2xl">
-          {/* Phone layout image overlay */}
-          <img
-            src="/images/phone-layout-clean.png"
-            alt="Mobile Layout"
-            className="absolute top-1/2 left-1/2 pointer-events-none z-20 max-w-none"
-            style={{
-              width: '202.77%',
-              height: '145.04%',
-              transform: 'translate(-50%, -50%)'
-            }}
-          />
+        <div className="relative w-full max-w-[320px] aspect-[9/19.5] flex items-center justify-start flex-col">
 
           {/* Screen Content - Behind the phone frame, filling the screen area */}
           <div
-            className={`absolute inset-0 z-10 overflow-y-auto overflow-x-hidden flex flex-col justify-start p-2 sm:p-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${getFontClass()}`}
+            className={`absolute inset-[3%] z-10 overflow-y-auto overflow-x-hidden flex flex-col justify-start [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${getFontClass()}`}
             style={{
-              backgroundColor: "#0f0f1a",
-              borderRadius: '2.5rem', // Match screen rounded corners
+              borderRadius: '2rem',
             }}
           >
             {/* Card / Box */}
@@ -109,23 +128,36 @@ export default function LivePreview({ profile, page, links, appearance }) {
                 />
               )}
 
-              <div className="relative z-10 p-4 text-center">
+              <div className="relative z-10 p-3 text-center">
+                {/* Avatar */}
+                {page?.avatar_url && (
+                  <div className="flex justify-center mb-3 mt-3">
+                    <img
+                      src={page.avatar_url}
+                      alt={page?.display_name || "Profile"}
+                      className={`w-14 h-14 object-cover border-2 border-white/20 ${a.avatar_shape === "square" ? "rounded-lg" : "rounded-full"}`}
+                    />
+                  </div>
+                )}
+
                 {/* Name */}
-                <h2 className="text-white font-bold text-sm mb-1 mt-6">
-                  {profile?.display_name || "Your Name"}
-                </h2>
+                {page?.display_name && page.display_name.trim() !== "" && (
+                  <h2 className="text-white font-bold text-sm mb-1">
+                    {page.display_name}
+                  </h2>
+                )}
 
                 {/* Bio */}
-                {profile?.bio && (
-                  <p className="text-white/80 text-xs mb-3 px-2">
-                    {profile.bio}
+                {page?.bio && page.bio.trim() !== "" && (
+                  <p className="text-white/80 text-xs mb-3 px-1">
+                    {page.bio}
                   </p>
                 )}
 
                 {/* Links */}
                 <div className="space-y-2 px-1">
                   {(!links || links.length === 0) ? (
-                    <p className="text-white/50 text-xs py-6">
+                    <p className="text-white/50 text-xs py-4">
                       Your links will appear here
                     </p>
                   ) : (
@@ -135,44 +167,42 @@ export default function LivePreview({ profile, page, links, appearance }) {
                         href={link.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`block py-2.5 px-3 ${getBorderRadiusClass()} transition-transform hover:scale-[1.02]`}
+                        className={`block py-2 px-2 ${getBorderRadiusClass()} transition-transform hover:scale-[1.02]`}
                         style={getCardStyle(link)}
                       >
-                        <div className="relative flex items-center justify-center min-h-[36px] px-10">
+                        <div className="flex items-center gap-1.5">
                           {/* Left Side: Thumbnail or Icon */}
-                          <div className="absolute left-0 pl-1 flex items-center justify-center pointer-events-none">
-                            {link.thumbnail_url ? (
-                              <img
-                                src={link.thumbnail_url}
-                                alt=""
-                                className="w-8 h-8 rounded-md object-cover"
-                              />
-                            ) : link.icon ? (
-                              <div className="w-8 h-8 flex items-center justify-center">
+                          {(link.thumbnail_url || link.icon) && (
+                            <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+                              {link.thumbnail_url ? (
+                                <img
+                                  src={link.thumbnail_url}
+                                  alt=""
+                                  className="w-5 h-5 rounded object-cover"
+                                />
+                              ) : link.icon ? (
                                 <LinkIcon icon={link.icon} color={link.text_color || a.card_text_color} />
-                              </div>
-                            ) : null}
-                          </div>
+                              ) : null}
+                            </div>
+                          )}
 
                           {/* Center: Title */}
-                          <span className="font-semibold text-xs text-center w-full leading-tight">{link.title}</span>
+                          <span className="font-medium text-xs flex-1 text-center leading-tight">{link.title}</span>
 
-                          {/* Right Side: Share Button */}
-                          <div className="absolute right-0 pr-1 flex items-center justify-center">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                setShareLink(link);
-                              }}
-                              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
-                            >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                              </svg>
-                            </button>
-                          </div>
+                          {/* Right Side: Three dots menu */}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setShareLink(link);
+                            }}
+                            className="flex-shrink-0 w-5 h-5 flex items-center justify-center hover:bg-black/10 rounded transition-colors"
+                          >
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                          </button>
                         </div>
                       </a>
                     ))
@@ -189,10 +219,10 @@ export default function LivePreview({ profile, page, links, appearance }) {
         <p className="text-gray-400 text-xs mb-1">Your page is live at:</p>
         <div className="flex items-center gap-2">
           <code className="text-green-400 text-xs flex-1 truncate">
-            /{profile?.username || ""}/{page?.slug || ""}
+            /{page?.slug || ""}
           </code>
           <button
-            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/${profile?.username || ""}/${page?.slug || ""}`)}
+            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/${page?.slug || ""}`)}
             className="text-gray-400 hover:text-white transition-all"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
