@@ -3,12 +3,25 @@
 import { useState, useEffect } from "react";
 import { LinkIcon } from "./LinkForm";
 
-export default function ShareModal({ isOpen, onClose, link }) {
+export interface LinkData {
+    url: string;
+    title: string;
+    thumbnail_url?: string;
+    icon?: string;
+}
+
+interface ShareModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    link: LinkData | null | undefined;
+}
+
+export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
     const [copied, setCopied] = useState(false);
 
     // Close on Escape key
     useEffect(() => {
-        const handleEsc = (e) => {
+        const handleEsc = (e: KeyboardEvent) => {
             if (e.key === "Escape") onClose();
         };
         window.addEventListener("keydown", handleEsc);

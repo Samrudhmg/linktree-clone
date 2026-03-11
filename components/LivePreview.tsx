@@ -67,109 +67,120 @@ export default function LivePreview({ profile, page, links, appearance }) {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Phone Frame */}
-      <div className="flex-1 bg-gray-900 rounded-3xl overflow-hidden border-4 border-gray-700 shadow-2xl flex flex-col max-h-[600px]">
-        {/* Notch */}
-        <div className="h-6 bg-gray-900 flex justify-center items-end pb-1">
-          <div className="w-20 h-4 bg-gray-800 rounded-full" />
-        </div>
-
-        {/* Screen Content â€” Dark outer bg with card inside */}
-        <div className={`flex-1 overflow-y-auto flex items-start justify-center p-3 ${getFontClass()}`} style={{ backgroundColor: "#0f0f1a" }}>
-          {/* Card / Box */}
-          <div
-            className="w-full rounded-2xl overflow-hidden relative"
+      {/* Phone Frame Layout */}
+      <div className="flex-1 flex items-center justify-center p-4 lg:p-8 overflow-hidden">
+        {/* Core Screen Container - Represents the bright screen size */}
+        <div className="relative w-full max-w-[340px] aspect-[505/1059] flex items-center justify-start flex-col rounded-[2.5rem] shadow-2xl">
+          {/* Phone layout image overlay */}
+          <img
+            src="/images/phone-layout-clean.png"
+            alt="Mobile Layout"
+            className="absolute top-1/2 left-1/2 pointer-events-none z-20 max-w-none"
             style={{
-              ...getPageBackground(),
-              boxShadow: "0 8px 30px -6px rgba(0, 0, 0, 0.4)",
+              width: '202.77%',
+              height: '145.04%',
+              transform: 'translate(-50%, -50%)'
+            }}
+          />
+
+          {/* Screen Content - Behind the phone frame, filling the screen area */}
+          <div
+            className={`absolute inset-0 z-10 overflow-y-auto overflow-x-hidden flex flex-col justify-start p-2 sm:p-3 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${getFontClass()}`}
+            style={{
+              backgroundColor: "#0f0f1a",
+              borderRadius: '2.5rem', // Match screen rounded corners
             }}
           >
-            {/* Overlay for image backgrounds */}
-            {a.page_bg_type === "image" && a.page_bg_image && (
-              <div
-                className="absolute inset-0"
-                style={{
-                  background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)",
-                }}
-              />
-            )}
-
-            <div className="relative z-10 p-4 text-center">
-              {/* Name */}
-              <h2 className="text-white font-bold text-sm mb-1">
-                {profile?.display_name || "Your Name"}
-              </h2>
-
-              {/* Bio */}
-              {profile?.bio && (
-                <p className="text-white/80 text-xs mb-3 px-2">
-                  {profile.bio}
-                </p>
+            {/* Card / Box */}
+            <div
+              className="w-full min-h-full rounded-2xl overflow-hidden relative"
+              style={{
+                ...getPageBackground(),
+                boxShadow: "0 8px 30px -6px rgba(0, 0, 0, 0.4)",
+              }}
+            >
+              {/* Overlay for image backgrounds */}
+              {a.page_bg_type === "image" && a.page_bg_image && (
+                <div
+                  className="absolute inset-0 z-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)",
+                  }}
+                />
               )}
 
-              {/* Links */}
-              <div className="space-y-2 px-1">
-                {(!links || links.length === 0) ? (
-                  <p className="text-white/50 text-xs py-6">
-                    Your links will appear here
+              <div className="relative z-10 p-4 text-center">
+                {/* Name */}
+                <h2 className="text-white font-bold text-sm mb-1 mt-6">
+                  {profile?.display_name || "Your Name"}
+                </h2>
+
+                {/* Bio */}
+                {profile?.bio && (
+                  <p className="text-white/80 text-xs mb-3 px-2">
+                    {profile.bio}
                   </p>
-                ) : (
-                  links.map((link) => (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`block py-2.5 px-3 ${getBorderRadiusClass()} transition-transform hover:scale-[1.02]`}
-                      style={getCardStyle(link)}
-                    >
-                      <div className="relative flex items-center justify-center min-h-[36px] px-10">
-                        {/* Left Side: Thumbnail or Icon */}
-                        <div className="absolute left-0 pl-1 flex items-center justify-center pointer-events-none">
-                          {link.thumbnail_url ? (
-                            <img
-                              src={link.thumbnail_url}
-                              alt=""
-                              className="w-8 h-8 rounded-md object-cover"
-                            />
-                          ) : link.icon ? (
-                            <div className="w-8 h-8 flex items-center justify-center">
-                              <LinkIcon icon={link.icon} color={link.text_color || a.card_text_color} />
-                            </div>
-                          ) : null}
-                        </div>
-
-                        {/* Center: Title */}
-                        <span className="font-semibold text-xs text-center w-full leading-tight">{link.title}</span>
-
-                        {/* Right Side: Share Button */}
-                        <div className="absolute right-0 pr-1 flex items-center justify-center">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setShareLink(link);
-                            }}
-                            className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </a>
-                  ))
                 )}
+
+                {/* Links */}
+                <div className="space-y-2 px-1">
+                  {(!links || links.length === 0) ? (
+                    <p className="text-white/50 text-xs py-6">
+                      Your links will appear here
+                    </p>
+                  ) : (
+                    links.map((link) => (
+                      <a
+                        key={link.id}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`block py-2.5 px-3 ${getBorderRadiusClass()} transition-transform hover:scale-[1.02]`}
+                        style={getCardStyle(link)}
+                      >
+                        <div className="relative flex items-center justify-center min-h-[36px] px-10">
+                          {/* Left Side: Thumbnail or Icon */}
+                          <div className="absolute left-0 pl-1 flex items-center justify-center pointer-events-none">
+                            {link.thumbnail_url ? (
+                              <img
+                                src={link.thumbnail_url}
+                                alt=""
+                                className="w-8 h-8 rounded-md object-cover"
+                              />
+                            ) : link.icon ? (
+                              <div className="w-8 h-8 flex items-center justify-center">
+                                <LinkIcon icon={link.icon} color={link.text_color || a.card_text_color} />
+                              </div>
+                            ) : null}
+                          </div>
+
+                          {/* Center: Title */}
+                          <span className="font-semibold text-xs text-center w-full leading-tight">{link.title}</span>
+
+                          {/* Right Side: Share Button */}
+                          <div className="absolute right-0 pr-1 flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setShareLink(link);
+                              }}
+                              className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </a>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Home Indicator */}
-        <div className="h-6 bg-gray-900 flex justify-center items-center">
-          <div className="w-24 h-1 bg-gray-700 rounded-full" />
         </div>
       </div>
 

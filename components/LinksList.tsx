@@ -214,8 +214,8 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
                             type="button"
                             onClick={() => { setIcon(opt.value); if (opt.value) setThumbnailUrl(""); }}
                             className={`p-2 rounded-lg border transition-all flex items-center justify-center ${icon === opt.value && !thumbnailUrl
-                                ? "bg-purple-600 border-purple-500"
-                                : "bg-gray-700 border-gray-600 hover:border-gray-500"
+                              ? "bg-purple-600 border-purple-500"
+                              : "bg-gray-700 border-gray-600 hover:border-gray-500"
                               }`}
                             title={opt.label}
                           >
