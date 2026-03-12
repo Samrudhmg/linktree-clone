@@ -42,7 +42,7 @@ export default function LinksList({ links, updateLink, deleteLink, reorderLinks 
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     const dragIndex = draggedIndex;
-    
+
     if (dragIndex === null || dragIndex === dropIndex) {
       setDraggedIndex(null);
       setDragOverIndex(null);
@@ -82,11 +82,10 @@ export default function LinksList({ links, updateLink, deleteLink, reorderLinks 
             onDragOver={(e) => handleDragOver(e, index)}
             onDragLeave={handleDragLeave}
             onDrop={(e) => handleDrop(e, index)}
-            className={`transition-all duration-200 ${
-              dragOverIndex === index && draggedIndex !== index
-                ? 'border-t-2 border-purple-500 pt-2'
-                : ''
-            } ${draggedIndex === index ? 'opacity-50' : ''}`}
+            className={`transition-all duration-200 ${dragOverIndex === index && draggedIndex !== index
+              ? 'border-t-2 border-purple-500 pt-2'
+              : ''
+              } ${draggedIndex === index ? 'opacity-50' : ''}`}
           >
             <LinkCard
               link={link}
@@ -134,6 +133,7 @@ const ICON_OPTIONS = [
 function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
   const [title, setTitle] = useState(link.title);
   const [url, setUrl] = useState(link.url);
+  const [subtext, setSubtext] = useState(link.subtext || "");
   const [icon, setIcon] = useState(link.icon || "");
   const [thumbnailUrl, setThumbnailUrl] = useState(link.thumbnail_url || "");
   const [bgColor, setBgColor] = useState(link.bg_color || "#FFFFFF");
@@ -180,7 +180,7 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
   };
 
   const handleSave = () => {
-    updateLink(link.id, { title, url, icon, thumbnail_url: thumbnailUrl, bg_color: bgColor, text_color: textColor, font });
+    updateLink(link.id, { title, url, subtext, icon, thumbnail_url: thumbnailUrl, bg_color: bgColor, text_color: textColor, font });
     setEditing(false);
     setShowAppearance(false);
     setShowIconPicker(false);
@@ -227,6 +227,13 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="URL"
+                className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
+              />
+              <input
+                type="text"
+                value={subtext}
+                onChange={(e) => setSubtext(e.target.value)}
+                placeholder="Subtext (optional)"
                 className="w-full bg-gray-700 text-white px-3 py-2 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base"
               />
 
@@ -433,7 +440,10 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
                     <LinkIcon icon={link.icon} color="#9CA3AF" size="w-5 h-5" />
                   </div>
                 ) : null}
-                <h3 className="text-white font-medium text-sm sm:text-base truncate">{link.title}</h3>
+                <div className="min-w-0">
+                  <h3 className="text-white font-medium text-sm sm:text-base truncate">{link.title}</h3>
+                  {link.subtext && <p className="text-gray-400 text-xs truncate">{link.subtext}</p>}
+                </div>
                 <button
                   onClick={() => setEditing(true)}
                   className="text-gray-500 hover:text-white transition-all flex-shrink-0"
@@ -449,16 +459,18 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 ">
           {/* Toggle Switch */}
           <button
             onClick={handleToggle}
-            className={`relative w-11 sm:w-12 h-6 rounded-full transition-colors duration-200 ${isEnabled ? "bg-green-500" : "bg-gray-600"
+            className={`relative w-11 sm:w-12 h-6 rounded-full transition-all duration-300 ease-in-out ${isEnabled ? "bg-green-500 shadow-inner" : "bg-gray-600"
               }`}
             aria-label={isEnabled ? "Disable link" : "Enable link"}
           >
             <span
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${isEnabled ? "translate-x-6 sm:translate-x-7" : "translate-x-1"
+              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ease-in-out ${isEnabled
+                  ? "translate-x-5 sm:translate-x-6 scale-110"
+                  : "translate-x-0 scale-100"
                 }`}
             />
           </button>
@@ -466,9 +478,9 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
           {/* Delete */}
           <button
             onClick={handleDelete}
-            className="text-gray-500 hover:text-red-500 transition-all sm:opacity-0 sm:group-hover:opacity-100"
+            className="text-gray-500 hover:text-red-500 transition-all"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
@@ -476,37 +488,48 @@ function LinkCard({ link, isEditing, setEditing, updateLink, deleteLink }) {
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-sm space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </div>
-              <h3 className="text-white font-semibold text-lg">Delete Link</h3>
-            </div>
-            <p className="text-gray-400 text-sm">
-              Are you sure you want to delete &quot;{link.title}&quot;? This action cannot be undone.
-            </p>
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-all text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+{showDeleteConfirm && (
+  <div className="fixed inset-0 bg-black/10 backdrop-blur-[1px] flex items-center justify-center p-4">
+    
+    <div className="bg-gray-900 border border-gray-700 shadow-2xl rounded-2xl p-6 w-full max-w-sm space-y-4">
+      
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
+          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
         </div>
-      )}
+
+        <h3 className="text-white font-semibold text-lg">
+          Delete Link
+        </h3>
+      </div>
+
+      <p className="text-gray-300 text-sm">
+        Are you sure you want to delete <span className="text-white font-medium">"{link.title}"</span>?  
+        This action cannot be undone.
+      </p>
+
+      <div className="flex gap-3 pt-2">
+        <button
+          onClick={() => setShowDeleteConfirm(false)}
+          className="flex-1 px-4 py-2 bg-gray-700 text-gray-200 rounded-lg hover:bg-gray-600 transition text-sm"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={confirmDelete}
+          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm"
+        >
+          Delete
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
     </div>
   );
 }

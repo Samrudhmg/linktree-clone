@@ -120,7 +120,11 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
         <div className="relative">
           <button
             onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-            className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-700 flex items-center justify-center text-white text-xl sm:text-2xl shrink-0 overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all group"
+            className={`w-12 h-12 sm:w-16 sm:h-16 bg-gray-700 flex items-center justify-center text-white text-xl sm:text-2xl shrink-0 overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all group ${
+              page?.avatar_shape === "square" ? "rounded-none" : 
+              page?.avatar_shape === "rounded" ? "rounded-2xl" : 
+              page?.avatar_shape === "full" ? "w-full aspect-video rounded-none" : "rounded-full"
+            }`}
           >
             {avatarUrl || page?.avatar_url ? (
               <img
@@ -271,7 +275,7 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
                 </button>
               </div>
               {page?.bio ? (
-                <p className="text-gray-400 text-sm">{page.bio}</p>
+                <p className="text-gray-400 text-sm break-words overflow-hidden">{page.bio}</p>
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}

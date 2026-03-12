@@ -1,10 +1,16 @@
 "use client"
 
 import { createClient } from "@/lib/supabase-browser"
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
 const supabase = createClient()
 
-export default function Login() {
+function LoginContent() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get("error")
+  const message = searchParams.get("message")
+
   const signIn = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -26,6 +32,15 @@ export default function Login() {
             All your links in one place
           </p>
         </div>
+
+        {/* Error Message */}
+        {error === "unauthorized" && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-600 text-sm font-medium">
+              {message || "Access denied. Only authorized users can sign in."}
+            </p>
+          </div>
+        )}
 
         {/* Decorative Icon */}
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-8 flex items-center justify-center">
@@ -50,10 +65,22 @@ export default function Login() {
         </button>
 
         {/* Footer */}
-        <p className="mt-8 text-sm text-gray-400">
-          Share your links with the world
-        </p>
+        {/* <p className="mt-8 text-sm text-gray-400">
+          Only @eltglobal.in emails allowed
+        </p> */}
       </div>
     </div>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }

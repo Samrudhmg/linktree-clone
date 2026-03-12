@@ -71,15 +71,15 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
   // Auto-save function with debouncing
   const autoSave = useCallback(async () => {
     if (!updatePage) return;
-    
+
     setAutoSaveStatus("saving");
     const appearance = getCurrentAppearance();
     console.log("[PageAppearance] Auto-saving appearance:", appearance);
-    
+
     try {
       const result = await updatePage(appearance);
       console.log("[PageAppearance] Save result:", result);
-      
+
       if (result?.error) {
         console.error("[PageAppearance] Save error:", result.error);
         setAutoSaveStatus("idle");
@@ -97,33 +97,33 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
   // Notify parent of appearance changes for real-time preview + auto-save
   useEffect(() => {
     const appearance = getCurrentAppearance();
-    
+
     if (onAppearanceChange) {
       onAppearanceChange(appearance);
     }
-    
+
     // Skip auto-save on initial render
     if (!isInitializedRef.current) {
       isInitializedRef.current = true;
       return;
     }
-    
+
     // Clear any existing auto-save timeout
     if (autoSaveTimeoutRef.current) {
       clearTimeout(autoSaveTimeoutRef.current);
     }
-    
+
     // Debounce auto-save - wait 800ms after last change before saving
     autoSaveTimeoutRef.current = setTimeout(() => {
       autoSave();
     }, 800);
-    
+
     return () => {
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTheme, bgType, bgColor, gradientFrom, gradientTo, bgImage, cardBgColor, cardTextColor, cardStyle, borderRadius, pageFont, avatarShape]);
 
   // When page changes, reset local state
@@ -131,7 +131,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
     if (page) {
       // Reset initialized flag to prevent auto-save on page data reset
       isInitializedRef.current = false;
-      
+
       setSelectedTheme(page.theme_preset || "default");
       setBgType(page.page_bg_type || "gradient");
       setBgColor(page.page_bg_color || "#6366F1");
@@ -144,7 +144,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
       setBorderRadius(page.card_border_radius || "rounded");
       setPageFont(page.page_font || "sans");
       setAvatarShape(page.avatar_shape || "rounded");
-      
+
       // Re-enable auto-save after state is set
       setTimeout(() => {
         isInitializedRef.current = true;
@@ -460,27 +460,25 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
           {activeSection === "avatar" && (
             <div className="space-y-3">
               <p className="text-gray-400 text-sm">Choose the shape for your profile avatar</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { setAvatarShape("rounded"); setSelectedTheme("custom"); }}
-                  className={`flex-1 p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${avatarShape === "rounded"
-                    ? "bg-purple-600/20 border-purple-500"
-                    : "bg-gray-700 border-gray-600 hover:border-gray-500"
-                    }`}
-                >
-                  <div className="w-12 h-12 bg-gray-500 rounded-full" />
-                  <span className="text-xs text-gray-300">Rounded</span>
-                </button>
-                <button
-                  onClick={() => { setAvatarShape("square"); setSelectedTheme("custom"); }}
-                  className={`flex-1 p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${avatarShape === "square"
-                    ? "bg-purple-600/20 border-purple-500"
-                    : "bg-gray-700 border-gray-600 hover:border-gray-500"
-                    }`}
-                >
-                  <div className="w-12 h-12 bg-gray-500 rounded-lg" />
-                  <span className="text-xs text-gray-300">Square</span>
-                </button>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: "circle", label: "Circle", previewClass: "rounded-full" },
+                  { value: "rounded", label: "Rounded", previewClass: "rounded-xl" },
+                  { value: "square", label: "Square", previewClass: "rounded-none" },
+                  { value: "full", label: "Full Width", previewClass: "rounded-none w-full h-8" },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => { setAvatarShape(opt.value); setSelectedTheme("custom"); }}
+                    className={`p-3 rounded-lg border transition-all flex flex-col items-center gap-2 ${avatarShape === opt.value
+                      ? "bg-purple-600/20 border-purple-500"
+                      : "bg-gray-700 border-gray-600 hover:border-gray-500"
+                      }`}
+                  >
+                    <div className={`bg-gray-500 ${opt.previewClass} ${opt.value !== 'full' ? 'w-10 h-10' : ''}`} />
+                    <span className="text-xs text-gray-300">{opt.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           )}
@@ -509,22 +507,22 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
               disabled={saving || autoSaveStatus === "saving"}
               className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-semibold rounded-full transition-all flex items-center justify-center gap-2 text-sm"
             >
-            {saving ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Saving...
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Save Appearance
-              </>
-            )}
+              {saving ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Save Appearance
+                </>
+              )}
             </button>
           </div>
         </div>

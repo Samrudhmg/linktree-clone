@@ -67,10 +67,10 @@ export default function LivePreview({ profile, page, links, appearance }) {
   };
 
   // Check if there's any meaningful content to display
-  const hasContent = (page?.avatar_url && page.avatar_url !== "") || 
-                     (page?.display_name && page.display_name !== "") || 
-                     (page?.bio && page.bio !== "") || 
-                     (links && links.length > 0);
+  const hasContent = (page?.avatar_url && page.avatar_url !== "") ||
+    (page?.display_name && page.display_name !== "") ||
+    (page?.bio && page.bio !== "") ||
+    (links && links.length > 0);
 
   const pageBackground = getPageBackground();
   const fontClass = getFontClass();
@@ -107,25 +107,45 @@ export default function LivePreview({ profile, page, links, appearance }) {
             <div className="h-full overflow-y-auto p-4 pt-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Avatar */}
               {page?.avatar_url && (
-                <div className="flex justify-center mb-3 mt-4">
-                  <img
-                    src={page.avatar_url}
-                    alt={page?.display_name || "Profile"}
-                    className={`w-16 h-16 object-cover border-2 border-white/20 ${a.avatar_shape === "square" ? "rounded-lg" : "rounded-full"}`}
-                  />
+                <div
+                  className={`${a.avatar_shape === "full"
+                    ? "-mx-4 -mt-8 mb-4 border-b border-white/10"
+                    : "flex justify-center mb-3 mt-4"
+                    }`}
+                >
+                  {a.avatar_shape === "full" ? (
+                    <div className="w-50 h-10 mx-auto mt-20 overflow-hidden">
+                      <img
+                        src={page.avatar_url}
+                        alt={page?.display_name || "Profile"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={page.avatar_url}
+                      alt={page?.display_name || "Profile"}
+                      className={`object-cover ${a.avatar_shape === "square"
+                        ? "w-16 h-16 rounded-none border-2 border-white/20"
+                        : a.avatar_shape === "rounded"
+                          ? "w-16 h-16 rounded-2xl border-2 border-white/20"
+                          : "w-16 h-16 rounded-full border-2 border-white/20"
+                        }`}
+                    />
+                  )}
                 </div>
               )}
 
               {/* Name */}
               {page?.display_name && page.display_name.trim() !== "" && (
-                <h2 className="text-white font-bold text-base mb-1 text-center">
+                <h2 className="text-white font-bold text-base mb-1 text-center break-words">
                   {page.display_name}
                 </h2>
               )}
 
               {/* Bio */}
               {page?.bio && page.bio.trim() !== "" && (
-                <p className="text-white/80 text-sm mb-4 text-center px-2">
+                <p className="text-white/80 text-sm mb-4 text-center px-2 break-words">
                   {page.bio}
                 </p>
               )}
@@ -162,8 +182,11 @@ export default function LivePreview({ profile, page, links, appearance }) {
                           </div>
                         )}
 
-                        {/* Center: Title */}
-                        <span className="font-medium text-sm flex-1 text-center truncate max-w-[160px]">{link.title}</span>
+                        {/* Center: Title & Subtext */}
+                        <div className="flex-1 text-center min-w-0">
+                          <span className="font-medium text-sm block truncate max-w-[160px] mx-auto">{link.title}</span>
+                          {link.subtext && <span className="text-xs opacity-70 block truncate max-w-[160px] mx-auto">{link.subtext}</span>}
+                        </div>
 
                         {/* Right Side: Three dots menu */}
                         <button

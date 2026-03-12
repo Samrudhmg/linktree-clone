@@ -194,3 +194,9 @@ export const ICON_OPTIONS = [
   { value: "pinterest", label: "Pinterest" },
   { value: "snapchat", label: "Snapchat" },
 ];
+export const AVATAR_SHAPE_OPTIONS = [
+  { value: "circle", label: "Circle", class: "rounded-full" },
+  { value: "rounded", label: "Rounded", class: "rounded-2xl" },
+  { value: "square", label: "Square", class: "rounded-none" },
+  { value: "full", label: "Full Width", class: "w-full rounded-none" },
+];

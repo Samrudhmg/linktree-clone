@@ -104,8 +104,11 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
             </div>
           )}
 
-          {/* Center: Title */}
-          <span className="font-semibold text-center break-words whitespace-normal flex-1 text-[15px] leading-tight">{link.title}</span>
+          {/* Center: Title & Subtext */}
+          <div className="flex-1 text-center min-w-0">
+            <span className="font-semibold break-words whitespace-normal block text-[15px] leading-tight">{link.title}</span>
+            {link.subtext && <span className="text-xs opacity-70 break-words whitespace-normal block mt-0.5">{link.subtext}</span>}
+          </div>
 
           {/* Right Side: Three dots menu */}
           <button

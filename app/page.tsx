@@ -15,4 +15,4 @@ await supabase.auth.signInWithOAuth({
     <Login />    
      </div>
   )
-}
+} 

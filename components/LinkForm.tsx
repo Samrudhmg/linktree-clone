@@ -36,6 +36,7 @@ const ICON_OPTIONS = [
 export default function LinkForm({ onSubmit, onCancel }) {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
+  const [subtext, setSubtext] = useState("");
   const [icon, setIcon] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [bgType, setBgType] = useState("color"); // 'color' or 'image'
@@ -99,6 +100,7 @@ export default function LinkForm({ onSubmit, onCancel }) {
     onSubmit({
       title: title.trim(),
       url: url.trim(),
+      subtext: subtext.trim(),
       icon,
       thumbnail_url: thumbnailUrl,
       bg_type: bgType,
@@ -142,6 +144,17 @@ export default function LinkForm({ onSubmit, onCancel }) {
               placeholder="https://example.com"
               className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-400 text-sm mb-1">Subtext</label>
+            <input
+              type="text"
+              value={subtext}
+              onChange={(e) => setSubtext(e.target.value)}
+              placeholder="Optional description below the title"
+              className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>

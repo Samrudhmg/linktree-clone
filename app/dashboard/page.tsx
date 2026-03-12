@@ -247,6 +247,7 @@ export default function Dashboard() {
       title: linkData.title || "New Link",
       url: linkData.url || "https://example.com",
       position: nextPosition,
+      subtext: linkData.subtext || null,
       icon: linkData.icon || null,
       thumbnail_url: linkData.thumbnail_url || null,
       bg_type: linkData.bg_type || "color",
@@ -275,7 +276,7 @@ export default function Dashboard() {
       )
     );
 
-    const SCHEMA_FIELDS = ["title", "url", "position", "icon", "thumbnail_url", "bg_type", "bg_color", "bg_image", "text_color", "font", "enabled"];
+    const SCHEMA_FIELDS = ["title", "url", "subtext", "position", "icon", "thumbnail_url", "bg_type", "bg_color", "bg_image", "text_color", "font", "enabled"];
     const dbUpdates = Object.fromEntries(
       Object.entries(updates).filter(([key]) => SCHEMA_FIELDS.includes(key))
     );

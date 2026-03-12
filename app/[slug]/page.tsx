@@ -42,7 +42,7 @@ const getAvatarShape = (page) => {
 export default async function PublicPage({ params }) {
     // Prevent caching of this page
     noStore();
-    
+
     const { slug } = await params;
 
     // Fetch the link page by slug (globally unique)
@@ -126,17 +126,21 @@ export default async function PublicPage({ params }) {
                     <div className="text-center mb-6 sm:mb-8">
                         {/* Avatar */}
                         {linkPage.avatar_url && (
-                            <div className="flex justify-center mb-4">
+                            <div className={`${linkPage.avatar_shape === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-6 border-b border-white/10" : "flex justify-center mb-4"}`}>
                                 <img
                                     src={linkPage.avatar_url}
                                     alt={linkPage.display_name || "Profile"}
-                                    className={`w-20 h-20 sm:w-24 sm:h-24 object-cover border-2 border-white/20 ${avatarShapeClass}`}
+                                    className={`object-cover ${linkPage.avatar_shape === "square" ? "w-20 h-20 sm:w-24 sm:h-24 rounded-none border-2 border-white/20" :
+                                        linkPage.avatar_shape === "rounded" ? "w-20 h-20 sm:w-24 sm:h-24 rounded-3xl border-2 border-white/20" :
+                                            linkPage.avatar_shape === "full" ? "w-[50%] h-20 mt-2 mx-auto aspect-video" :
+                                                "w-20 h-20 sm:w-24 sm:h-24 rounded-full border-2 border-white/20"
+                                        }`}
                                 />
                             </div>
                         )}
-                        <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">{linkPage.display_name || "Untitled"}</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold text-white mb-1 break-words px-2">{linkPage.display_name || "Untitled"}</h1>
                         {linkPage.bio && (
-                            <p className="text-white/80 text-sm max-w-xs mx-auto">{linkPage.bio}</p>
+                            <p className="text-white/80 text-sm max-w-xs mx-auto break-words px-4">{linkPage.bio}</p>
                         )}
                     </div>
 
