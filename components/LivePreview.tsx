@@ -78,7 +78,7 @@ export default function LivePreview({ profile, page, links, appearance }) {
   // Empty state
   if (!hasContent) {
     return (
-      <div className="py-4">
+      <div>
         <div className="w-full flex justify-center">
           <div className="w-[280px] h-[580px] bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative">
             <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />
@@ -99,7 +99,7 @@ export default function LivePreview({ profile, page, links, appearance }) {
   }
 
   return (
-    <div className="py-4">
+    <div>
       <div className="w-full flex justify-center">
         <div className="w-[280px] h-[580px] bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative">
           <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />

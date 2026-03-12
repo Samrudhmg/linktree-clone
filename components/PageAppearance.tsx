@@ -96,8 +96,10 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
 
   // Notify parent of appearance changes for real-time preview + auto-save
   useEffect(() => {
+    const appearance = getCurrentAppearance();
+    
     if (onAppearanceChange) {
-      onAppearanceChange(getCurrentAppearance());
+      onAppearanceChange(appearance);
     }
     
     // Skip auto-save on initial render
@@ -121,7 +123,8 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [getCurrentAppearance, onAppearanceChange, autoSave]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTheme, bgType, bgColor, gradientFrom, gradientTo, bgImage, cardBgColor, cardTextColor, cardStyle, borderRadius, pageFont, avatarShape]);
 
   // When page changes, reset local state
   useEffect(() => {

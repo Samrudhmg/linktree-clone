@@ -807,17 +807,17 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Live Preview - Desktop */}
-        <div className="hidden lg:block w-96 bg-gray-800 p-6">
-          <div className="sticky top-6">
-            <LivePreview
-              profile={profile}
-              page={activePage}
-              links={enabledLinks}
-              appearance={liveAppearance}
-            />
-          </div>
+        {/* Live Preview - Desktop (Fixed on right side, vertically centered) */}
+        <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-gray-800 items-center justify-center">
+          <LivePreview
+            profile={profile}
+            page={activePage}
+            links={enabledLinks}
+            appearance={liveAppearance}
+          />
         </div>
+        {/* Spacer to prevent content from going under the fixed preview */}
+        <div className="hidden lg:block w-96 shrink-0" />
 
         {/* Live Preview - Mobile Modal */}
         {showPreview && (
