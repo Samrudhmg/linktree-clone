@@ -124,11 +124,11 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
             />
 
             {/* Modal dialog */}
-            <div className="fixed inset-x-0 bottom-0 sm:inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 pointer-events-none">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
                 <div
-                    className="w-full max-w-[360px] mx-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto transition-transform sm:transform-none transform translate-y-0"
+                    className="w-full max-w-[360px] mx-auto bg-white rounded-3xl sm:rounded-3xl shadow-2xl overflow-hidden pointer-events-auto transition-transform sm:transform-none transform translate-y-0"
                     role="dialog"
-                    aria-modal="true"
+                    aria-modal="true"  
                 >
                     {/* Header */}
                     <div className="relative flex items-center justify-center px-5 py-3 border-b border-gray-100">
@@ -140,13 +140,13 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            </svg>  
                         </button>
                     </div>
 
                     <div className="p-4 bg-gray-50 h-full flex flex-col justify-center">
                         {/* Link Preview Card (Dark style from image) */}
-                        <div className="bg-[#3A332C] rounded-[24px] p-5 flex flex-col items-center text-center shadow-md relative overflow-hidden mb-5 max-w-[260px] mx-auto w-full">
+                        <div className="bg-[#272727] rounded-[24px] p-5 flex flex-col items-center text-center shadow-md relative overflow-hidden mb-5 max-w-[260px] mx-auto w-full">
 
                             {/* Box around icon/thumbnail */}
                             <div className="w-16 h-16 mb-3 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-1.5 shrink-0">

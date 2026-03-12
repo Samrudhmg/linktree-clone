@@ -11,7 +11,7 @@ export async function GET(request: Request) {
 
   if (code) {
     const cookieStore = await cookies();
-    
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,25 +30,25 @@ export async function GET(request: Request) {
     );
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    
+
     if (!error) {
       // Get the user's email to validate domain
       const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user?.email) {
-        const emailDomain = user.email.split("@")[1];
-        
-        // Check if email is from allowed domain
-        if (emailDomain !== ALLOWED_DOMAIN) {
-          // Sign out the unauthorized user
-          await supabase.auth.signOut();
-          
-          // Redirect to login with error message
-          return NextResponse.redirect(
-            new URL(`/login?error=unauthorized&message=Only @${ALLOWED_DOMAIN} emails are allowed`, request.url)
-          );
-        }
-      }
+
+      // if (user?.email) {
+      //   const emailDomain = user.email.split("@")[1];
+
+      //   // Check if email is from allowed domain
+      //   if (emailDomain !== ALLOWED_DOMAIN) {
+      //     // Sign out the unauthorized user
+      //     await supabase.auth.signOut();
+
+      //     // Redirect to login with error message
+      //     return NextResponse.redirect(
+      //       new URL(`/login?error=unauthorized&message=Only @${ALLOWED_DOMAIN} emails are allowed`, request.url)
+      //     );
+      //   }
+      // }
     }
   }
 

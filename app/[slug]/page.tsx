@@ -2,6 +2,7 @@
 import { supabase } from "@/lib/supabase";
 import PublicLinkItem from "@/components/PublicLinkItem";
 import { unstable_noStore as noStore } from 'next/cache';
+import ShareTrigger from "@/components/shareTrigger";
 
 // Disable ALL caching so appearance changes reflect immediately
 export const dynamic = 'force-dynamic';
@@ -111,6 +112,14 @@ export default async function PublicPage({ params }) {
                     boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.5)",
                 }}
             >
+                <div className="absolute top-4 right-4 z-20">
+                    <ShareTrigger
+                        link={{
+                            url: typeof window !== "undefined" ? window.location.href : "",
+                            title: linkPage.display_name || "My links"
+                        }}
+                    />
+                </div>
                 {/* Gradient overlay for readability when using image backgrounds */}
                 {linkPage?.page_bg_type === "image" && linkPage?.page_bg_image && (
                     <div
