@@ -356,17 +356,21 @@ export default function Dashboard() {
   const updatePage = async (updates: any) => {
     if (!activePage) return { error: "No active page" };
 
-    const { error } = await supabase
+    console.log("[Dashboard] Updating page:", activePage.id, "with:", updates);
+    
+    const { error, data } = await supabase
       .from("link_pages")
       .update(updates)
       .eq("id", activePage.id)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select();
 
     if (error) {
-      console.error("Error updating page:", error);
+      console.error("[Dashboard] Error updating page:", error);
       return { error };
     }
 
+    console.log("[Dashboard] Page updated successfully:", data);
     setActivePage({ ...activePage, ...updates });
     // Refresh pages list
     await fetchPages(user.id);
@@ -804,7 +808,7 @@ export default function Dashboard() {
         </div>
 
         {/* Live Preview - Desktop */}
-        <div className="hidden lg:block w-80 bg-gray-800 p-6">
+        <div className="hidden lg:block w-96 bg-gray-800 p-6">
           <div className="sticky top-6">
             <LivePreview
               profile={profile}

@@ -30,8 +30,11 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
   const [avatarShape, setAvatarShape] = useState(page?.avatar_shape || "rounded");
 
   const [saving, setSaving] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [uploadingBgImage, setUploadingBgImage] = useState(false);
   const bgImageInputRef = useRef(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitializedRef = useRef(false);
 
   // Handle background image file upload
   const handleBgImageUpload = (e) => {
@@ -65,16 +68,67 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
     avatar_shape: avatarShape,
   }), [selectedTheme, bgType, bgColor, gradientFrom, gradientTo, bgImage, cardBgColor, cardTextColor, cardStyle, borderRadius, pageFont, avatarShape]);
 
-  // Notify parent of appearance changes for real-time preview
+  // Auto-save function with debouncing
+  const autoSave = useCallback(async () => {
+    if (!updatePage) return;
+    
+    setAutoSaveStatus("saving");
+    const appearance = getCurrentAppearance();
+    console.log("[PageAppearance] Auto-saving appearance:", appearance);
+    
+    try {
+      const result = await updatePage(appearance);
+      console.log("[PageAppearance] Save result:", result);
+      
+      if (result?.error) {
+        console.error("[PageAppearance] Save error:", result.error);
+        setAutoSaveStatus("idle");
+      } else {
+        setAutoSaveStatus("saved");
+        // Reset status after 2 seconds
+        setTimeout(() => setAutoSaveStatus("idle"), 2000);
+      }
+    } catch (error) {
+      console.error("[PageAppearance] Auto-save exception:", error);
+      setAutoSaveStatus("idle");
+    }
+  }, [getCurrentAppearance, updatePage]);
+
+  // Notify parent of appearance changes for real-time preview + auto-save
   useEffect(() => {
     if (onAppearanceChange) {
       onAppearanceChange(getCurrentAppearance());
     }
-  }, [getCurrentAppearance, onAppearanceChange]);
+    
+    // Skip auto-save on initial render
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      return;
+    }
+    
+    // Clear any existing auto-save timeout
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
+    // Debounce auto-save - wait 800ms after last change before saving
+    autoSaveTimeoutRef.current = setTimeout(() => {
+      autoSave();
+    }, 800);
+    
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [getCurrentAppearance, onAppearanceChange, autoSave]);
 
   // When page changes, reset local state
   useEffect(() => {
     if (page) {
+      // Reset initialized flag to prevent auto-save on page data reset
+      isInitializedRef.current = false;
+      
       setSelectedTheme(page.theme_preset || "default");
       setBgType(page.page_bg_type || "gradient");
       setBgColor(page.page_bg_color || "#6366F1");
@@ -87,6 +141,11 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
       setBorderRadius(page.card_border_radius || "rounded");
       setPageFont(page.page_font || "sans");
       setAvatarShape(page.avatar_shape || "rounded");
+      
+      // Re-enable auto-save after state is set
+      setTimeout(() => {
+        isInitializedRef.current = true;
+      }, 100);
     }
   }, [page?.id]);
 
@@ -423,12 +482,30 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
             </div>
           )}
 
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-semibold rounded-full transition-all flex items-center justify-center gap-2 text-sm"
-          >
+          {/* Save Button with Auto-save Status */}
+          <div className="space-y-2">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center justify-center gap-2 text-purple-400 text-xs">
+                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Auto-saving...
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center justify-center gap-2 text-green-400 text-xs">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Changes saved - Live on your page!
+              </div>
+            )}
+            <button
+              onClick={handleSave}
+              disabled={saving || autoSaveStatus === "saving"}
+              className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-semibold rounded-full transition-all flex items-center justify-center gap-2 text-sm"
+            >
             {saving ? (
               <>
                 <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -445,7 +522,8 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange })
                 Save Appearance
               </>
             )}
-          </button>
+            </button>
+          </div>
         </div>
       )}
     </div>

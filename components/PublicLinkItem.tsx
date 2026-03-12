@@ -105,7 +105,7 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
           )}
 
           {/* Center: Title */}
-          <span className="font-semibold text-center break-words flex-1 text-[15px]">{link.title}</span>
+          <span className="font-semibold text-center break-words whitespace-normal flex-1 text-[15px] leading-tight">{link.title}</span>
 
           {/* Right Side: Three dots menu */}
           <button

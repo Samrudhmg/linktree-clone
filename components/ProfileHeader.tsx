@@ -282,7 +282,7 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
               )}
             </>
           )}
-        </div>
+        </div> 
 
         {/* Add Social Icons */}
         <button className="shrink-0 w-8 h-8 rounded-full bg-gray-700 hidden sm:flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-600 transition-all">

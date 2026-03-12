@@ -1,9 +1,12 @@
 // @ts-nocheck
 import { supabase } from "@/lib/supabase";
 import PublicLinkItem from "@/components/PublicLinkItem";
+import { unstable_noStore as noStore } from 'next/cache';
 
-// Disable caching so appearance changes reflect immediately
+// Disable ALL caching so appearance changes reflect immediately
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 const getBoxBackgroundStyle = (page) => {
     const bgType = page?.page_bg_type || "gradient";
@@ -37,6 +40,9 @@ const getAvatarShape = (page) => {
 };
 
 export default async function PublicPage({ params }) {
+    // Prevent caching of this page
+    noStore();
+    
     const { slug } = await params;
 
     // Fetch the link page by slug (globally unique)
