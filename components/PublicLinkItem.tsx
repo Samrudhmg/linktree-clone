@@ -1,82 +1,33 @@
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
-import { LinkIcon } from "./LinkForm";
+import { 
+    getCardStyle, 
+    getFontClass 
+} from "@/lib/themes";
+import { MoreVertical } from "lucide-react";
+import LinkThumbnail from "./ui/LinkThumbnail";
 import ShareModal from "./ShareModal";
+import { Link, LinkPage } from "@/lib/types";
 
-export default function PublicLinkItem({ link, profile, borderRadiusClass = "rounded-xl" }) {
-  const getFontClass = (fontValue) => {
-    const fonts = {
-      sans: "font-sans",
-      serif: "font-serif",
-      mono: "font-mono",
-    };
-    return fonts[fontValue] || "font-sans";
-  };
-
+export default function PublicLinkItem({ 
+  link, 
+  profile, 
+  borderRadiusClass = "rounded-xl" 
+}: { 
+  link: Link; 
+  profile: LinkPage; 
+  borderRadiusClass?: string;
+}) {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
-  const handleShare = (e) => {
+  const handleShare = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsShareOpen(true);
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    // Show a toast notification
-    const toast = document.createElement("div");
-    toast.className = "fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-black/80 text-white text-sm rounded-lg z-50";
-    toast.textContent = "Link copied to clipboard!";
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2000);
-  };
-
-  // Get card style based on profile settings
-  const getCardStyle = () => {
-    const bgColor = link.bg_color || profile?.card_bg_color || "#FFFFFF";
-    const textColor = link.text_color || profile?.card_text_color || "#1F2937";
-    const cardStyle = profile?.card_style || "filled";
-
-    // If link has a background image, use that
-    if (link.bg_type === "image" && link.bg_image) {
-      return {
-        backgroundImage: `url(${link.bg_image})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        color: textColor,
-      };
-    }
-
-    const baseStyle = { backgroundColor: bgColor, color: textColor };
-
-    switch (cardStyle) {
-      case "outline":
-        return {
-          ...baseStyle,
-          backgroundColor: "transparent",
-          border: `2px solid ${bgColor}`,
-          color: bgColor
-        };
-      case "shadow":
-        return {
-          ...baseStyle,
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.2)"
-        };
-      case "glass":
-        return {
-          ...baseStyle,
-          backgroundColor: `${bgColor}CC`,
-          backdropFilter: "blur(10px)"
-        };
-      default:
-        return baseStyle;
-    }
-  };
-
-  const cardStyle = getCardStyle();
-  const hasThumbnail = link.thumbnail_url;
+  const cardStyle = getCardStyle(profile, link);
 
   return (
     <>
@@ -88,21 +39,12 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
         style={cardStyle}
       >
         <div className="flex items-center gap-3">
-          {/* Left Side: Thumbnail or Icon */}
-          {(hasThumbnail || link.icon) && (
-            <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-              {hasThumbnail ? (
-                <img
-                  src={link.thumbnail_url}
-                  alt=""
-                  className="w-10 h-10 rounded-lg object-cover"
-                  onError={(e: any) => e.target.style.display = 'none'}
-                />
-              ) : link.icon ? (
-                <LinkIcon icon={link.icon} color={cardStyle.color} size="w-6 h-6" />
-              ) : null}
-            </div>
-          )}
+          <LinkThumbnail 
+            thumbnailUrl={link.thumbnail_url || undefined} 
+            icon={link.icon || undefined} 
+            color={cardStyle.color} 
+            size="w-10 h-10" 
+          />
 
           {/* Center: Title & Subtext */}
           <div className="flex-1 text-center min-w-0">
@@ -116,9 +58,7 @@ export default function PublicLinkItem({ link, profile, borderRadiusClass = "rou
             className="flex-shrink-0 w-10 h-10 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
             title="More options"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
+            <MoreVertical className="w-5 h-5" />
           </button>
         </div>
       </a>

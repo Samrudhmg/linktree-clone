@@ -1,0 +1,4 @@
+﻿components/appearance/ProfileSection.tsx(63,33): error TS2339: Property 'username' does not exist on type 'LinkPage'.
+components/appearance/ProfileSection.tsx(64,50): error TS2353: Object literal may only specify known properties, and 'username' does not exist in type 'Partial<LinkPage>'.
+components/ProfileHeader.tsx(139,17): error TS2322: Type 'string | null | undefined' is not assignable to type 'string | Blob | undefined'.
+  Type 'null' is not assignable to type 'string | Blob | undefined'.

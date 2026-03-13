@@ -1,16 +1,15 @@
-// @ts-nocheck
-﻿// @ts-nocheck
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
+import type { User } from "@supabase/supabase-js";
 
 const supabase = createClient();
 
 export default function Setup() {
   const router = useRouter();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [projectName, setProjectName] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -38,7 +37,7 @@ export default function Setup() {
       return;
     }
 
-    setUser(user);
+    setUser(user as User);
     setLoading(false);
   }, [router]);
 
@@ -47,13 +46,13 @@ export default function Setup() {
     checkUser();
   }, [checkUser]);
 
-  const validateProjectName = (name) => {
+  const validateProjectName = (name: string) => {
     // Only allow lowercase letters, numbers, and hyphens
     const regex = /^[a-z0-9-]+$/;
     return regex.test(name) && name.length >= 3 && name.length <= 30;
   };
 
-  const checkAvailability = async (name) => {
+  const checkAvailability = async (name: string) => {
     const { data } = await supabase
       .from("profiles")
       .select("username")
@@ -63,7 +62,7 @@ export default function Setup() {
     return !data;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -84,7 +83,7 @@ export default function Setup() {
     // Create the profile
     const { error: insertError } = await supabase.from("profiles").insert([
       {
-        id: user.id,
+        id: user!.id,
         username: projectName,
         display_name: displayName || "",
         bio: "",
@@ -99,6 +98,20 @@ export default function Setup() {
       return;
     }
 
+    // Create default link page so the user's public URL works immediately
+    const { error: pageError } = await supabase.from("link_pages").insert([
+      {
+        user_id: user!.id,
+        title: displayName || "My Links",
+        slug: projectName,
+        is_default: true,
+        display_name: displayName || "",
+      }
+    ]);
+
+    if (pageError) {
+      console.error("Error creating default page:", pageError);
+    }
 
     router.push("/dashboard");
   };
@@ -137,7 +150,7 @@ export default function Setup() {
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 placeholder="my-links"
-                className="flex-1 bg-transparent py-3 px-2 focus:outline-none text-gray-800 min-w-0"
+                className="flex-1 bg-transparent py-3 px-2 focus:outline-none dark:text-gray-800 min-w-0"
                 required
               />
             </div>
@@ -183,8 +196,8 @@ export default function Setup() {
             type="submit"
             disabled={saving || !projectName}
             className={`w-full py-4 rounded-xl font-semibold transition-all ${saving || !projectName
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
+              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+              : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
               }`}
           >
             {saving ? "Creating..." : "Create My ELTLINKTREE"}

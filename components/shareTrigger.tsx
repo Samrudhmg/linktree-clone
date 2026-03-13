@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import ShareModal from "@/components/ShareModal";
+import ShareModal, { ShareLinkData } from "@/components/ShareModal";
 import { ShareIcon } from "lucide-react";
 
-export default function ShareTrigger({ link }) {
+interface ShareTriggerProps {
+  link: ShareLinkData;
+}
+
+export default function ShareTrigger({ link }: ShareTriggerProps) {
   const [open, setOpen] = useState(false);
 
   return (

@@ -1,79 +1,49 @@
-// @ts-nocheck
-// @ts-nocheck
 "use client";
 
 import { useState } from "react";
-import { LinkPreviewItem, LinkIcon } from "./LinkForm";
-import { FONT_OPTIONS, BORDER_RADIUS_OPTIONS, CARD_STYLES } from "@/lib/themes";
+import { LinkIcon } from "./LinkIcon";
+import {
+  getPageBackgroundStyle,
+  getCardStyle,
+  getFontClass,
+  getBorderRadiusClass,
+  getAvatarShapeClass
+} from "@/lib/themes";
 import ShareModal from "./ShareModal";
+import type { ShareLinkData } from "./ShareModal";
+import { MoreVertical } from "lucide-react";
+import { LinkPage, Link } from "@/lib/types";
 
 // 'appearance' prop: live/unsaved appearance state from PageAppearance editor
 // Falls back to 'page' (saved DB state), then to defaults
-export default function LivePreview({ profile, page, links, appearance }) {
-  const [shareLink, setShareLink] = useState(null);
+export default function LivePreview({ page, links, appearance }: { page: LinkPage | null, links: Link[], appearance: LinkPage | null }) {
+  const [shareLink, setShareLink] = useState<ShareLinkData | null>(null);
 
   // Merge: live appearance > saved page data > defaults
   const a = {
     page_bg_type: appearance?.page_bg_type ?? page?.page_bg_type ?? "gradient",
     page_bg_color: appearance?.page_bg_color ?? page?.page_bg_color ?? "#6366F1",
-    page_bg_gradient_from: appearance?.page_bg_gradient_from ?? page?.page_bg_gradient_from ?? "#6366F1",
-    page_bg_gradient_to: appearance?.page_bg_gradient_to ?? page?.page_bg_gradient_to ?? "#A855F7",
+    page_bg_gradient_start: appearance?.page_bg_gradient_start ?? page?.page_bg_gradient_start ?? "#6366F1",
+    page_bg_gradient_end: appearance?.page_bg_gradient_end ?? page?.page_bg_gradient_end ?? "#A855F7",
     page_bg_image: appearance?.page_bg_image ?? page?.page_bg_image ?? "",
     card_bg_color: appearance?.card_bg_color ?? page?.card_bg_color ?? "#FFFFFF",
     card_text_color: appearance?.card_text_color ?? page?.card_text_color ?? "#1F2937",
-    card_border_radius: appearance?.card_border_radius ?? page?.card_border_radius ?? "rounded",
+    button_radius: appearance?.button_radius ?? page?.button_radius ?? "rounded",
     card_style: appearance?.card_style ?? page?.card_style ?? "filled",
     page_font: appearance?.page_font ?? page?.page_font ?? "sans",
     avatar_shape: appearance?.avatar_shape ?? page?.avatar_shape ?? "rounded",
   };
 
-  const getPageBackground = () => {
-    if (a.page_bg_type === "image" && a.page_bg_image) {
-      return { backgroundImage: `url(${a.page_bg_image})`, backgroundSize: "cover", backgroundPosition: "center" };
-    }
-    if (a.page_bg_type === "color") {
-      return { backgroundColor: a.page_bg_color };
-    }
-    return {
-      background: `linear-gradient(135deg, ${a.page_bg_gradient_from} 0%, ${a.page_bg_gradient_to} 100%)`
-    };
-  };
-
-  const getCardStyle = (link) => {
-    const bgColor = link?.bg_color || a.card_bg_color;
-    const textColor = link?.text_color || a.card_text_color;
-    const cardStyle = a.card_style;
-
-    const baseStyle = { backgroundColor: bgColor, color: textColor };
-
-    switch (cardStyle) {
-      case "outline":
-        return { ...baseStyle, backgroundColor: "transparent", border: `2px solid ${bgColor}`, color: bgColor };
-      case "shadow":
-        return { ...baseStyle, boxShadow: "0 4px 15px -3px rgba(0, 0, 0, 0.2)" };
-      case "glass":
-        return { ...baseStyle, backgroundColor: `${bgColor}CC`, backdropFilter: "blur(10px)" };
-      default:
-        return baseStyle;
-    }
-  };
-
-  const getBorderRadiusClass = () => {
-    return BORDER_RADIUS_OPTIONS.find(r => r.value === a.card_border_radius)?.class || "rounded-xl";
-  };
-
-  const getFontClass = () => {
-    return FONT_OPTIONS.find(f => f.value === a.page_font)?.class || "font-sans";
-  };
+  const pageBackground = getPageBackgroundStyle(a);
+  const fontClass = getFontClass(a.page_font);
+  const borderRadiusClass = getBorderRadiusClass(a.button_radius);
+  const avatarShapeClass = getAvatarShapeClass(a.avatar_shape);
 
   // Check if there's any meaningful content to display
   const hasContent = (page?.avatar_url && page.avatar_url !== "") ||
     (page?.display_name && page.display_name !== "") ||
     (page?.bio && page.bio !== "") ||
     (links && links.length > 0);
-
-  const pageBackground = getPageBackground();
-  const fontClass = getFontClass();
 
   // Empty state
   if (!hasContent) {
@@ -125,12 +95,7 @@ export default function LivePreview({ profile, page, links, appearance }) {
                     <img
                       src={page.avatar_url}
                       alt={page?.display_name || "Profile"}
-                      className={`object-cover ${a.avatar_shape === "square"
-                        ? "w-16 h-16 rounded-none border-2 border-white/20"
-                        : a.avatar_shape === "rounded"
-                          ? "w-16 h-16 rounded-2xl border-2 border-white/20"
-                          : "w-16 h-16 rounded-full border-2 border-white/20"
-                        }`}
+                      className={`object-cover ${avatarShapeClass} ${a.avatar_shape === "full" ? "w-full" : "w-16 h-16"} border-2 border-white/20`}
                     />
                   )}
                 </div>
@@ -163,8 +128,8 @@ export default function LivePreview({ profile, page, links, appearance }) {
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`block py-3 px-3 ${getBorderRadiusClass()} transition-transform hover:scale-[1.02]`}
-                      style={getCardStyle(link)}
+                      className={`block py-3 px-3 ${borderRadiusClass} transition-transform hover:scale-[1.02]`}
+                      style={getCardStyle(a, link)}
                     >
                       <div className="flex items-center gap-2">
                         {/* Left Side: Thumbnail or Icon */}
@@ -194,13 +159,16 @@ export default function LivePreview({ profile, page, links, appearance }) {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            setShareLink(link);
+                            setShareLink({
+                              url: link.url,
+                              title: link.title,
+                              thumbnail_url: link.thumbnail_url ?? undefined,
+                              icon: link.icon ?? undefined,
+                            });
                           }}
                           className="shrink-0 w-6 h-6 flex items-center justify-center hover:bg-black/10 rounded transition-colors"
                         >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                          </svg>
+                          <MoreVertical className="w-4 h-4" />
                         </button>
                       </div>
                     </a>

@@ -1,126 +1,137 @@
 // Theme presets and color palettes for the Linktree clone
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { LinkPage, Link } from "./types";
 
-export const THEME_PRESETS = [
+export const THEMES = [
   {
     id: "default",
     name: "Default Purple",
-    preview: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)",
+    preview_bg: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)",
+    preview_button: "#FFFFFF",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#6366F1",
-    page_bg_gradient_to: "#A855F7",
-    card_bg_color: "#FFFFFF",
-    card_text_color: "#1F2937",
+    page_bg_gradient_start: "#6366F1",
+    page_bg_gradient_end: "#A855F7",
+    button_color: "#FFFFFF",
+    button_text_color: "#1F2937",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "midnight",
     name: "Midnight Blue",
-    preview: "linear-gradient(135deg, #1E3A8A 0%, #312E81 100%)",
+    preview_bg: "linear-gradient(135deg, #1E3A8A 0%, #312E81 100%)",
+    preview_button: "#1E293B",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#1E3A8A",
-    page_bg_gradient_to: "#312E81",
-    card_bg_color: "#1E293B",
-    card_text_color: "#F1F5F9",
+    page_bg_gradient_start: "#1E3A8A",
+    page_bg_gradient_end: "#312E81",
+    button_color: "#1E293B",
+    button_text_color: "#F1F5F9",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "sunset",
     name: "Sunset Orange",
-    preview: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)",
+    preview_bg: "linear-gradient(135deg, #F97316 0%, #EC4899 100%)",
+    preview_button: "#FFFFFF",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#F97316",
-    page_bg_gradient_to: "#EC4899",
-    card_bg_color: "#FFFFFF",
-    card_text_color: "#1F2937",
+    page_bg_gradient_start: "#F97316",
+    page_bg_gradient_end: "#EC4899",
+    button_color: "#FFFFFF",
+    button_text_color: "#1F2937",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "forest",
     name: "Forest Green",
-    preview: "linear-gradient(135deg, #059669 0%, #0D9488 100%)",
+    preview_bg: "linear-gradient(135deg, #059669 0%, #0D9488 100%)",
+    preview_button: "#ECFDF5",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#059669",
-    page_bg_gradient_to: "#0D9488",
-    card_bg_color: "#ECFDF5",
-    card_text_color: "#064E3B",
+    page_bg_gradient_start: "#059669",
+    page_bg_gradient_end: "#0D9488",
+    button_color: "#ECFDF5",
+    button_text_color: "#064E3B",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "ocean",
     name: "Ocean Blue",
-    preview: "linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%)",
+    preview_bg: "linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%)",
+    preview_button: "#F0F9FF",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#0EA5E9",
-    page_bg_gradient_to: "#06B6D4",
-    card_bg_color: "#F0F9FF",
-    card_text_color: "#0C4A6E",
+    page_bg_gradient_start: "#0EA5E9",
+    page_bg_gradient_end: "#06B6D4",
+    button_color: "#F0F9FF",
+    button_text_color: "#0C4A6E",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "rose",
     name: "Rose Pink",
-    preview: "linear-gradient(135deg, #F43F5E 0%, #EC4899 100%)",
+    preview_bg: "linear-gradient(135deg, #F43F5E 0%, #EC4899 100%)",
+    preview_button: "#FFF1F2",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#F43F5E",
-    page_bg_gradient_to: "#EC4899",
-    card_bg_color: "#FFF1F2",
-    card_text_color: "#881337",
+    page_bg_gradient_start: "#F43F5E",
+    page_bg_gradient_end: "#EC4899",
+    button_color: "#FFF1F2",
+    button_text_color: "#881337",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "dark",
     name: "Dark Mode",
-    preview: "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
+    preview_bg: "linear-gradient(135deg, #18181B 0%, #27272A 100%)",
+    preview_button: "#3F3F46",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#18181B",
-    page_bg_gradient_to: "#27272A",
-    card_bg_color: "#3F3F46",
-    card_text_color: "#FAFAFA",
+    page_bg_gradient_start: "#18181B",
+    page_bg_gradient_end: "#27272A",
+    button_color: "#3F3F46",
+    button_text_color: "#FAFAFA",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "lavender",
     name: "Lavender Dream",
-    preview: "linear-gradient(135deg, #A78BFA 0%, #C4B5FD 100%)",
+    preview_bg: "linear-gradient(135deg, #A78BFA 0%, #C4B5FD 100%)",
+    preview_button: "#F5F3FF",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#A78BFA",
-    page_bg_gradient_to: "#C4B5FD",
-    card_bg_color: "#F5F3FF",
-    card_text_color: "#4C1D95",
-  },
-  {
-    id: "minimalist",
-    name: "Minimalist White",
-    preview: "#F9FAFB",
-    page_bg_type: "color",
-    page_bg_color: "#F9FAFB",
-    page_bg_gradient_from: "#F9FAFB",
-    page_bg_gradient_to: "#F9FAFB",
-    card_bg_color: "#FFFFFF",
-    card_text_color: "#111827",
+    page_bg_gradient_start: "#A78BFA",
+    page_bg_gradient_end: "#C4B5FD",
+    button_color: "#F5F3FF",
+    button_text_color: "#4C1D95",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "neon",
     name: "Neon Nights",
-    preview: "linear-gradient(135deg, #7C3AED 0%, #F472B6 100%)",
+    preview_bg: "linear-gradient(135deg, #7C3AED 0%, #F472B6 100%)",
+    preview_button: "#1F1F1F",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#7C3AED",
-    page_bg_gradient_to: "#F472B6",
-    card_bg_color: "#1F1F1F",
-    card_text_color: "#F472B6",
+    page_bg_gradient_start: "#7C3AED",
+    page_bg_gradient_end: "#F472B6",
+    button_color: "#1F1F1F",
+    button_text_color: "#F472B6",
+    button_radius: "rounded",
+    page_font: "sans"
   },
   {
     id: "autumn",
     name: "Autumn Warmth",
-    preview: "linear-gradient(135deg, #DC2626 0%, #F59E0B 100%)",
+    preview_bg: "linear-gradient(135deg, #DC2626 0%, #F59E0B 100%)",
+    preview_button: "#FFFBEB",
     page_bg_type: "gradient",
-    page_bg_gradient_from: "#DC2626",
-    page_bg_gradient_to: "#F59E0B",
-    card_bg_color: "#FFFBEB",
-    card_text_color: "#78350F",
-  },
-  {
-    id: "custom",
-    name: "Custom",
-    preview: "linear-gradient(135deg, #6366F1 0%, #A855F7 100%)",
-    page_bg_type: "gradient",
-    page_bg_gradient_from: "#6366F1",
-    page_bg_gradient_to: "#A855F7",
-    card_bg_color: "#FFFFFF",
-    card_text_color: "#1F2937",
+    page_bg_gradient_start: "#DC2626",
+    page_bg_gradient_end: "#F59E0B",
+    button_color: "#FFFBEB",
+    button_text_color: "#78350F",
+    button_radius: "rounded",
+    page_font: "sans"
   },
 ];
 
@@ -200,3 +211,93 @@ export const AVATAR_SHAPE_OPTIONS = [
   { value: "square", label: "Square", class: "rounded-none" },
   { value: "full", label: "Full Width", class: "w-full rounded-none" },
 ];
+
+export const getPageBackgroundStyle = (config: Partial<LinkPage>) => {
+  const {
+    page_bg_type = "gradient",
+    page_bg_color = "#6366F1",
+    page_bg_gradient_start = "#6366F1",
+    page_bg_gradient_end = "#A855F7",
+    page_bg_image = ""
+  } = config;
+
+  if (page_bg_type === "image" && page_bg_image) {
+    return {
+      backgroundImage: `url(${page_bg_image})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+    };
+  }
+  if (page_bg_type === "color") {
+    return { backgroundColor: page_bg_color };
+  }
+  return {
+    background: `linear-gradient(135deg, ${page_bg_gradient_start} 0%, ${page_bg_gradient_end} 100%)`,
+  };
+};
+
+export const getCardStyle = (config: Partial<LinkPage>, linkOverlay?: Partial<Link>) => {
+  const bgColor = linkOverlay?.bg_color || config.card_bg_color || config.button_color || "#FFFFFF";
+  const textColor = linkOverlay?.text_color || config.card_text_color || config.button_text_color || "#1F2937";
+  const cardStyle = config.card_style || "filled";
+
+  const baseStyle = { backgroundColor: bgColor, color: textColor };
+
+  switch (cardStyle) {
+    case "outline":
+      return {
+        ...baseStyle,
+        backgroundColor: "transparent",
+        border: `2px solid ${bgColor}`,
+        color: bgColor,
+      };
+    case "shadow":
+      return {
+        ...baseStyle,
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+      };
+    case "glass":
+      return {
+        ...baseStyle,
+        backgroundColor: `${bgColor}CC`,
+        backdropFilter: "blur(12px)",
+        border: `1px solid ${bgColor}33`,
+      };
+    default:
+      return baseStyle;
+  }
+};
+
+export const getFontClass = (fontValue?: string) => {
+  return FONT_OPTIONS.find((f) => f.value === fontValue)?.class || "font-sans";
+};
+
+export const getBorderRadiusClass = (radiusValue?: string) => {
+  return BORDER_RADIUS_OPTIONS.find((r) => r.value === radiusValue)?.class || "rounded-xl";
+};
+
+
+export const getAvatarShapeClass = (shapeValue?: string) => {
+  return AVATAR_SHAPE_OPTIONS.find((s) => s.value === shapeValue)?.class || "rounded-full";
+};
+
+/**
+ * Shared utility for uploading images to Supabase storage
+ */
+export const uploadLinkImage = async (supabase: SupabaseClient, file: File, bucket = "link_images") => {
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please upload an image file");
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image must be less than 5MB");
+  }
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+
+  const { error } = await supabase.storage.from(bucket).upload(fileName, file);
+  if (error) throw error;
+
+  const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
+  return publicUrlData.publicUrl;
+};

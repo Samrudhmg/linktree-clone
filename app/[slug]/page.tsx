@@ -1,61 +1,55 @@
-// @ts-nocheck
 import { supabase } from "@/lib/supabase";
+import type { PostgrestError } from "@supabase/supabase-js";
 import PublicLinkItem from "@/components/PublicLinkItem";
 import { unstable_noStore as noStore } from 'next/cache';
 import ShareTrigger from "@/components/shareTrigger";
+import {
+    getPageBackgroundStyle,
+    getFontClass,
+    getBorderRadiusClass,
+} from "@/lib/themes";
+import { LinkPage, Link } from "@/lib/types";
 
 // Disable ALL caching so appearance changes reflect immediately
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const fetchCache = 'force-no-store';
 
-const getBoxBackgroundStyle = (page) => {
-    const bgType = page?.page_bg_type || "gradient";
-    if (bgType === "image" && page?.page_bg_image) {
-        return {
-            backgroundImage: `url(${page.page_bg_image})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center"
-        };
-    }
-    if (bgType === "color") {
-        return { backgroundColor: page?.page_bg_color || "#6366F1" };
-    }
-    return {
-        background: `linear-gradient(135deg, ${page?.page_bg_gradient_from || "#6366F1"} 0%, ${page?.page_bg_gradient_to || "#A855F7"} 100%)`
-    };
-};
 
-const getFontClass = (page) => {
-    const fonts = { sans: "font-sans", serif: "font-serif", mono: "font-mono" };
-    return fonts[page?.page_font] || "font-sans";
-};
-
-const getCardBorderRadius = (page) => {
-    const radiusMap = { none: "rounded-none", sm: "rounded-lg", rounded: "rounded-xl", full: "rounded-full" };
-    return radiusMap[page?.card_border_radius] || "rounded-xl";
-};
-
-const getAvatarShape = (page) => {
-    return page?.avatar_shape === "square" ? "rounded-xl" : "rounded-full";
-};
-
-export default async function PublicPage({ params }) {
+export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
     // Prevent caching of this page
     noStore();
 
     const { slug } = await params;
 
-    // Fetch the link page by slug (globally unique)
+    // Fetch the link page by slug (optimizing column selection)
     const { data: linkPage, error: pageError } = await supabase
         .from("link_pages")
-        .select("*")
+        .select(`
+            id, 
+            user_id, 
+            slug, 
+            display_name, 
+            bio, 
+            avatar_url, 
+            avatar_shape,
+            page_bg_type,
+            page_bg_color,
+            page_bg_gradient_start,
+            page_bg_gradient_end,
+            page_bg_image,
+            card_bg_color,
+            card_text_color,
+            card_border_radius,
+            card_style,
+            page_font
+        `)
         .eq("slug", slug)
-        .single();
+        .single() as { data: LinkPage | null, error: PostgrestError | null };
 
     if (pageError || !linkPage) {
         return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0f0f1a" }}>
+            <div className="min-h-screen flex items-center justify-center bg-[#0f0f1a]">
                 <div className="text-center text-white">
                     <h1 className="text-4xl font-bold mb-4">404</h1>
                     <p className="text-white/70">This page doesn&apos;t exist</p>
@@ -64,40 +58,35 @@ export default async function PublicPage({ params }) {
         );
     }
 
-    // Fetch the profile for this page
-    const { data: profile, error: profileError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", linkPage.user_id)
-        .single();
-
-    if (profileError || !profile) {
-        return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0f0f1a" }}>
-                <div className="text-center text-white">
-                    <h1 className="text-4xl font-bold mb-4">404</h1>
-                    <p className="text-white/70">This page doesn&apos;t exist</p>
-                </div>
-            </div>
-        );
-    }
-
-    // Fetch links for this specific page (only enabled links)
+    // Fetch links for this specific page (only enabled links, optimizing columns)
     const { data: links, error: linksError } = await supabase
         .from("links")
-        .select("*")
+        .select(`
+            id,
+            title,
+            url,
+            subtext,
+            icon,
+            thumbnail_url,
+            enabled,
+            position,
+            bg_type,
+            bg_color,
+            bg_image,
+            text_color,
+            font
+        `)
         .eq("page_id", linkPage.id)
         .neq("enabled", false)
-        .order("position", { ascending: true });
+        .order("position", { ascending: true }) as { data: Link[] | null, error: PostgrestError | null };
 
     if (linksError) {
         console.error("Error fetching links:", linksError);
     }
 
-    const boxStyle = getBoxBackgroundStyle(linkPage);
-    const fontClass = getFontClass(linkPage);
-    const borderRadiusClass = getCardBorderRadius(linkPage);
-    const avatarShapeClass = getAvatarShape(linkPage);
+    const boxStyle = getPageBackgroundStyle(linkPage);
+    const fontClass = getFontClass(linkPage.page_font);
+    const borderRadiusClass = getBorderRadiusClass(linkPage.card_border_radius);
 
     return (
         <div

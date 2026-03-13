@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import Sidebar from "@/components/Sidebar";
@@ -9,16 +9,28 @@ import LivePreview from "@/components/LivePreview";
 import ProfileHeader from "@/components/ProfileHeader";
 import LinkForm from "@/components/LinkForm";
 import PageAppearance from "@/components/PageAppearance";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import CreatePageForm from "@/components/dashboard/CreatePageForm";
+import PageList from "@/components/dashboard/PageList";
+import PageInfoCard from "@/components/dashboard/PageInfoCard";
+import {
+  X,
+  Plus,
+  Pencil,
+  ExternalLink
+} from "lucide-react";
+import { Link, LinkPage, Profile } from "@/lib/types";
+import { User } from "@supabase/supabase-js";
 
 const supabase = createClient();
 
 export default function Dashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [pages, setPages] = useState<any[]>([]);
-  const [activePage, setActivePage] = useState<any>(null);
-  const [links, setLinks] = useState<any[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [pages, setPages] = useState<LinkPage[]>([]);
+  const [activePage, setActivePage] = useState<LinkPage | null>(null);
+  const [links, setLinks] = useState<Link[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("links");
@@ -28,7 +40,7 @@ export default function Dashboard() {
   const [newPageTitle, setNewPageTitle] = useState("");
   const [newPageSlug, setNewPageSlug] = useState("");
   // Live appearance for real-time preview
-  const [liveAppearance, setLiveAppearance] = useState<any>(null);
+  const [liveAppearance, setLiveAppearance] = useState<LinkPage | null>(null);
   // Profile editing
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState("");
@@ -41,6 +53,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     checkUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Supabase Realtime: keep links in sync
@@ -72,6 +85,7 @@ export default function Dashboard() {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, activePage]);
 
   const checkUser = async () => {
@@ -120,6 +134,36 @@ export default function Dashboard() {
         // If link_pages table doesn't exist yet, create a virtual default page
         setPages([]);
         return;
+      }
+
+      // Auto-create default page for existing users who don't have one yet
+      if (!data || data.length === 0) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("username, display_name")
+          .eq("id", userId)
+          .single();
+
+        if (prof?.username) {
+          const { data: newPage } = await supabase
+            .from("link_pages")
+            .insert([{
+              user_id: userId,
+              title: prof.display_name || "My Links",
+              slug: prof.username,
+              is_default: true,
+              display_name: prof.display_name || "",
+            }])
+            .select()
+            .single();
+
+          if (newPage) {
+            setPages([newPage]);
+            setActivePage(newPage);
+            setLinks([]);
+            return;
+          }
+        }
       }
 
       setPages(data || []);
@@ -234,7 +278,7 @@ export default function Dashboard() {
     await fetchPages(user.id);
   };
 
-  const addLink = async (linkData: any = {}) => {
+  const addLink = async (linkData: Partial<Link> = {}) => {
     if (!user || !activePage) return;
 
     const nextPosition = links.length > 0
@@ -269,7 +313,7 @@ export default function Dashboard() {
     setActiveTab("links");
   };
 
-  const updateLink = async (linkId: string, updates: any) => {
+  const updateLink = async (linkId: string, updates: Partial<Link>) => {
     setLinks(prevLinks =>
       prevLinks.map(link =>
         link.id === linkId ? { ...link, ...updates } : link
@@ -287,7 +331,7 @@ export default function Dashboard() {
       .from("links")
       .update(dbUpdates)
       .eq("id", linkId)
-      .eq("user_id", user.id);
+      .eq("user_id", user?.id);
 
     if (error) {
       console.error("Error updating link:", error);
@@ -301,7 +345,7 @@ export default function Dashboard() {
       .from("links")
       .delete()
       .eq("id", linkId)
-      .eq("user_id", user.id);
+      .eq("user_id", user?.id);
 
     if (error) {
       console.error("Error deleting link:", error);
@@ -311,7 +355,7 @@ export default function Dashboard() {
     if (activePage) await fetchLinks(activePage.id);
   };
 
-  const reorderLinks = async (newOrderedLinks: any[]) => {
+  const reorderLinks = async (newOrderedLinks: Link[]) => {
     // Update local state immediately for responsive UI
     setLinks(newOrderedLinks);
 
@@ -327,7 +371,7 @@ export default function Dashboard() {
         .from("links")
         .update({ position: update.position })
         .eq("id", update.id)
-        .eq("user_id", user.id);
+        .eq("user_id", user?.id);
 
       if (error) {
         console.error("Error updating link position:", error);
@@ -338,7 +382,8 @@ export default function Dashboard() {
     }
   };
 
-  const updateProfile = async (updates: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return { error: "No user" };
     const { error } = await supabase
       .from("profiles")
@@ -350,20 +395,20 @@ export default function Dashboard() {
       return { error };
     }
 
-    setProfile({ ...profile, ...updates });
+    if (profile) setProfile({ ...profile, ...updates } as Profile);
     return { success: true };
   };
 
-  const updatePage = async (updates: any) => {
+  const updatePage = async (updates: Partial<LinkPage>) => {
     if (!activePage) return { error: "No active page" };
 
     console.log("[Dashboard] Updating page:", activePage.id, "with:", updates);
-    
+
     const { error, data } = await supabase
       .from("link_pages")
       .update(updates)
       .eq("id", activePage.id)
-      .eq("user_id", user.id)
+      .eq("user_id", user?.id)
       .select();
 
     if (error) {
@@ -374,13 +419,13 @@ export default function Dashboard() {
     console.log("[Dashboard] Page updated successfully:", data);
     setActivePage({ ...activePage, ...updates });
     // Refresh pages list
-    await fetchPages(user.id);
+    if (user) await fetchPages(user.id);
     return { success: true };
   };
 
   const saveEditProfile = async () => {
     if (!user || !editDisplayName.trim()) return;
-    
+
     const { error } = await supabase
       .from("profiles")
       .update({
@@ -394,13 +439,13 @@ export default function Dashboard() {
       return;
     }
 
-    setProfile({ ...profile, display_name: editDisplayName });
+    if (profile) setProfile({ ...profile, display_name: editDisplayName } as Profile);
     setShowEditProfile(false);
   };
 
   const savePageSlug = async () => {
     if (!activePage || !editPageSlug.trim()) return;
-    
+
     // Check if slug is available globally (not just for this user)
     const { data } = await supabase
       .from("link_pages")
@@ -408,17 +453,17 @@ export default function Dashboard() {
       .eq("slug", editPageSlug)
       .neq("id", activePage.id)
       .single();
-    
+
     if (data) {
       setError("This URL is already taken. Please choose a different one.");
       return;
     }
-    
+
     const { error } = await supabase
       .from("link_pages")
       .update({ slug: editPageSlug })
       .eq("id", activePage.id)
-      .eq("user_id", user.id);
+      .eq("user_id", user?.id);
 
     if (error) {
       console.error("Error updating page slug:", error);
@@ -428,10 +473,10 @@ export default function Dashboard() {
 
     setActivePage({ ...activePage, slug: editPageSlug });
     setEditingPageSlug(false);
-    await fetchPages(user.id);
+    if (user) await fetchPages(user.id);
   };
 
-  const handleSelectPage = (page: any) => {
+  const handleSelectPage = (page: LinkPage) => {
     setActivePage(page);
     setActiveTab("links");
     setLiveAppearance(null);
@@ -445,9 +490,9 @@ export default function Dashboard() {
     setShowSidebar(false);
   };
 
-  const handleAppearanceChange = useCallback((appearance: any) => {
+  const handleAppearanceChange = (appearance: LinkPage) => {
     setLiveAppearance(appearance);
-  }, []);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -465,7 +510,7 @@ export default function Dashboard() {
   const enabledLinks = links.filter(l => l.enabled !== false);
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen bg-white dark:bg-[#101828] text-gray-900 dark:text-white flex transition-colors">
       {/* Mobile Overlay */}
       {showSidebar && (
         <div
@@ -475,7 +520,7 @@ export default function Dashboard() {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed lg:relative z-50 lg:z-auto transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      <div className={`fixed inset-y-0 left-0 lg:relative z-50 lg:z-auto transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}>
         <Sidebar
           profile={profile}
@@ -495,270 +540,70 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex-1 flex flex-col lg:flex-row  bg-gray-50 dark:bg-[#101828] transition-colors">
         {/* Editor Area */}
         <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
           <div className="max-w-2xl mx-auto">
-            {/* Mobile Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowSidebar(true)}
-                  className="lg:hidden p-2 text-gray-400 hover:text-white"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                <h1 className="text-xl sm:text-2xl font-bold text-white">
-                  {showCreatePage ? "Create New Page" : activePage ? activePage.title : "My Pages"}
-                </h1>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Mobile Preview Toggle */}
-                <button
-                  onClick={() => setShowPreview(true)}
-                  className="lg:hidden p-2 text-gray-400 hover:text-white"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-
-                <a
-                  href={activePage ? `/${activePage.slug}` : `/`}
-                  target="_blank"
-                  className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2 bg-gray-800 text-gray-300 rounded-full hover:bg-gray-700 transition-all text-xs sm:text-sm"
-                >
-                  <span className="truncate max-w-[180px] sm:max-w-none">{activePage ? `/${activePage.slug}` : `/`}</span>
-                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-              </div>
-            </div>
+            {/* Dashboard Header */}
+            <DashboardHeader
+              showCreatePage={showCreatePage}
+              activePage={activePage}
+              onShowSidebar={() => setShowSidebar(true)}
+              onShowPreview={() => setShowPreview(true)}
+            />
 
             {/* Mobile Link to Profile */}
-            <a
-              href={activePage ? `/${activePage.slug}` : `/`}
-              target="_blank"
-              className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 transition-all text-sm"
-            >
-              <span>View: {activePage ? `/${activePage.slug}` : `/`}</span>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
+            {activePage && (
+              <a
+                href={`/${activePage.slug}`}
+                target="_blank"
+                className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm"
+              >
+                <span>View: /{activePage.slug}</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
 
             {/* Error Message */}
             {error && (
               <div className="p-4 bg-red-500/20 text-red-400 rounded-lg mb-6 text-sm flex items-center justify-between">
                 <span>{error}</span>
                 <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 ml-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
             {/* Create New Page Form */}
             {showCreatePage ? (
-              <div className="bg-gray-800 rounded-xl p-6 space-y-4">
-                <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  New Link Page
-                </h3>
-                <p className="text-gray-400 text-sm">Create a new page with its own set of links and appearance.</p>
-
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">Page Title *</label>
-                  <input
-                    type="text"
-                    value={newPageTitle}
-                    onChange={(e) => setNewPageTitle(e.target.value)}
-                    placeholder="My Social Links"
-                    className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
-                    autoFocus
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">Page URL *</label>
-                  <div className="flex items-center bg-gray-700 rounded-lg border border-gray-600 focus-within:border-purple-500 overflow-hidden">
-                    <span className="px-3 text-gray-400 text-sm whitespace-nowrap border-r border-gray-600">/</span>
-                    <input
-                      type="text"
-                      value={newPageSlug}
-                      onChange={(e) => setNewPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                      placeholder="my-social-links"
-                      className="flex-1 bg-transparent text-white px-3 py-3 focus:outline-none"
-                      onKeyDown={(e) => e.key === "Enter" && createPage()}
-                    />
-                  </div>
-                  <p className="text-gray-500 text-xs mt-1">This will be your page&apos;s URL. Use lowercase letters, numbers, and hyphens.</p>
-                </div>
-
-                {newPageSlug.trim() && (
-                  <div className="bg-gray-700/50 rounded-lg p-3">
-                    <p className="text-gray-400 text-xs mb-1">Your page will be hosted at:</p>
-                    <p className="text-green-400 text-sm font-mono">
-                      {typeof window !== "undefined" ? window.location.origin : ""}/{newPageSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "")}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => { setShowCreatePage(false); setNewPageTitle(""); setNewPageSlug(""); }}
-                    className="flex-1 py-3 px-6 bg-gray-700 text-gray-300 font-semibold rounded-full hover:bg-gray-600 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={createPage}
-                    disabled={!newPageTitle.trim() || !newPageSlug.trim()}
-                    className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
-                  >
-                    Create Page
-                  </button>
-                </div>
-              </div>
+              <CreatePageForm
+                newPageTitle={newPageTitle}
+                setNewPageTitle={setNewPageTitle}
+                newPageSlug={newPageSlug}
+                setNewPageSlug={setNewPageSlug}
+                onCreatePage={createPage}
+                onCancel={() => { setShowCreatePage(false); setNewPageTitle(""); setNewPageSlug(""); }}
+              />
             ) : !activePage ? (
-              /* No Page Selected — Show Page List */
-              <div className="space-y-4">
-                {pages.length === 0 ? (
-                  <div className="text-center py-16">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
-                    <h3 className="text-white text-xl font-semibold mb-2">Start Creating Links!</h3>
-                    <p className="text-gray-400 mb-6">Create your first page and add links to share with the world</p>
-                    <button
-                      onClick={handleCreatePage}
-                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-full transition-all shadow-lg"
-                    >
-                      Create Your First Page
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex items-center justify-between mb-2">
-                      <p className="text-gray-400 text-sm">{pages.length} page{pages.length !== 1 ? "s" : ""}</p>
-                      <button
-                        onClick={handleCreatePage}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded-full transition-all"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        New Page
-                      </button>
-                    </div>
-                    {pages.map((page) => (
-                      <div
-                        key={page.id}
-                        className="bg-gray-800 rounded-xl p-4 hover:bg-gray-750 transition-all group cursor-pointer"
-                        onClick={() => handleSelectPage(page)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-10 h-10 rounded-lg flex items-center justify-center"
-                              style={{ background: `linear-gradient(135deg, ${page.page_bg_gradient_from || "#6366F1"} 0%, ${page.page_bg_gradient_to || "#A855F7"} 100%)` }}
-                            >
-                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                              </svg>
-                            </div>
-                            <div>
-                              <h3 className="text-white font-medium">{page.title}</h3>
-                              <p className="text-gray-500 text-xs">/{page.slug}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-
-                            <button
-                              onClick={(e) => { e.stopPropagation(); deletePage(page.id); }}
-                              className="text-gray-500 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                )}
-              </div>
+              <PageList
+                pages={pages}
+                onSelectPage={handleSelectPage}
+                onDeletePage={(deleteId, e) => { e.stopPropagation(); deletePage(deleteId); }}
+                onCreatePage={handleCreatePage}
+              />
             ) : (
               /* Page Editor */
               <>
-                {/* Back to Pages */}
-                <button
-                  onClick={() => { setActivePage(null); setLiveAppearance(null); }}
-                  className="flex items-center gap-2 text-gray-400 hover:text-white transition-all mb-4 text-sm"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                  Back to Pages
-                </button>
+                <PageInfoCard
+                  activePage={activePage}
+                  editingPageSlug={editingPageSlug}
+                  setEditingPageSlug={setEditingPageSlug}
+                  editPageSlug={editPageSlug}
+                  setEditPageSlug={setEditPageSlug}
+                  onSavePageSlug={savePageSlug}
+                  onBack={() => { setActivePage(null); setLiveAppearance(null); }}
+                />
 
-                {/* Page Info Card */}
-                <div className="bg-gray-800 rounded-xl p-4 mb-6">
-                  <h2 className="text-white font-semibold text-lg mb-2">{activePage.title}</h2>
-                  <div className="flex items-center gap-2">
-                    {editingPageSlug ? (
-                      <div className="flex-1 flex items-center gap-2">
-                        <div className="flex items-center bg-gray-700 rounded-lg border border-gray-600 focus-within:border-purple-500 overflow-hidden flex-1">
-                          <span className="px-2 text-gray-400 text-xs whitespace-nowrap border-r border-gray-600">/</span>
-                          <input
-                            type="text"
-                            value={editPageSlug}
-                            onChange={(e) => setEditPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                            className="flex-1 bg-transparent text-white px-2 py-1.5 text-sm focus:outline-none"
-                            autoFocus
-                          />
-                        </div>
-                        <button
-                          onClick={savePageSlug}
-                          className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-all"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingPageSlug(false)}
-                          className="px-3 py-1.5 bg-gray-700 text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-600 transition-all"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="text-gray-400 text-sm flex-1">/{activePage.slug}</p>
-                        <button
-                          onClick={() => { setEditPageSlug(activePage.slug); setEditingPageSlug(true); }}
-                          className="text-gray-500 hover:text-purple-400 transition-all p-1"
-                          title="Edit URL"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
 
                 {/* Tab Content */}
                 {activeTab === "create-link" ? (
@@ -788,9 +633,7 @@ export default function Dashboard() {
                       onClick={() => setActiveTab("create-link")}
                       className="w-full py-3 sm:py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full mb-6 transition-all flex items-center justify-center gap-2"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
+                      <Plus className="w-5 h-5" />
                       Create New Link
                     </button>
 
@@ -809,16 +652,18 @@ export default function Dashboard() {
         </div>
 
         {/* Live Preview - Desktop (Fixed on right side, vertically centered) */}
-        <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-gray-800 items-center justify-center">
-          <LivePreview
-            profile={profile}
-            page={activePage}
-            links={enabledLinks}
-            appearance={liveAppearance}
-          />
-        </div>
+        {activePage && (
+          <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-gray-100 dark:bg-gray-800 items-center justify-center border-l border-gray-200 dark:border-gray-700 transition-colors">
+            <LivePreview
+              page={activePage}
+              links={enabledLinks}
+              appearance={liveAppearance}
+            />
+          </div>)}
         {/* Spacer to prevent content from going under the fixed preview */}
-        <div className="hidden lg:block w-96 shrink-0" />
+        {activePage && (
+          <div className="hidden lg:block w-96 shrink-0" />
+        )}
 
         {/* Live Preview - Mobile Modal */}
         {showPreview && (
@@ -828,12 +673,9 @@ export default function Dashboard() {
                 onClick={() => setShowPreview(false)}
                 className="absolute top-4 right-4 text-white p-2"
               >
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-8 h-8" />
               </button>
               <LivePreview
-                profile={profile}
                 page={activePage}
                 links={enabledLinks}
                 appearance={liveAppearance}
@@ -843,14 +685,13 @@ export default function Dashboard() {
         )}
       </div>
 
+
       {/* Edit Profile Modal */}
       {showEditProfile && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-xl p-6 w-full max-w-md space-y-4">
-            <h3 className="text-white font-semibold text-lg flex items-center gap-2">
-              <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-              </svg>
+          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl transition-colors">
+            <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
+              <Pencil className="w-5 h-5 text-purple-400" />
               Edit Profile
             </h3>
 
@@ -861,7 +702,7 @@ export default function Dashboard() {
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
                 placeholder="Your Name"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-600 focus:outline-none focus:border-purple-500"
+                className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
                 autoFocus
               />
             </div>
@@ -869,7 +710,7 @@ export default function Dashboard() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setShowEditProfile(false)}
-                className="flex-1 py-3 px-6 bg-gray-700 text-gray-300 font-semibold rounded-full hover:bg-gray-600 transition-all"
+                className="flex-1 py-3 px-6 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
               >
                 Cancel
               </button>
