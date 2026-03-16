@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useRef } from "react";
 import {
   GripVertical,
@@ -141,11 +142,18 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
                       <div className="flex items-center gap-2">
                         {thumbnailUrl && (
                           <div className="relative">
-                            <img src={thumbnailUrl} alt="" className="w-10 h-10 rounded-md object-cover" />
+                            <div className="relative w-10 h-10 shadow-sm">
+                              <Image
+                                src={thumbnailUrl}
+                                alt=""
+                                fill
+                                className="rounded-md object-cover"
+                              />
+                            </div>
                             <button
                               type="button"
                               onClick={() => setThumbnailUrl("")}
-                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center"
+                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center z-10"
                             >
                               <X className="w-2.5 h-2.5 text-white" />
                             </button>

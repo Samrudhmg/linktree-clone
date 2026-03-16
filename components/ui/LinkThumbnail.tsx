@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { LinkIcon } from "../LinkIcon";
 
 interface LinkThumbnailProps {
@@ -19,11 +20,14 @@ export default function LinkThumbnail({
 }: LinkThumbnailProps) {
   if (thumbnailUrl) {
     return (
-      <img 
-        src={thumbnailUrl} 
-        alt="" 
-        className={`${size} rounded object-cover shrink-0 ${className}`} 
-      />
+      <div className={`${size} relative shrink-0`}>
+        <Image 
+          src={thumbnailUrl} 
+          alt="" 
+          fill
+          className={`rounded object-cover ${className}`} 
+        />
+      </div>
     );
   }
 

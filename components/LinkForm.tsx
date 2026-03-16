@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import {
   X,
   Palette,
@@ -168,15 +169,18 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
             <div className="mt-4 relative bg-gray-50 dark:bg-gray-750 rounded-lg p-3 flex flex-col items-center border border-gray-200 dark:border-gray-700 transition-colors">
               <span className="text-gray-400 text-xs mb-2 w-full text-left">Uploaded Icon Preview:</span>
               <div className="relative group">
-                <img
-                  src={thumbnailUrl}
-                  alt="Thumbnail preview"
-                  className="w-16 h-16 object-cover rounded-md shadow-md"
-                />
+                <div className="relative w-16 h-16 shadow-md">
+                  <Image
+                    src={thumbnailUrl}
+                    alt="Thumbnail preview"
+                    fill
+                    className="object-cover rounded-md"
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setThumbnailUrl("")}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <X className="w-3 h-3" />
                 </button>

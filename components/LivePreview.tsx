@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { LinkIcon } from "./LinkIcon";
 import {
   getPageBackgroundStyle,
@@ -84,19 +85,23 @@ export default function LivePreview({ page, links, appearance }: { page: LinkPag
                     }`}
                 >
                   {a.avatar_shape === "full" ? (
-                    <div className="w-50 h-10 mx-auto mt-20 overflow-hidden">
-                      <img
+                    <div className="w-50 h-10 mx-auto mt-20 overflow-hidden relative">
+                      <Image
                         src={page.avatar_url}
                         alt={page?.display_name || "Profile"}
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   ) : (
-                    <img
-                      src={page.avatar_url}
-                      alt={page?.display_name || "Profile"}
-                      className={`object-cover ${avatarShapeClass} ${a.avatar_shape === "full" ? "w-full" : "w-16 h-16"} border-2 border-white/20`}
-                    />
+                    <div className={`relative ${a.avatar_shape === "full" ? "w-full" : "w-16 h-16"}`}>
+                      <Image
+                        src={page.avatar_url}
+                        alt={page?.display_name || "Profile"}
+                        fill
+                        className={`object-cover ${avatarShapeClass} border-2 border-white/20`}
+                      />
+                    </div>
                   )}
                 </div>
               )}
@@ -134,12 +139,13 @@ export default function LivePreview({ page, links, appearance }: { page: LinkPag
                       <div className="flex items-center gap-2">
                         {/* Left Side: Thumbnail or Icon */}
                         {(link.thumbnail_url || link.icon) && (
-                          <div className="shrink-0 w-6 h-6 flex items-center justify-center">
+                          <div className="shrink-0 w-6 h-6 flex items-center justify-center relative">
                             {link.thumbnail_url ? (
-                              <img
+                              <Image
                                 src={link.thumbnail_url}
                                 alt=""
-                                className="w-6 h-6 rounded object-cover"
+                                fill
+                                className="rounded object-cover"
                               />
                             ) : link.icon ? (
                               <LinkIcon icon={link.icon} color={link.text_color || a.card_text_color} />

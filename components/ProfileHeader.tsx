@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
+import Image from "next/image";
 import {
   Camera,
   Loader2,
@@ -135,10 +136,11 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
               }`}
           >
             {avatarUrl || page?.avatar_url ? (
-              <img
-                src={avatarUrl || page?.avatar_url || undefined}
+              <Image
+                src={avatarUrl || page?.avatar_url || ""}
                 alt="Avatar"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               page?.display_name?.[0]?.toUpperCase() || "@"

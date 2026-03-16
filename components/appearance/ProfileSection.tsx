@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { Upload, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase-browser";
 import { uploadLinkImage } from "@/lib/themes";
@@ -35,7 +36,12 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
         <div className="relative group">
           <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 ring-4 ring-purple-500/10 dark:ring-purple-500/20">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+              <Image 
+                src={profile.avatar_url} 
+                alt="Profile" 
+                fill 
+                className="object-cover transition-transform group-hover:scale-110" 
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
                 <Upload className="w-8 h-8" />

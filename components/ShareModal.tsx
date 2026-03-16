@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { LinkIcon } from "./LinkIcon";
+import Image from "next/image";
 import {
     LucideLink,
     Twitter,
@@ -128,9 +129,9 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
                         <div className="bg-gray-700 rounded-[24px] p-5 flex flex-col items-center text-center shadow-md relative overflow-hidden mb-5 max-w-[260px] mx-auto w-full">
 
                             {/* Box around icon/thumbnail */}
-                            <div className="w-16 h-16 mb-3 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-1.5 shrink-0">
+                            <div className="w-16 h-16 mb-3 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-1.5 shrink-0 relative">
                                 {link.thumbnail_url ? (
-                                    <img src={link.thumbnail_url} alt="" className="w-full h-full rounded-xl object-cover" />
+                                    <Image src={link.thumbnail_url} alt="" fill className="rounded-xl object-cover p-1.5" />
                                 ) : (
                                     <>
                                         <LinkIcon icon={link.icon || "link"} color={link.icon === "whatsapp" ? "#25D366" : "#4ade80"} size="w-8 h-8" />
