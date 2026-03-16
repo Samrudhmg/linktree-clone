@@ -11,7 +11,8 @@ import {
   Upload,
   X,
   Palette,
-  AlertCircle
+  AlertCircle,
+  BarChart2
 } from "lucide-react";
 import { LinkIcon } from "./LinkIcon";
 import {
@@ -260,7 +261,13 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
                   <Pencil className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-gray-500 text-xs sm:text-sm truncate mt-0.5">{link.url}</p>
+              <div className="flex items-center gap-3 mt-1.5 flex-wrap">
+                <p className="text-gray-500 text-xs sm:text-sm truncate flex-1 min-w-0">{link.url}</p>
+                <div className="flex items-center gap-1.5 px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-gray-500 dark:text-gray-400 group-hover:bg-purple-50 dark:group-hover:bg-purple-900/30 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                  <BarChart2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium">{link.click_events?.[0]?.count || 0}</span>
+                </div>
+              </div>
             </div>
           )}
         </div>

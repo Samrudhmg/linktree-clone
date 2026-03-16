@@ -48,6 +48,7 @@ export interface Link {
   bg_image?: string | null;
   text_color?: string;
   font?: string;
+  click_events?: { count: number }[];
 }
 
 export interface Theme {

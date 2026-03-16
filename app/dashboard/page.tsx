@@ -188,7 +188,7 @@ export default function Dashboard() {
     try {
       const { data, error } = await supabase
         .from("links")
-        .select("*")
+        .select("*, click_events(count)")
         .eq("page_id", pageId)
         .order("position", { ascending: true });
 
@@ -379,6 +379,29 @@ export default function Dashboard() {
         if (activePage) await fetchLinks(activePage.id);
         return;
       }
+    }
+  };
+
+  const trackClick = (link: Link) => {
+    // Optimistic UI update
+    setLinks((prev) =>
+      prev.map((l) =>
+        l.id === link.id
+          ? {
+            ...l,
+            click_events: [
+              { count: (l.click_events?.[0]?.count ?? 0) + 1 }
+            ]
+          }
+          : l
+      )
+    );
+
+    // Record click
+    if (typeof window !== "undefined" && navigator.sendBeacon) {
+      const data = JSON.stringify({ linkId: link.id });
+      const blob = new Blob([data], { type: "application/json" });
+      navigator.sendBeacon("/api/track-click", blob);
     }
   };
 
@@ -658,6 +681,7 @@ export default function Dashboard() {
               page={activePage}
               links={enabledLinks}
               appearance={liveAppearance}
+              onLinkClick={trackClick}
             />
           </div>)}
         {/* Spacer to prevent content from going under the fixed preview */}
@@ -679,6 +703,7 @@ export default function Dashboard() {
                 page={activePage}
                 links={enabledLinks}
                 appearance={liveAppearance}
+                onLinkClick={trackClick}
               />
             </div>
           </div>

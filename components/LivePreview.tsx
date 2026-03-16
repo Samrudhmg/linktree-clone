@@ -17,7 +17,17 @@ import { LinkPage, Link } from "@/lib/types";
 
 // 'appearance' prop: live/unsaved appearance state from PageAppearance editor
 // Falls back to 'page' (saved DB state), then to defaults
-export default function LivePreview({ page, links, appearance }: { page: LinkPage | null, links: Link[], appearance: LinkPage | null }) {
+export default function LivePreview({ 
+  page, 
+  links, 
+  appearance, 
+  onLinkClick 
+}: { 
+  page: LinkPage | null, 
+  links: Link[], 
+  appearance: LinkPage | null,
+  onLinkClick?: (link: Link) => void
+}) {
   const [shareLink, setShareLink] = useState<ShareLinkData | null>(null);
 
   // Merge: live appearance > saved page data > defaults
@@ -135,6 +145,13 @@ export default function LivePreview({ page, links, appearance }: { page: LinkPag
                       rel="noopener noreferrer"
                       className={`block py-3 px-3 ${borderRadiusClass} transition-transform hover:scale-[1.02]`}
                       style={getCardStyle(a, link)}
+                      onClick={(e) => {
+                        if (onLinkClick) {
+                          e.preventDefault();
+                          onLinkClick(link);
+                          window.open(link.url, "_blank");
+                        }
+                      }}
                     >
                       <div className="flex items-center gap-2">
                         {/* Left Side: Thumbnail or Icon */}
