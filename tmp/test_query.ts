@@ -7,9 +7,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function testQuery() {
     // Using an existing slug found in the database
-    const slug = 'eeee'; 
+    const slug = 'eeee';
     console.log("Testing query for slug:", slug);
-    
+
     const { data: linkPage, error: pageError } = await supabase
         .from("link_pages")
         .select(`
