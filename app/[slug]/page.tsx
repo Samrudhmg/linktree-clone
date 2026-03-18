@@ -96,10 +96,11 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
         >
             {/* Card / Box Container */}
             <div
-                className="w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:rounded-3xl overflow-hidden relative"
+                className="w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:rounded-3xl relative"
                 style={{
                     ...boxStyle,
                     boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.5)",
+                    overflow: "clip",
                 }}
             >
                 <div className="absolute top-4 right-4 z-20">

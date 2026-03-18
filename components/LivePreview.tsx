@@ -17,14 +17,14 @@ import { LinkPage, Link } from "@/lib/types";
 
 // 'appearance' prop: live/unsaved appearance state from PageAppearance editor
 // Falls back to 'page' (saved DB state), then to defaults
-export default function LivePreview({ 
-  page, 
-  links, 
-  appearance, 
-  onLinkClick 
-}: { 
-  page: LinkPage | null, 
-  links: Link[], 
+export default function LivePreview({
+  page,
+  links,
+  appearance,
+  onLinkClick
+}: {
+  page: LinkPage | null,
+  links: Link[],
   appearance: LinkPage | null,
   onLinkClick?: (link: Link) => void
 }) {

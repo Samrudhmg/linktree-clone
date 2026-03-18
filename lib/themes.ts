@@ -259,9 +259,10 @@ export const getCardStyle = (config: Partial<LinkPage>, linkOverlay?: Partial<Li
     case "glass":
       return {
         ...baseStyle,
-        backgroundColor: `${bgColor}CC`,
-        backdropFilter: "blur(12px)",
-        border: `1px solid ${bgColor}33`,
+        backgroundColor: `${bgColor}33`,
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: `1px solid ${bgColor}4D`,
       };
     default:
       return baseStyle;

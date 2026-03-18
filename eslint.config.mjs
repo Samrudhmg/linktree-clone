@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Utility scripts (not part of the app)
     "flood.js",
     "get-bounds.js",
+    // Throwaway temp scripts
+    "tmp/**",
   ]),
 ]);
 
