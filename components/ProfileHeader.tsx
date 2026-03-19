@@ -301,14 +301,7 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
           )}
         </div>
 
-        {/* Add Social Icons */}
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="shrink-0 w-8 h-8 rounded-full hidden sm:flex text-muted-foreground"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
+
       </div>
     </Card>
   );

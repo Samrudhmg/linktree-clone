@@ -6,10 +6,9 @@ import Image from "next/image";
 import ShareTrigger from "@/components/shareTrigger";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 import {
-    getPageBackgroundStyle,
-    getFontClass,
-    getBorderRadiusClass,
-} from "@/lib/themes";
+    getThemeStyles,
+    DBTheme
+} from "@/lib/theme-utils";
 import { LinkPage, Link } from "@/lib/types";
 
 // Disable ALL caching so appearance changes reflect immediately
@@ -87,21 +86,65 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
         console.error("Error fetching links:", linksError);
     }
 
-    const boxStyle = getPageBackgroundStyle(linkPage);
-    const fontClass = getFontClass(linkPage.page_font);
-    const borderRadiusClass = getBorderRadiusClass(linkPage.card_border_radius);
+    // Fetch the active theme
+    let activeTheme: DBTheme | null = null;
+    if (linkPage.theme_preset) {
+        const { data: themeData } = await supabase
+            .from("themes")
+            .select("*")
+            .eq("id", linkPage.theme_preset)
+            .single() as { data: DBTheme | null };
+        activeTheme = themeData;
+    }
+
+    if (!activeTheme) {
+        const { data: defaultTheme } = await supabase
+            .from("themes")
+            .select("*")
+            .eq("type", "default")
+            .limit(1)
+            .single() as { data: DBTheme | null };
+        activeTheme = defaultTheme;
+    }
+
+    const themeStyles = activeTheme ? getThemeStyles(activeTheme.config) : {};
+
+    // For avatar shape and font fallback
+    const fontClass = "font-sans";
+
+    const getCardContainerStyle = () => {
+        if (!activeTheme) return {};
+        const style = activeTheme.config.card.style;
+        if (style === 'glass') {
+            return {
+                backgroundColor: 'rgba(255,255,255,0.05)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.1)'
+            };
+        } else if (style === 'bordered') {
+            return {
+                backgroundColor: 'transparent',
+                border: '1px solid var(--theme-bg-secondary)'
+            };
+        }
+        // flat
+        return {
+            backgroundColor: 'var(--theme-bg-secondary)',
+        };
+    };
 
     return (
         <AnimatedContainer>
             <div
-                className={`min-h-screen flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
-                style={{ backgroundColor: "#0f0f1a" }}
+                className={`min-h-dvh flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
+                style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)' }}
             >
             {/* Card / Box Container */}
             <div
-                className="w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500"
+                className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{
-                    ...boxStyle,
+                    ...getCardContainerStyle(),
                     boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.5)",
                     overflow: "clip",
                 }}
@@ -115,15 +158,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                         }}
                     />
                 </div>
-                {/* Gradient overlay for readability when using image backgrounds */}
-                {linkPage?.page_bg_type === "image" && linkPage?.page_bg_image && (
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)",
-                        }}
-                    />
-                )}
+                {/* Gradient overlay has been removed for CSS Var spec */}
 
                 <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-10">
                     {/* Profile Header */}
@@ -145,23 +180,22 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                                 </div>
                             </div>
                         )}
-                        <h1 className="text-xl sm:text-2xl font-bold text-white mb-1 break-words px-2">{linkPage.display_name || "Untitled"}</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold mb-1 break-words px-2">{linkPage.display_name || "Untitled"}</h1>
                         {linkPage.bio && (
-                            <p className="text-white/80 text-sm max-w-xs mx-auto break-words px-4">{linkPage.bio}</p>
+                            <p className="opacity-80 text-sm max-w-xs mx-auto break-words px-4">{linkPage.bio}</p>
                         )}
                     </div>
 
                     {/* Links */}
                     <div className="flex flex-col gap-2 sm:gap-3">
                         {(!links || links.length === 0) ? (
-                            <p className="text-white/70 text-sm sm:text-base text-center">No links available</p>
+                            <p className="opacity-70 text-sm sm:text-base text-center">No links available</p>
                         ) : (
                             links.map((link) => (
                                 <PublicLinkItem
                                     key={link.id}
                                     link={link}
-                                    profile={linkPage}
-                                    borderRadiusClass={borderRadiusClass}
+                                    theme={activeTheme}
                                 />
                             ))
                         )}

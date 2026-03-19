@@ -20,6 +20,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { Link, LinkPage, Profile } from "@/lib/types";
+import { DBTheme } from "@/lib/theme-utils";
 import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +34,7 @@ export default function Dashboard() {
   const [pages, setPages] = useState<LinkPage[]>([]);
   const [activePage, setActivePage] = useState<LinkPage | null>(null);
   const [links, setLinks] = useState<Link[]>([]);
+  const [themes, setThemes] = useState<DBTheme[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("links");
@@ -43,6 +45,7 @@ export default function Dashboard() {
   const [newPageSlug, setNewPageSlug] = useState("");
   // Live appearance for real-time preview
   const [liveAppearance, setLiveAppearance] = useState<LinkPage | null>(null);
+  const [editingThemePreview, setEditingThemePreview] = useState<DBTheme | null>(null);
   // Profile editing
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState("");
@@ -114,12 +117,33 @@ export default function Dashboard() {
       }
 
       setProfile(profileData);
-      await fetchPages(user.id);
+      await Promise.all([
+        fetchPages(user.id),
+        fetchThemes(user.id)
+      ]);
     } catch (err) {
       console.error("Auth error:", err);
       router.push("/login");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchThemes = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("themes")
+        .select("*")
+        .or(`type.eq.default,user_id.eq.${userId}`)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching themes:", error);
+        return;
+      }
+      setThemes(data || []);
+    } catch (err) {
+      console.error("Unexpected error fetching themes:", err);
     }
   };
 
@@ -519,6 +543,14 @@ export default function Dashboard() {
     setLiveAppearance(appearance);
   };
 
+  const deriveActiveTheme = () => {
+    if (editingThemePreview) return editingThemePreview;
+    
+    const currentThemeId = liveAppearance?.theme_preset || activePage?.theme_preset;
+    if (!currentThemeId) return themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
+    return themes.find(t => t.id === currentThemeId) || themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
@@ -535,7 +567,7 @@ export default function Dashboard() {
   const enabledLinks = links.filter(l => l.enabled !== false);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#101828] text-gray-900 dark:text-white flex transition-colors">
+    <div className="min-h-screen font-inter bg-white dark:bg-[#101828] text-gray-900 dark:text-white flex transition-colors">
       {/* Mobile Overlay */}
       {showSidebar && (
         <div
@@ -567,7 +599,7 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:flex-row bg-gray-50 dark:bg-[#101828] transition-colors">
         {/* Editor Area */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -656,6 +688,10 @@ export default function Dashboard() {
                       page={activePage}
                       updatePage={updatePage}
                       onAppearanceChange={handleAppearanceChange}
+                      themes={themes}
+                      user={user!}
+                      refreshThemes={async () => { if (user) await fetchThemes(user.id); }}
+                      onPreviewChange={setEditingThemePreview}
                     />
 
                     {/* Create New Link Button */}
@@ -687,7 +723,7 @@ export default function Dashboard() {
             <LivePreview
               page={activePage}
               links={enabledLinks}
-              appearance={liveAppearance}
+              theme={deriveActiveTheme()}
               onLinkClick={trackClick}
             />
           </div>)}
@@ -709,7 +745,7 @@ export default function Dashboard() {
               <LivePreview
                 page={activePage}
                 links={enabledLinks}
-                appearance={liveAppearance}
+                theme={deriveActiveTheme()}
                 onLinkClick={trackClick}
               />
             </div>

@@ -4,52 +4,79 @@ import { useState } from "react";
 import Image from "next/image";
 import { LinkIcon } from "./LinkIcon";
 import {
-  getPageBackgroundStyle,
-  getCardStyle,
-  getFontClass,
-  getBorderRadiusClass,
-  getAvatarShapeClass
-} from "@/lib/themes";
+  getThemeStyles
+} from "@/lib/theme-utils";
+import type { DBTheme } from "@/lib/theme-utils";
 import ShareModal from "./ShareModal";
 import type { ShareLinkData } from "./ShareModal";
 import { MoreVertical } from "lucide-react";
 import { LinkPage, Link } from "@/lib/types";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 
-// 'appearance' prop: live/unsaved appearance state from PageAppearance editor
-// Falls back to 'page' (saved DB state), then to defaults
 export default function LivePreview({
   page,
   links,
-  appearance,
+  theme,
   onLinkClick
 }: {
   page: LinkPage | null,
   links: Link[],
-  appearance: LinkPage | null,
+  theme: DBTheme | null,
   onLinkClick?: (link: Link) => void
 }) {
   const [shareLink, setShareLink] = useState<ShareLinkData | null>(null);
 
-  // Merge: live appearance > saved page data > defaults
-  const a = {
-    page_bg_type: appearance?.page_bg_type ?? page?.page_bg_type ?? "gradient",
-    page_bg_color: appearance?.page_bg_color ?? page?.page_bg_color ?? "#6366F1",
-    page_bg_gradient_start: appearance?.page_bg_gradient_start ?? page?.page_bg_gradient_start ?? "#6366F1",
-    page_bg_gradient_end: appearance?.page_bg_gradient_end ?? page?.page_bg_gradient_end ?? "#A855F7",
-    page_bg_image: appearance?.page_bg_image ?? page?.page_bg_image ?? "",
-    card_bg_color: appearance?.card_bg_color ?? page?.card_bg_color ?? "#FFFFFF",
-    card_text_color: appearance?.card_text_color ?? page?.card_text_color ?? "#1F2937",
-    button_radius: appearance?.button_radius ?? page?.button_radius ?? "rounded",
-    card_style: appearance?.card_style ?? page?.card_style ?? "filled",
-    page_font: appearance?.page_font ?? page?.page_font ?? "sans",
-    avatar_shape: appearance?.avatar_shape ?? page?.avatar_shape ?? "rounded",
+  const themeStyles = theme ? getThemeStyles(theme.config) : {};
+
+  // For avatar shapes and fonts, we can use simple defaults since they aren't fully migrated yet 
+  // or we can remove them if they aren't part of the new Theme spec
+  const avatarShapeClass = "rounded-full"; // Defaulting back to rounded full
+  const fontClass = "font-sans"; // Defaulting back to sans until font integration is specified
+
+  // Helper for component dynamic styles
+  const getCardStyle = (linkOverlay?: Partial<Link>) => {
+    if (!theme) return {};
+    const style = theme.config.links.style;
+    const isTranslucent = style === 'glass' || style === 'outline';
+    
+    // We can just rely on the CSS variables since we inject `themeStyles` at the root
+    if (style === 'outline') {
+      return { backgroundColor: 'transparent', border: '2px solid var(--theme-text-primary)' };
+    } else if (style === 'glass') {
+      return { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)' };
+    } else if (style === 'white') {
+      return { backgroundColor: '#ffffff', color: '#000000' };
+    }
+    // flat
+    return { backgroundColor: 'var(--theme-accent)', color: 'var(--theme-text-primary)' }; 
   };
 
-  const pageBackground = getPageBackgroundStyle(a);
-  const fontClass = getFontClass(a.page_font);
-  const borderRadiusClass = getBorderRadiusClass(a.button_radius);
-  const avatarShapeClass = getAvatarShapeClass(a.avatar_shape);
+  const getCardClasses = () => {
+    if (!theme) return "";
+    return theme.config.links.radius === 'rounded-full' ? 'rounded-full' : theme.config.links.radius === 'rounded-none' ? 'rounded-none' : 'rounded-2xl';
+  };
+
+  const getCardContainerStyle = () => {
+    if (!theme) return {};
+    const style = theme.config.card.style;
+    if (style === 'glass') {
+        return {
+            backgroundColor: 'rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+            border: '1px solid rgba(255,255,255,0.1)'
+        };
+    } else if (style === 'bordered') {
+        return {
+            backgroundColor: 'transparent',
+            border: '1px solid var(--theme-bg-secondary)'
+        };
+    }
+    // flat
+    return {
+        backgroundColor: 'var(--theme-bg-secondary)',
+    };
+  };
 
   // Check if there's any meaningful content to display
   const hasContent = (page?.avatar_url && page.avatar_url !== "") ||
@@ -62,9 +89,9 @@ export default function LivePreview({
     return (
       <div>
         <div className="w-full flex justify-center">
-          <div className="w-[280px] h-[580px] bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative">
+          <div className="w-[280px] h-[580px] rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative" style={getCardContainerStyle()}>
             <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />
-            <div className={`w-full h-full rounded-[2rem] overflow-hidden ${fontClass}`} style={pageBackground}>
+            <div className={`w-full h-full rounded-[2rem] overflow-hidden ${fontClass}`} style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)' }}>
               <div className="flex items-center justify-center h-full">
                 <p className="text-white/50 text-sm">Add content to see preview</p>
               </div>
@@ -84,29 +111,16 @@ export default function LivePreview({
     <div>
       <AnimatedContainer>
         <div className="w-full flex justify-center">
-        <div className="w-[280px] h-[580px] bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative">
+        <div className="w-[280px] h-[580px] rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative" style={getCardContainerStyle()}>
           <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />
-          <div className={`w-full h-full rounded-[2rem] overflow-hidden ${fontClass}`} style={pageBackground}>
-            <div className="h-full overflow-y-auto p-4 pt-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className={`w-full h-full rounded-[2rem] overflow-hidden flex flex-col ${fontClass}`} style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)' }}>
+            <div className="flex-1 overflow-y-auto p-4 pt-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               {/* Avatar */}
               {page?.avatar_url && (
                 <div
-                  className={`${a.avatar_shape === "full"
-                    ? "-mx-4 -mt-8 mb-4 border-b border-white/10"
-                    : "flex justify-center mb-3 mt-4"
-                    }`}
+                  className="flex justify-center mb-3 mt-4"
                 >
-                  {a.avatar_shape === "full" ? (
-                    <div className="w-50 h-10 mx-auto mt-20 overflow-hidden relative">
-                      <Image
-                        src={page.avatar_url}
-                        alt={page?.display_name || "Profile"}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className={`relative ${a.avatar_shape === "full" ? "w-full" : "w-16 h-16"}`}>
+                    <div className="relative w-16 h-16">
                       <Image
                         src={page.avatar_url}
                         alt={page?.display_name || "Profile"}
@@ -114,7 +128,6 @@ export default function LivePreview({
                         className={`object-cover ${avatarShapeClass} border-2 border-white/20`}
                       />
                     </div>
-                  )}
                 </div>
               )}
 
@@ -145,8 +158,8 @@ export default function LivePreview({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`block py-3 px-3 ${borderRadiusClass} transition-transform hover:scale-[1.02]`}
-                      style={getCardStyle(a, link)}
+                      className={`block py-3 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
+                      style={getCardStyle(link)}
                       onClick={(e) => {
                         if (onLinkClick) {
                           e.preventDefault();
@@ -167,7 +180,7 @@ export default function LivePreview({
                                 className="rounded object-cover"
                               />
                             ) : link.icon ? (
-                              <LinkIcon icon={link.icon} color={link.text_color || a.card_text_color} />
+                              <LinkIcon icon={link.icon} color={link.text_color || (theme?.config.text.primary || '#ffffff')} />
                             ) : null}
                           </div>
                         )}

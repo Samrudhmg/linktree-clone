@@ -1,10 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { 
-    getCardStyle, 
-    getFontClass 
-} from "@/lib/themes";
+import { DBTheme } from "@/lib/theme-utils";
 import { MoreVertical } from "lucide-react";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import ShareModal from "./ShareModal";
@@ -13,12 +10,10 @@ import { Button } from "@/components/ui/button";
 
 export default function PublicLinkItem({ 
   link, 
-  profile, 
-  borderRadiusClass = "rounded-xl" 
+  theme
 }: { 
   link: Link; 
-  profile: LinkPage; 
-  borderRadiusClass?: string;
+  theme: DBTheme | null;
 }) {
   const [isShareOpen, setIsShareOpen] = useState(false);
 
@@ -36,7 +31,31 @@ export default function PublicLinkItem({
     }
   };
 
-  const cardStyle = getCardStyle(profile, link);
+  const getCardStyle = () => {
+    if (!theme) return {};
+    const style = theme.config.links.style;
+    
+    // Default Tailwind handles background colors and borders via CSS variables now
+    if (style === 'outline') {
+      return { backgroundColor: 'transparent', border: '2px solid var(--theme-text-primary)' };
+    } else if (style === 'glass') {
+      return { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)' };
+    } else if (style === 'white') {
+      return { backgroundColor: '#ffffff', color: '#000000' };
+    }
+    // flat
+    return { backgroundColor: 'var(--theme-accent)', color: 'var(--theme-text-primary)' }; 
+  };
+
+  const getCardClasses = () => {
+    if (!theme) return "rounded-xl";
+    return theme.config.links.radius === 'rounded-full' ? 'rounded-full' : theme.config.links.radius === 'rounded-none' ? 'rounded-none' : 'rounded-2xl';
+  };
+
+  const cardStyle = getCardStyle();
+
+  // For typography we can stick with standard sans unless DBTheme extends it later
+  const fontClass = "font-sans";
 
   return (
     <>
@@ -45,7 +64,7 @@ export default function PublicLinkItem({
         target="_blank"
         rel="noopener noreferrer"
         onClick={handleClick}
-        className={`block py-3 px-4 ${borderRadiusClass} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${getFontClass(link.font || profile?.page_font)}`}
+        className={`block py-3 px-4 ${getCardClasses()} hover:scale-[1.02] hover:shadow-lg transition-all duration-200 ${fontClass}`}
         style={cardStyle}
       >
         <div className="flex items-center gap-3">

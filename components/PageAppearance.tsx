@@ -1,23 +1,28 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Palette, ChevronDown, Check, Loader2 } from "lucide-react";
+import { Palette, ChevronDown, Check, Loader2, Plus } from "lucide-react";
 import ThemeSection from "./appearance/ThemeSection";
-import CustomSection from "./appearance/CustomSection";
-import { LinkPage, Theme } from "@/lib/types";
+import { LinkPage } from "@/lib/types";
+import { DBTheme } from "@/lib/theme-utils";
+import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AnimatedPanel } from "@/components/animated/interaction";
+import ThemeEditorSheet from "./dashboard/ThemeEditorSheet";
 
 interface PageAppearanceProps {
   page: LinkPage;
   updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>;
   onAppearanceChange: (data: LinkPage) => void;
+  themes: DBTheme[];
+  user: User | null;
+  refreshThemes: () => Promise<void>;
+  onPreviewChange?: (theme: DBTheme | null) => void;
 }
 
-export default function PageAppearance({ page, updatePage, onAppearanceChange }: PageAppearanceProps) {
+export default function PageAppearance({ page, updatePage, onAppearanceChange, themes, user, refreshThemes, onPreviewChange }: PageAppearanceProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [activeSection, setActiveSection] = useState("themes");
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -58,6 +63,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange }:
   };
 
   return (
+    <>
     <Card className="mb-6 overflow-hidden transition-colors border-0 dark:border-gray-800 shadow-sm">
       {/* Collapsible Header */}
       <button
@@ -88,43 +94,27 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange }:
       {/* Expandable Content */}
       <AnimatedPanel open={isExpanded}>
         <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-6">
-          {/* Section Tabs */}
-          <Tabs value={activeSection} onValueChange={setActiveSection} className="w-full">
-            <TabsList className="w-full grid grid-cols-2 bg-muted h-11 p-1 rounded-xl">
-              <TabsTrigger value="themes" className="rounded-lg">Themes</TabsTrigger>
-              <TabsTrigger value="custom" className="rounded-lg">Custom</TabsTrigger>
-            </TabsList>
-
-            <div className="mt-6">
-              <TabsContent value="themes" className="m-0">
-                <ThemeSection
-                  currentTheme={page?.theme_preset}
-                  onThemeSelect={(theme: Theme) => handleUpdate({
-                    theme_preset: theme.id,
-                    page_bg_type: theme.page_bg_type,
-                    page_bg_color: theme.page_bg_color,
-                    page_bg_gradient_start: theme.page_bg_gradient_start,
-                    page_bg_gradient_end: theme.page_bg_gradient_end,
-                    page_bg_image: theme.page_bg_image || "",
-                    card_bg_color: theme.button_color,
-                    card_text_color: theme.button_text_color,
-                    card_border_radius: theme.button_radius,
-                    card_style: "filled",
-                    page_font: theme.page_font
-                  })}
-                />
-              </TabsContent>
-
-              <TabsContent value="custom" className="m-0">
-                <CustomSection
-                  profile={page}
-                  updateProfile={handleUpdate}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
+          <ThemeSection
+            currentTheme={page?.theme_preset}
+            themes={themes}
+            onThemeSelect={(theme: DBTheme) => handleUpdate({
+              theme_preset: theme.id,
+            })}
+            onAddTheme={() => setIsEditorOpen(true)}
+          />
         </div>
       </AnimatedPanel>
     </Card>
+    
+    {user && (
+      <ThemeEditorSheet
+        open={isEditorOpen}
+        onOpenChange={setIsEditorOpen}
+        userId={user.id}
+        onSuccess={refreshThemes}
+        onPreviewChange={onPreviewChange}
+      />
+    )}
+    </>
   );
 }
