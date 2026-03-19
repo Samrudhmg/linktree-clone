@@ -4,6 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase-browser";
 import type { User } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 const supabase = createClient();
 
@@ -126,7 +130,13 @@ export default function Setup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-4">
-      <div className="bg-white rounded-3xl p-6 sm:p-10 shadow-2xl w-full max-w-md">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="w-full max-w-md"
+      >
+        <Card className="p-6 sm:p-10 rounded-2xl shadow-2xl border-0 bg-white dark:bg-gray-900">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-br from-indigo-500 to-purple-600 bg-clip-text text-transparent mb-2">
@@ -139,39 +149,39 @@ export default function Setup() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Project Name */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2 text-sm">
+          <div className="space-y-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium text-sm">
               Choose your project name
             </label>
-            <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden">
+            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden border border-input focus-within:ring-1 focus-within:ring-ring">
               <span className="px-3 text-gray-500 text-sm whitespace-nowrap">eltlinktree/</span>
-              <input
+              <Input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 placeholder="my-links"
-                className="flex-1 bg-transparent py-3 px-2 focus:outline-none dark:text-gray-800 min-w-0"
+                className="flex-1 bg-transparent border-0 shadow-none focus-visible:ring-0 px-2 h-12 rounded-none dark:text-white"
                 required
               />
             </div>
-            <p className="text-gray-400 text-xs mt-1">
+            <p className="text-gray-400 text-xs">
               This will be your shareable link URL
             </p>
           </div>
 
           {/* Display Name */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2 text-sm">
+          <div className="space-y-2">
+            <label className="block text-gray-700 dark:text-gray-300 font-medium text-sm">
               Display Name (optional)
             </label>
-            <input
+            <Input
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your Name"
-              className="w-full bg-gray-100 py-3 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 text-gray-800"
+              className="h-12 bg-gray-100 dark:bg-gray-800 border-0 focus-visible:ring-1"
             />
-            <p className="text-gray-400 text-xs mt-1">
+            <p className="text-gray-400 text-xs">
               You can add this later
             </p>
           </div>
@@ -192,18 +202,17 @@ export default function Setup() {
           </div>
 
           {/* Submit Button */}
-          <button
+          <Button
             type="submit"
+            size="lg"
             disabled={saving || !projectName}
-            className={`w-full py-4 rounded-xl font-semibold transition-all ${saving || !projectName
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:opacity-90"
-              }`}
+            className="w-full py-6 rounded-md font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 hover:opacity-90 text-white transition-all shadow-sm hover:shadow-md mt-2"
           >
             {saving ? "Creating..." : "Create My ELTLINKTREE"}
-          </button>
+          </Button>
         </form>
-      </div>
+        </Card>
+      </motion.div>
     </div>
   );
 }

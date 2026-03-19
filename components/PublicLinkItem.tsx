@@ -9,6 +9,7 @@ import { MoreVertical } from "lucide-react";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import ShareModal from "./ShareModal";
 import { Link, LinkPage } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 export default function PublicLinkItem({ 
   link, 
@@ -62,13 +63,15 @@ export default function PublicLinkItem({
           </div>
 
           {/* Right Side: Three dots menu */}
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={handleShare}
-            className="shrink-0 w-10 h-10 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
+            className="shrink-0 w-10 h-10 hover:bg-black/10 rounded-full transition-colors text-inherit focus:ring-0"
             title="More options"
           >
             <MoreVertical className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
       </a>
 

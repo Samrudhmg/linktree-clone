@@ -14,6 +14,7 @@ import ShareModal from "./ShareModal";
 import type { ShareLinkData } from "./ShareModal";
 import { MoreVertical } from "lucide-react";
 import { LinkPage, Link } from "@/lib/types";
+import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 
 // 'appearance' prop: live/unsaved appearance state from PageAppearance editor
 // Falls back to 'page' (saved DB state), then to defaults
@@ -81,7 +82,8 @@ export default function LivePreview({
 
   return (
     <div>
-      <div className="w-full flex justify-center">
+      <AnimatedContainer>
+        <div className="w-full flex justify-center">
         <div className="w-[280px] h-[580px] bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative">
           <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />
           <div className={`w-full h-full rounded-[2rem] overflow-hidden ${fontClass}`} style={pageBackground}>
@@ -200,8 +202,9 @@ export default function LivePreview({
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
+      </AnimatedContainer>
 
       <ShareModal
         isOpen={!!shareLink}

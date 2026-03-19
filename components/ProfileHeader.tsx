@@ -14,6 +14,10 @@ import {
   X
 } from "lucide-react";
 import { LinkPage } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfileHeader({ page, updatePage, autoEdit, onEditComplete }: { page: LinkPage | null, updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, autoEdit?: boolean, onEditComplete?: () => void }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -124,7 +128,7 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 mb-6 transition-colors">
+    <Card className="p-4 sm:p-6 mb-6 transition-colors border-0 dark:border-gray-800 shadow-sm">
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Avatar */}
         <div className="relative">
@@ -157,23 +161,23 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
                 <p className="text-gray-900 dark:text-white text-sm font-medium">Update Avatar</p>
 
                 {/* Upload Button */}
-                <button
+                <Button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingAvatar}
-                  className="w-full py-2 px-3 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
+                  className="w-full"
                 >
                   {uploadingAvatar ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
                       Uploading...
                     </>
                   ) : (
                     <>
-                      <Upload className="w-4 h-4" />
+                      <Upload className="w-4 h-4 mr-2" />
                       Upload Image
                     </>
                   )}
-                </button>
+                </Button>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -184,44 +188,48 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
 
                 {/* URL Input */}
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-xs">Or paste image URL:</p>
+                  <p className="text-muted-foreground text-xs">Or paste image URL:</p>
                   <div className="flex gap-2">
-                    <input
+                    <Input
                       type="url"
                       value={avatarUrlInput}
                       onChange={(e) => setAvatarUrlInput(e.target.value)}
                       placeholder="https://..."
-                      className="flex-1 bg-gray-50 dark:bg-gray-600 text-gray-900 dark:text-white px-2 py-1.5 rounded text-sm border border-gray-200 dark:border-gray-500 focus:outline-none focus:border-purple-500"
+                      className="flex-1 h-9"
                     />
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={handleAvatarUrlSave}
                       disabled={!avatarUrlInput.trim()}
-                      className="px-3 py-1.5 bg-gray-100 dark:bg-gray-600 hover:bg-gray-200 dark:hover:bg-gray-500 disabled:opacity-50 text-gray-700 dark:text-white rounded text-sm transition-colors border border-gray-200 dark:border-gray-500"
+                      className="h-9"
                     >
                       Set
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
                 {/* Remove Button */}
                 {(avatarUrl || page?.avatar_url) && (
-                  <button
+                  <Button
+                    variant="destructive"
                     onClick={handleRemoveAvatar}
-                    className="w-full py-2 px-3 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm flex items-center justify-center gap-2 transition-colors"
+                    className="w-full"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 mr-2" />
                     Remove Avatar
-                  </button>
+                  </Button>
                 )}
               </div>
 
               {/* Close */}
-              <button
+              <Button
+                variant="ghost"
                 onClick={() => setShowAvatarMenu(false)}
-                className="w-full py-2 bg-gray-50 dark:bg-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 text-sm transition-colors border-t border-gray-200 dark:border-gray-600"
+                className="w-full rounded-none border-t border-border"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -230,70 +238,79 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
         <div className="flex-1 min-w-0">
           {isEditing ? (
             <div className="space-y-3">
-              <input
+              <Input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="Display Name"
-                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+                className="w-full"
               />
-              <textarea
+              <Textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Add a bio"
                 rows={2}
-                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 resize-none transition-colors"
+                className="w-full resize-none"
               />
               <div className="flex gap-2">
-                <button
+                <Button
+                  size="sm"
                   onClick={handleSave}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all text-sm font-medium shadow-sm flex items-center gap-2"
+                  className="shadow-sm"
                 >
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 mr-2" />
                   Save
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={handleCancel}
-                  className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition-all text-sm font-medium flex items-center gap-2"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 mr-2" />
                   Cancel
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
             <>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-gray-900 dark:text-white font-semibold text-lg transition-colors">
+                <h2 className="text-foreground font-semibold text-lg transition-colors">
                   {page?.display_name || "Your Name"}
                 </h2>
-                <button
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setIsEditing(true)}
-                  className="text-gray-500 hover:text-white transition-all"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground transition-all"
                 >
                   <Pencil className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
               {page?.bio ? (
-                <p className="text-gray-400 text-sm break-words overflow-hidden">{page.bio}</p>
+                <p className="text-muted-foreground text-sm break-words overflow-hidden">{page?.bio}</p>
               ) : (
-                <button
+                <Button
+                  variant="link"
                   onClick={() => setIsEditing(true)}
-                  className="text-purple-400 text-sm hover:text-purple-300 transition-all"
+                  className="p-0 h-auto text-primary"
                 >
                   + Add bio
-                </button>
+                </Button>
               )}
             </>
           )}
         </div>
 
         {/* Add Social Icons */}
-        <button className="shrink-0 w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hidden sm:flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 transition-all border border-gray-200 dark:border-gray-600">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="shrink-0 w-8 h-8 rounded-full hidden sm:flex text-muted-foreground"
+        >
           <Plus className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 }
 

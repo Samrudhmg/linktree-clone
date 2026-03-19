@@ -5,6 +5,9 @@ import { Palette, ChevronDown, Check, Loader2 } from "lucide-react";
 import ThemeSection from "./appearance/ThemeSection";
 import CustomSection from "./appearance/CustomSection";
 import { LinkPage, Theme } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AnimatedPanel } from "@/components/animated/interaction";
 
 interface PageAppearanceProps {
   page: LinkPage;
@@ -55,7 +58,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange }:
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl mb-6 overflow-hidden transition-colors">
+    <Card className="mb-6 overflow-hidden transition-colors border-0 dark:border-gray-800 shadow-sm">
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -83,54 +86,45 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange }:
       </button>
 
       {/* Expandable Content */}
-      {isExpanded && (
+      <AnimatedPanel open={isExpanded}>
         <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-6">
           {/* Section Tabs */}
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {[
-              { id: "themes", label: "Themes" },
-              { id: "custom", label: "Custom" },
-            ].map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeSection === section.id
-                  ? "bg-purple-600 text-white shadow-md"
-                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
-                  }`}
-              >
-                {section.label}
-              </button>
-            ))}
-          </div>
+          <Tabs value={activeSection} onValueChange={setActiveSection} className="w-full">
+            <TabsList className="w-full grid grid-cols-2 bg-muted h-11 p-1 rounded-xl">
+              <TabsTrigger value="themes" className="rounded-lg">Themes</TabsTrigger>
+              <TabsTrigger value="custom" className="rounded-lg">Custom</TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-6">
-            {activeSection === "themes" && (
-              <ThemeSection
-                currentTheme={page?.theme_preset}
-                onThemeSelect={(theme: Theme) => handleUpdate({
-                  theme_preset: theme.id,
-                  page_bg_type: theme.page_bg_type,
-                  page_bg_color: theme.page_bg_color,
-                  page_bg_gradient_start: theme.page_bg_gradient_start,
-                  page_bg_gradient_end: theme.page_bg_gradient_end,
-                  button_color: theme.button_color,
-                  button_text_color: theme.button_text_color,
-                  button_radius: theme.button_radius,
-                  page_font: theme.page_font
-                })}
-              />
-            )}
+            <div className="mt-6">
+              <TabsContent value="themes" className="m-0">
+                <ThemeSection
+                  currentTheme={page?.theme_preset}
+                  onThemeSelect={(theme: Theme) => handleUpdate({
+                    theme_preset: theme.id,
+                    page_bg_type: theme.page_bg_type,
+                    page_bg_color: theme.page_bg_color,
+                    page_bg_gradient_start: theme.page_bg_gradient_start,
+                    page_bg_gradient_end: theme.page_bg_gradient_end,
+                    page_bg_image: theme.page_bg_image || "",
+                    card_bg_color: theme.button_color,
+                    card_text_color: theme.button_text_color,
+                    card_border_radius: theme.button_radius,
+                    card_style: "filled",
+                    page_font: theme.page_font
+                  })}
+                />
+              </TabsContent>
 
-            {activeSection === "custom" && (
-              <CustomSection
-                profile={page}
-                updateProfile={handleUpdate}
-              />
-            )}
-          </div>
+              <TabsContent value="custom" className="m-0">
+                <CustomSection
+                  profile={page}
+                  updateProfile={handleUpdate}
+                />
+              </TabsContent>
+            </div>
+          </Tabs>
         </div>
-      )}
-    </div>
+      </AnimatedPanel>
+    </Card>
   );
 }

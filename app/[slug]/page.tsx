@@ -4,6 +4,7 @@ import PublicLinkItem from "@/components/PublicLinkItem";
 import { unstable_noStore as noStore } from 'next/cache';
 import Image from "next/image";
 import ShareTrigger from "@/components/shareTrigger";
+import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 import {
     getPageBackgroundStyle,
     getFontClass,
@@ -39,6 +40,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
             page_bg_gradient_start,
             page_bg_gradient_end,
             page_bg_image,
+            theme_preset,
             card_bg_color,
             card_text_color,
             card_border_radius,
@@ -90,13 +92,14 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     const borderRadiusClass = getBorderRadiusClass(linkPage.card_border_radius);
 
     return (
-        <div
-            className={`min-h-screen flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
-            style={{ backgroundColor: "#0f0f1a" }}
-        >
+        <AnimatedContainer>
+            <div
+                className={`min-h-screen flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
+                style={{ backgroundColor: "#0f0f1a" }}
+            >
             {/* Card / Box Container */}
             <div
-                className="w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:rounded-3xl relative"
+                className="w-full sm:max-w-lg min-h-screen sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500"
                 style={{
                     ...boxStyle,
                     boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.5)",
@@ -107,7 +110,8 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                     <ShareTrigger
                         link={{
                             url: typeof window !== "undefined" ? window.location.href : "",
-                            title: linkPage.display_name || "My links"
+                            title: linkPage.display_name || "My links",
+                            thumbnail_url: linkPage.avatar_url || undefined
                         }}
                     />
                 </div>
@@ -164,6 +168,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </AnimatedContainer>
     );
 }

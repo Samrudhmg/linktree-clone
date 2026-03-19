@@ -3,6 +3,7 @@
 import { Menu, Eye, ExternalLink } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LinkPage } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 interface DashboardHeaderProps {
   showCreatePage: boolean;
@@ -20,36 +21,43 @@ export default function DashboardHeader({
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="flex items-center gap-3">
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={onShowSidebar}
-          className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          className="lg:hidden text-muted-foreground hover:text-foreground h-10 w-10 shrink-0"
         >
           <Menu className="w-6 h-6" />
-        </button>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+        </Button>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">
           {showCreatePage ? "Create New Page" : activePage ? activePage.title : "My Pages"}
         </h1>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         {activePage && (
           <>
             {/* Mobile Preview Toggle */}
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onShowPreview}
-              className="lg:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="lg:hidden text-muted-foreground hover:text-foreground h-10 w-10 shrink-0"
             >
               <Eye className="w-6 h-6" />
-            </button>
+            </Button>
 
-            <a
-              href={`/${activePage.slug}`}
-              target="_blank"
-              className="hidden sm:flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-xs sm:text-sm"
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="hidden sm:flex rounded-full text-muted-foreground hover:text-foreground bg-background shrink-0"
             >
-              <span className="truncate max-w-[180px] sm:max-w-none">/{activePage.slug}</span>
-              <ExternalLink className="w-4 h-4 shrink-0" />
-            </a>
+              <a href={`/${activePage.slug}`} target="_blank">
+                <span className="truncate max-w-[180px] sm:max-w-none">/{activePage.slug}</span>
+                <ExternalLink className="w-4 h-4 ml-2" />
+              </a>
+            </Button>
             <div className="flex items-center gap-1">
               <ThemeToggle />
             </div>

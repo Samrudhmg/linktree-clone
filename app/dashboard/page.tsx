@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { Link, LinkPage, Profile } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
+import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 const supabase = createClient();
 
@@ -563,9 +565,14 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row  bg-gray-50 dark:bg-[#101828] transition-colors">
+      <div className="flex-1 flex flex-col lg:flex-row bg-gray-50 dark:bg-[#101828] transition-colors">
         {/* Editor Area */}
-        <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex-1 p-4 sm:p-6 overflow-y-auto"
+        >
           <div className="max-w-2xl mx-auto">
             {/* Dashboard Header */}
             <DashboardHeader
@@ -672,7 +679,7 @@ export default function Dashboard() {
               </>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Live Preview - Desktop (Fixed on right side, vertically centered) */}
         {activePage && (
@@ -712,44 +719,42 @@ export default function Dashboard() {
 
 
       {/* Edit Profile Modal */}
-      {showEditProfile && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 w-full max-w-md space-y-4 shadow-2xl transition-colors">
-            <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-              <Pencil className="w-5 h-5 text-purple-400" />
-              Edit Profile
-            </h3>
+      <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+        <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-6 space-y-4 shadow-2xl transition-colors bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none [&>button]:hidden sm:rounded-xl">
+          <DialogTitle className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2 m-0">
+            <Pencil className="w-5 h-5 text-purple-400" />
+            Edit Profile
+          </DialogTitle>
 
-            <div>
-              <label className="block text-gray-400 text-sm mb-1">Display Name</label>
-              <input
-                type="text"
-                value={editDisplayName}
-                onChange={(e) => setEditDisplayName(e.target.value)}
-                placeholder="Your Name"
-                className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
-                autoFocus
-              />
-            </div>
-
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={() => setShowEditProfile(false)}
-                className="flex-1 py-3 px-6 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveEditProfile}
-                disabled={!editDisplayName.trim()}
-                className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
-              >
-                Save
-              </button>
-            </div>
+          <div>
+            <label className="block text-gray-400 text-sm mb-1">Display Name</label>
+            <input
+              type="text"
+              value={editDisplayName}
+              onChange={(e) => setEditDisplayName(e.target.value)}
+              placeholder="Your Name"
+              className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+              autoFocus
+            />
           </div>
-        </div>
-      )}
+
+          <div className="flex gap-3 pt-2">
+            <button
+              onClick={() => setShowEditProfile(false)}
+              className="flex-1 py-3 px-6 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={saveEditProfile}
+              disabled={!editDisplayName.trim()}
+              className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
+            >
+              Save
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

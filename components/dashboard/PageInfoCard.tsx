@@ -2,6 +2,9 @@
 
 import { ChevronLeft, Pencil } from "lucide-react";
 import { LinkPage } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface PageInfoCardProps {
   activePage: LinkPage;
@@ -25,57 +28,51 @@ export default function PageInfoCard({
   return (
     <>
       {/* Back to Pages */}
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
         onClick={onBack}
-        className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all mb-4 text-sm"
+        className="text-muted-foreground hover:text-foreground transition-all mb-4 -ml-2"
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft className="w-4 h-4 mr-1" />
         Back to Pages
-      </button>
+      </Button>
 
       {/* Page Info Card */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 mb-6 shadow-sm transition-colors">
-        <h2 className="dark:text-white text-black font-semibold text-lg mb-2">{activePage.title}</h2>
+      <Card className="p-4 mb-6 shadow-sm transition-colors border-gray-200 dark:border-gray-800">
+        <h2 className="text-foreground font-semibold text-lg mb-2">{activePage.title}</h2>
         <div className="flex items-center gap-2">
           {editingPageSlug ? (
-            <div className="flex-1 flex items-center gap-2">
-              <div className="flex items-center bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 focus-within:border-purple-500 overflow-hidden flex-1 transition-colors">
-                <span className="px-2 text-gray-400 text-xs whitespace-nowrap border-r border-gray-200 dark:border-gray-600">/</span>
-                <input
+            <div className="flex-1 flex flex-wrap items-center gap-2">
+              <div className="flex items-center bg-background rounded-md border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden flex-1 transition-colors">
+                <span className="px-3 py-2 text-muted-foreground text-sm bg-muted/50 border-r h-9 flex items-center">/</span>
+                <Input
                   type="text"
                   value={editPageSlug}
                   onChange={(e) => setEditPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                  className="flex-1 bg-transparent dark:text-white text-gray-900 px-2 py-1.5 text-sm focus:outline-none"
+                  className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-9"
                   autoFocus
                 />
               </div>
-              <button
-                onClick={onSavePageSlug}
-                className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-all"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setEditingPageSlug(false)}
-                className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
-              >
-                Cancel
-              </button>
+              <Button size="sm" onClick={onSavePageSlug}>Save</Button>
+              <Button size="sm" variant="secondary" onClick={() => setEditingPageSlug(false)}>Cancel</Button>
             </div>
           ) : (
             <>
-              <p className="text-gray-400 text-sm flex-1">/{activePage.slug}</p>
-              <button
+              <p className="text-muted-foreground text-sm flex-1">/{activePage.slug}</p>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => { setEditPageSlug(activePage.slug); setEditingPageSlug(true); }}
-                className="text-gray-500 hover:text-purple-400 transition-all p-1"
+                className="h-8 w-8 text-muted-foreground hover:text-primary transition-all"
                 title="Edit URL"
               >
                 <Pencil className="w-4 h-4" />
-              </button>
+              </Button>
             </>
           )}
         </div>
-      </div>
+      </Card>
     </>
   );
 }

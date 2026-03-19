@@ -4,6 +4,9 @@ import { Link as LucideLink } from "lucide-react";
 import { useState } from "react";
 import LinkCard from "./LinkCard";
 import { Link } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { fadeInUp } from "@/lib/animations";
 
 interface LinksListProps {
   links: Link[];
@@ -60,35 +63,44 @@ export default function LinksList({ links, updateLink, deleteLink, reorderLinks 
   };
 
   return (
-    <div className="space-y-3">
+    <motion.div 
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08 } }
+      }}
+      initial="hidden" 
+      animate="visible"
+      className="space-y-4 sm:space-y-6"
+    >
       {links.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 dark:text-gray-50 transition-colors">
+        <Card className="text-center py-12 text-gray-400 dark:text-gray-500 transition-colors border-dashed bg-gray-50 dark:bg-gray-800/50 shadow-none">
           <LucideLink className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>No links yet. Click &quot;Create New Link&quot; to add your first link!</p>
-        </div>
+        </Card>
       ) : (
         links.map((link, index) => (
-          <div
-            key={`${link.id}-${link.enabled}`}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragEnd={handleDragEnd}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
-            className={`transition-all duration-200 ${dragOverIndex === index && draggedIndex !== index ? 'border-t-2 border-purple-500 pt-2' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
-          >
-            <LinkCard
-              link={link}
-              isEditing={editingId === link.id}
-              setEditing={(editing) => setEditingId(editing ? link.id : null)}
-              updateLink={updateLink}
-              deleteLink={deleteLink}
-            />
-          </div>
+          <motion.div variants={fadeInUp} key={`${link.id}-${link.enabled}`}>
+            <div
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              className={`transition-all duration-200 ${dragOverIndex === index && draggedIndex !== index ? 'border-t-2 border-purple-500 pt-2' : ''} ${draggedIndex === index ? 'opacity-50' : ''}`}
+            >
+              <LinkCard
+                link={link}
+                isEditing={editingId === link.id}
+                setEditing={(editing) => setEditingId(editing ? link.id : null)}
+                updateLink={updateLink}
+                deleteLink={deleteLink}
+              />
+            </div>
+          </motion.div>
         ))
       )}
-    </div>
+    </motion.div>
   );
 }
 

@@ -24,6 +24,9 @@ import ColorPicker from "./ui/ColorPicker";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import { createClient } from "@/lib/supabase-browser";
 import { Link } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface LinkCardProps {
   link: Link;
@@ -90,7 +93,7 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
   };
 
   return (
-    <div className={`bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 sm:p-4 group transition-all ${!isEnabled ? 'opacity-60' : ''}`}>
+    <Card className={`p-3 sm:p-4 group transition-all border-0 dark:border-gray-800 shadow-sm ${!isEnabled ? 'opacity-60' : ''}`}>
       <div className="flex items-start gap-2 sm:gap-3">
         <div className="mt-2 cursor-grab active:cursor-grabbing text-gray-600 hover:text-gray-400 transition-colors">
           <GripVertical className="w-5 h-5" />
@@ -99,26 +102,26 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
         <div className="flex-1 min-w-0">
           {isEditing ? (
             <div className="space-y-3">
-              <input
+              <Input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title"
-                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base transition-colors"
+                className="h-10 text-sm sm:text-base"
               />
-              <input
+              <Input
                 type="url"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="URL"
-                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base transition-colors"
+                className="h-10 text-sm sm:text-base"
               />
-              <input
+              <Input
                 type="text"
                 value={subtext}
                 onChange={(e) => setSubtext(e.target.value)}
                 placeholder="Subtext (optional)"
-                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 text-sm sm:text-base transition-colors"
+                className="h-10 text-sm sm:text-base"
               />
 
               <div>
@@ -237,13 +240,13 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <button onClick={handleSave} className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all text-sm font-medium shadow-sm flex items-center gap-2">
+              <div className="flex gap-2 mt-4">
+                <Button onClick={handleSave} className="bg-purple-600 text-white hover:bg-purple-700 shadow-sm flex items-center gap-2">
                   <Check className="w-4 h-4" /> Save
-                </button>
-                <button onClick={() => { setEditing(false); setShowAppearance(false); }} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition-all text-sm font-medium flex items-center gap-2">
+                </Button>
+                <Button onClick={() => { setEditing(false); setShowAppearance(false); }} variant="outline" className="flex items-center gap-2">
                   <X className="w-4 h-4" /> Cancel
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
@@ -287,7 +290,7 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
 
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-2xl rounded-2xl p-6 w-full max-w-sm space-y-4">
+          <Card className="p-6 w-full max-w-sm space-y-4 shadow-2xl border-gray-200 dark:border-gray-800 rounded-2xl">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-5 h-5 text-red-500" />
@@ -297,13 +300,13 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
             <p className="text-gray-600 dark:text-gray-300 text-sm">
               Are you sure you want to delete <span className="font-medium">&quot;{link.title}&quot;</span>? This action cannot be undone.
             </p>
-            <div className="flex gap-3">
-              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition text-sm font-medium">Cancel</button>
-              <button onClick={confirmDelete} className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium">Delete</button>
+            <div className="flex gap-3 mt-2">
+              <Button onClick={() => setShowDeleteConfirm(false)} variant="outline" className="flex-1">Cancel</Button>
+              <Button onClick={confirmDelete} variant="destructive" className="flex-1">Delete</Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

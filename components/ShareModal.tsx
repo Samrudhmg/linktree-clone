@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { LinkIcon } from "./LinkIcon";
 import Image from "next/image";
 import {
@@ -14,6 +14,8 @@ import {
     X
 } from "lucide-react";
 import { Link } from "@/lib/types";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+
 export type ShareLinkData = { url: string; title: string; thumbnail_url?: string; icon?: string; };
 
 interface ShareModalProps {
@@ -24,20 +26,53 @@ interface ShareModalProps {
 
 export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
     const [copied, setCopied] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const isDragging = useRef(false);
+    const startX = useRef(0);
+    const scrollLeft = useRef(0);
+    const draggedSinceDown = useRef(false);
 
-    // Close on Escape key
-    useEffect(() => {
-        const handleEsc = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        window.addEventListener("keydown", handleEsc);
-        return () => window.removeEventListener("keydown", handleEsc);
-    }, [onClose]);
+    const [activeLink, setActiveLink] = useState(link);
+    const [prevLinkProp, setPrevLinkProp] = useState(link);
 
-    if (!isOpen || !link) return null;
+    if (link !== prevLinkProp) {
+        setPrevLinkProp(link);
+        if (link) {
+            setActiveLink(link);
+        }
+    }
 
-    const url = link.url;
-    const title = link.title;
+    if (!activeLink) return null;
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!scrollRef.current) return;
+        isDragging.current = true;
+        draggedSinceDown.current = false;
+        startX.current = e.pageX - scrollRef.current.offsetLeft;
+        scrollLeft.current = scrollRef.current.scrollLeft;
+    };
+
+    const handleMouseLeave = () => {
+        isDragging.current = false;
+    };
+
+    const handleMouseUp = () => {
+        isDragging.current = false;
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging.current || !scrollRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - scrollRef.current.offsetLeft;
+        const walk = (x - startX.current) * 1.5;
+        if (Math.abs(walk) > 5) {
+            draggedSinceDown.current = true;
+        }
+        scrollRef.current.scrollLeft = scrollLeft.current - walk;
+    };
+
+    const url = activeLink.url;
+    const title = activeLink.title;
     const encodedUrl = encodeURIComponent(url);
     const encodedTitle = encodeURIComponent(title);
 
@@ -97,92 +132,97 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
     ];
 
     return (
-        <>
-            {/* Backdrop overlay */}
-            <div
-                className="fixed inset-0 z-50 bg-black/40 transition-opacity"
-                onClick={onClose}
-                aria-hidden="true"
-            />
+        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="flex flex-col sm:max-w-[360px] w-[95vw] p-0 overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl rounded-3xl gap-0 outline-none [&>button]:hidden">
+                {/* Header */}
+                <div className="relative flex items-center justify-center w-full px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+                    <DialogTitle className="text-base font-bold text-gray-900 dark:text-white m-0 text-center">
+                        Share link
+                    </DialogTitle>
+                    <button
+                        onClick={onClose}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
 
-            {/* Modal dialog */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-                <div
-                    className="w-full max-w-[360px] mx-auto bg-white dark:bg-gray-800 rounded-3xl sm:rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden pointer-events-auto transition-all sm:transform-none transform translate-y-0"
-                    role="dialog"
-                    aria-modal="true"
-                >
-                    {/* Header */}
-                    <div className="relative flex items-center justify-center px-5 py-3 border-b border-gray-100 dark:border-gray-700 transition-colors">
-                        <h2 className="text-base font-bold text-gray-900 dark:text-white">Share link</h2>
-                        <button
-                            onClick={onClose}
-                            className="absolute right-3 p-1.5 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                            aria-label="Close"
-                        >
-                            <X className="w-4 h-4" />
-                        </button>
-                    </div>
+                {/* Body - Forced centered */}
+                <div className="w-full px-4 py-8 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
 
-                    <div className="p-4 bg-gray-50 dark:bg-gray-900 h-full flex flex-col justify-center transition-colors">
-                        {/* Link Preview Card (Dark style from image) */}
-                        <div className="bg-gray-700 rounded-[24px] p-5 flex flex-col items-center text-center shadow-md relative overflow-hidden mb-5 max-w-[260px] mx-auto w-full">
+                    {/* Preview Card */}
+                    <div className="relative w-[260px] max-w-[90%] bg-gray-800 rounded-[24px] p-5 flex flex-col items-center text-center shadow-lg mb-8 border border-gray-700/50">
+                        <div className="w-16 h-16 mb-4 bg-gray-50 rounded-2xl flex flex-col items-center justify-center p-1.5 shadow-sm relative shrink-0">
+                            {activeLink.thumbnail_url ? (
+                                <Image src={activeLink.thumbnail_url} alt="" fill className="rounded-2xl object-cover p-1.5" />
+                            ) : (
+                                <>
+                                    <LinkIcon
+                                        icon={activeLink.icon || "link"}
+                                        color={activeLink.icon === "whatsapp" ? "#25D366" : "#4ade80"}
+                                        size="w-8 h-8"
+                                    />
+                                    {activeLink.icon === "whatsapp" && (
+                                        <span className="text-[#25D366] font-bold text-[10px] mt-0.5">
+                                            WhatsApp
+                                        </span>
+                                    )}
+                                </>
+                            )}
+                        </div>
 
-                            {/* Box around icon/thumbnail */}
-                            <div className="w-16 h-16 mb-3 bg-[#F7F3E8] rounded-2xl flex flex-col items-center justify-center shadow-sm p-1.5 shrink-0 relative">
-                                {link.thumbnail_url ? (
-                                    <Image src={link.thumbnail_url} alt="" fill className="rounded-xl object-cover p-1.5" />
-                                ) : (
-                                    <>
-                                        <LinkIcon icon={link.icon || "link"} color={link.icon === "whatsapp" ? "#25D366" : "#4ade80"} size="w-8 h-8" />
-                                        {link.icon === "whatsapp" && (
-                                            <span className="text-[#25D366] font-bold text-[10px] mt-0.5">WhatsApp</span>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-
-                            <h3 className="text-white font-extrabold text-base leading-snug mb-1.5 w-full truncate px-2">
-                                {link.title}
+                        {/* Text Content */}
+                        <div className="w-full flex flex-col items-center">
+                            <h3 className="text-white font-semibold text-base leading-snug mb-1 truncate w-full px-2 text-center">
+                                {activeLink.title}
                             </h3>
-
-                            <p className="text-white/80 text-[11px] truncate w-full mb-3 px-2">
-                                {link.url.replace(/^https?:\/\//, '')}
+                            <p className="text-white/80 text-[11px] truncate w-full mb-1 px-2 text-center">
+                                {activeLink.url.replace(/^https?:\/\//, "")}
                             </p>
-
-                            {link.url.includes('whatsapp.com') && (
-                                <p className="text-white/90 text-[10px] font-semibold tracking-wide uppercase">
+                            {activeLink.url.includes("whatsapp.com") && (
+                                <p className="text-[#25D366] text-[10px] font-bold uppercase tracking-wider mt-1 text-center">
                                     Group Invite
                                 </p>
                             )}
                         </div>
+                    </div>
 
-                        {/* Share Options Row */}
-                        <div className="flex overflow-x-auto pb-4 pt-1 snap-x snap-mandatory hide-scrollbar justify-start -mx-4 px-4 w-[calc(100%+32px)] gap-4">
-                            {shareOptions.map((option) => (
-                                <div key={option.id} className="flex flex-col items-center gap-1.5 shrink-0 snap-center w-[56px]">
-                                    <button
-                                        onClick={option.action}
-                                        className={`w-[48px] h-[48px] rounded-full flex items-center justify-center shadow-sm hover:scale-105 transition-transform active:scale-95 ${option.color} ${option.textColor}`}
-                                        aria-label={`Share on ${option.name}`}
-                                    >
-                                        {option.id === "copy" && copied ? (
-                                            <Check className="w-5 h-5" />
-                                        ) : (
-                                            <div className="scale-100">
-                                                {option.icon}
-                                            </div>
-                                        )}
-                                    </button>
-                                    <span className="text-gray-700 dark:text-gray-300 text-[10px] font-medium text-center truncate w-full transition-colors">
-                                        {option.id === "copy" && copied ? "Copied!" : option.name}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
+                    {/* Share Row - Slider */}
+                    <div
+                        ref={scrollRef}
+                        onMouseDown={handleMouseDown}
+                        onMouseLeave={handleMouseLeave}
+                        onMouseUp={handleMouseUp}
+                        onMouseMove={handleMouseMove}
+                        className="w-full flex justify-start gap-3 sm:gap-4 overflow-x-auto hide-scrollbar pb-2 pt-2 px-1 cursor-grab active:cursor-grabbing select-none"
+                    >
+                        {shareOptions.map((option) => (
+                            <div key={option.id} className="flex flex-col items-center justify-start gap-2 shrink-0 w-[64px]">
+                                <button
+                                    onClick={(e) => {
+                                        if (draggedSinceDown.current) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            return;
+                                        }
+                                        option.action();
+                                    }}
+                                    className={`w-[48px] h-[48px] rounded-full flex flex-col items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform shrink-0 outline-none ${option.color} ${option.textColor}`}
+                                >
+                                    {option.id === "copy" && copied ? (
+                                        <Check className="w-5 h-5" />
+                                    ) : (
+                                        option.icon
+                                    )}
+                                </button>
+                                <span className="text-gray-700 dark:text-gray-300 text-[10px] font-medium text-center w-full whitespace-nowrap overflow-hidden text-ellipsis px-1 select-none pointer-events-none">
+                                    {option.id === "copy" && copied ? "Copied!" : option.name}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
-            </div>
+            </DialogContent>
 
             <style dangerouslySetInnerHTML={{
                 __html: `
@@ -194,6 +234,6 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
           scrollbar-width: none;
         }
       `}} />
-        </>
+        </Dialog>
     );
 }

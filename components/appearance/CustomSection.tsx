@@ -229,8 +229,6 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                       card_style: opt.style,
                       card_bg_color: opt.bg,
                       card_text_color: opt.text,
-                      button_color: opt.bg,
-                      button_text_color: opt.text,
                       theme_preset: null
                     });
                   }}

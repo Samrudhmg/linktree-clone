@@ -19,6 +19,9 @@ import ColorPicker from "./ui/ColorPicker";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import { createClient } from "@/lib/supabase-browser";
 import { Link } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { AnimatedButton } from "@/components/animated/interaction";
 
 interface LinkFormProps {
   onSubmit: (data: Partial<Link>) => void;
@@ -80,7 +83,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Info Section */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 space-y-4 transition-colors">
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
         <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
           <LucideLink className="w-5 h-5 text-purple-400" />
           Link Details
@@ -89,43 +92,43 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
         <div className="space-y-3">
           <div>
             <label className="block text-gray-400 text-sm mb-1">Title *</label>
-            <input
+            <Input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="My Awesome Link"
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
               required
+              className="h-12"
             />
           </div>
 
           <div>
             <label className="block text-gray-400 text-sm mb-1">URL *</label>
-            <input
+            <Input
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
               required
+              className="h-12"
             />
           </div>
 
           <div>
             <label className="block text-gray-400 text-sm mb-1">Subtext</label>
-            <input
+            <Input
               type="text"
               value={subtext}
               onChange={(e) => setSubtext(e.target.value)}
               placeholder="Optional description below the title"
-              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+              className="h-12"
             />
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Icon Selection */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 space-y-4 transition-colors">
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
         <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
           <Palette className="w-5 h-5 text-purple-400" />
           Icon & Thumbnail
@@ -188,10 +191,10 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
             </div>
           )}
         </div>
-      </div>
+      </Card>
 
       {/* Appearance Section */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 space-y-4 transition-colors">
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
         <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
           <Palette className="w-5 h-5 text-purple-400" />
           Per-Link Styling
@@ -205,9 +208,10 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
               { value: "color", label: "Color" },
               { value: "image", label: "Image" }
             ].map((type) => (
-              <button
+              <AnimatedButton
                 key={type.value}
                 type="button"
+                selected={bgType === type.value}
                 onClick={() => setBgType(type.value)}
                 className={`flex-1 py-2 px-4 rounded-lg border transition-all text-sm font-medium ${bgType === type.value
                   ? "bg-purple-600 border-purple-500 text-white shadow-sm"
@@ -215,7 +219,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
                   }`}
               >
                 {type.label}
-              </button>
+              </AnimatedButton>
             ))}
           </div>
         </div>
@@ -233,12 +237,12 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
         {bgType === "image" && (
           <div>
             <label className="block text-gray-400 text-sm mb-2">Background Image URL</label>
-            <input
+            <Input
               type="url"
               value={bgImage}
               onChange={(e) => setBgImage(e.target.value)}
               placeholder="https://example.com/image.jpg"
-              className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+              className="h-12"
             />
             <p className="text-gray-500 text-xs mt-1">Enter a direct URL to an image</p>
           </div>
@@ -256,9 +260,10 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
           <label className="block text-gray-400 text-sm mb-2">Font Style</label>
           <div className="grid grid-cols-3 gap-2">
             {FONT_OPTIONS.map((opt) => (
-              <button
+              <AnimatedButton
                 key={opt.value}
                 type="button"
+                selected={font === opt.value}
                 onClick={() => setFont(opt.value)}
                 className={`py-3 px-4 rounded-lg border transition-all text-sm ${opt.class} ${font === opt.value
                   ? "bg-purple-600 border-purple-500 text-white shadow-sm"
@@ -266,14 +271,14 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
                   }`}
               >
                 {opt.label}
-              </button>
+              </AnimatedButton>
             ))}
           </div>
         </div>
-      </div>
+      </Card>
 
       {/* Preview */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 sm:p-6 space-y-4 transition-colors">
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
         <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
           <Eye className="w-5 h-5 text-purple-400" />
           Preview
@@ -291,23 +296,24 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
             url={url}
           />
         </div>
-      </div>
+      </Card>
 
       {/* Action Buttons */}
       <div className="flex gap-3 pt-2">
-        <button
+        <AnimatedButton
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 px-6 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 transition-all shadow-sm"
+          variant="outline"
+          className="flex-1 rounded-full h-12"
         >
           Cancel
-        </button>
-        <button
+        </AnimatedButton>
+        <AnimatedButton
           type="submit"
-          className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 transition-all shadow-md shadow-purple-500/20"
+          className="flex-1 rounded-full h-12 bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/20 text-white"
         >
           Create Link
-        </button>
+        </AnimatedButton>
       </div>
     </form>
   );
