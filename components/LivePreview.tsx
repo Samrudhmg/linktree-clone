@@ -34,7 +34,7 @@ export default function LivePreview({
   const fontClass = "font-sans"; // Defaulting back to sans until font integration is specified
 
   // Helper for component dynamic styles
-  const getCardStyle = (linkOverlay?: Partial<Link>) => {
+  const getCardStyle = () => {
     if (!theme) return {};
     const style = theme.config.links.style;
 
@@ -179,7 +179,7 @@ export default function LivePreview({
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`block py-3 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
-                        style={getCardStyle(link)}
+                        style={getCardStyle()}
                         onClick={(e) => {
                           if (onLinkClick) {
                             e.preventDefault();

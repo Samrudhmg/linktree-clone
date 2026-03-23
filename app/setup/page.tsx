@@ -9,9 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 
-const supabase = createClient();
-
 export default function Setup() {
+  const supabase = createClient();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [projectName, setProjectName] = useState("");
@@ -43,7 +42,7 @@ export default function Setup() {
 
     setUser(user as User);
     setLoading(false);
-  }, [router]);
+  }, [router, supabase]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

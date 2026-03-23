@@ -8,9 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { motion } from "framer-motion"
 
-const supabase = createClient()
-
 function LoginContent() {
+  const supabase = createClient()
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
   const message = searchParams.get("message")

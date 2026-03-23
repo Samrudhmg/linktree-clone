@@ -9,7 +9,6 @@ import {
   Upload,
   Trash2,
   Pencil,
-  Plus,
   Check,
   X
 } from "lucide-react";

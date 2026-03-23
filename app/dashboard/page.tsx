@@ -25,9 +25,8 @@ import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
-const supabase = createClient();
-
 export default function Dashboard() {
+  const supabase = createClient();
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);

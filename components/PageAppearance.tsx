@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Palette, ChevronDown, Check, Loader2, Plus } from "lucide-react";
+import { Palette, ChevronDown, Check, Loader2 } from "lucide-react";
 import ThemeSection from "./appearance/ThemeSection";
 import { LinkPage } from "@/lib/types";
 import { DBTheme } from "@/lib/theme-utils";
