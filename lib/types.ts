@@ -27,6 +27,7 @@ export interface LinkPage {
   card_style?: string;
   page_font?: string;
   theme_preset?: string | null;
+  theme_id?: string | null;
   button_color?: string;
   button_text_color?: string;
   button_radius?: string;

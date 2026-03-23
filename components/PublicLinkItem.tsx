@@ -35,16 +35,25 @@ export default function PublicLinkItem({
     if (!theme) return {};
     const style = theme.config.links.style;
     
-    // Default Tailwind handles background colors and borders via CSS variables now
+    let baseStyle: React.CSSProperties = {};
+
     if (style === 'outline') {
-      return { backgroundColor: 'transparent', border: '2px solid var(--theme-text-primary)' };
+      baseStyle = { backgroundColor: 'transparent', border: '2px solid var(--theme-text-primary)', color: 'var(--theme-text-primary)' };
     } else if (style === 'glass') {
-      return { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)' };
+      baseStyle = { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--theme-text-primary)' };
     } else if (style === 'white') {
-      return { backgroundColor: '#ffffff', color: '#000000' };
+      baseStyle = { backgroundColor: '#ffffff', color: '#000000' };
+    } else {
+        // Simple robust accent style (Solid with subtle gradient for depth)
+        baseStyle = { 
+            background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent))', 
+            color: '#ffffff', 
+            border: 'none',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        };
     }
-    // flat
-    return { backgroundColor: 'var(--theme-accent)', color: 'var(--theme-text-primary)' }; 
+
+    return baseStyle;
   };
 
   const getCardClasses = () => {

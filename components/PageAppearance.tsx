@@ -15,14 +15,16 @@ interface PageAppearanceProps {
   updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>;
   onAppearanceChange: (data: LinkPage) => void;
   themes: DBTheme[];
+  pages: LinkPage[];
   user: User | null;
   refreshThemes: () => Promise<void>;
   onPreviewChange?: (theme: DBTheme | null) => void;
 }
 
-export default function PageAppearance({ page, updatePage, onAppearanceChange, themes, user, refreshThemes, onPreviewChange }: PageAppearanceProps) {
+export default function PageAppearance({ page, updatePage, onAppearanceChange, themes, pages, user, refreshThemes, onPreviewChange }: PageAppearanceProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingTheme, setEditingTheme] = useState<DBTheme | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -95,12 +97,19 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
       <AnimatedPanel open={isExpanded}>
         <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-6">
           <ThemeSection
-            currentTheme={page?.theme_preset}
+            currentThemeId={page?.theme_id || page?.theme_preset}
             themes={themes}
             onThemeSelect={(theme: DBTheme) => handleUpdate({
-              theme_preset: theme.id,
+              theme_id: theme.id,
             })}
-            onAddTheme={() => setIsEditorOpen(true)}
+            onEditTheme={(theme: DBTheme) => {
+              setEditingTheme(theme);
+              setIsEditorOpen(true);
+            }}
+            onAddTheme={() => {
+              setEditingTheme(null);
+              setIsEditorOpen(true);
+            }}
           />
         </div>
       </AnimatedPanel>
@@ -111,8 +120,16 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
         open={isEditorOpen}
         onOpenChange={setIsEditorOpen}
         userId={user.id}
-        onSuccess={refreshThemes}
+        editingTheme={editingTheme}
+        pages={pages}
+        onSuccess={async (newTheme) => {
+          await refreshThemes();
+          if (newTheme && !editingTheme) {
+            handleUpdate({ theme_id: newTheme.id });
+          }
+        }}
         onPreviewChange={onPreviewChange}
+        pageId={page.id}
       />
     )}
     </>

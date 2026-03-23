@@ -129,13 +129,19 @@ export default function Dashboard() {
     }
   };
 
-  const fetchThemes = async (userId: string) => {
+  const fetchThemes = async (userId: string, pageId?: string) => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("themes")
-        .select("*")
-        .or(`type.eq.default,user_id.eq.${userId}`)
-        .order("created_at", { ascending: true });
+        .select("*");
+      
+      if (pageId) {
+        query = query.or(`type.eq.default,page_id.eq.${pageId}`);
+      } else {
+        query = query.eq("type", "default");
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: true });
 
       if (error) {
         console.error("Error fetching themes:", error);
@@ -198,11 +204,15 @@ export default function Dashboard() {
       if (data && data.length > 0 && !activePage) {
         const defaultPage = data.find(p => p.is_default) || data[0];
         setActivePage(defaultPage);
-        await fetchLinks(defaultPage.id);
+        await Promise.all([
+          fetchLinks(defaultPage.id),
+          fetchThemes(userId, defaultPage.id)
+        ]);
       } else if (activePage) {
         // Refresh the active page data
         const updatedPage = data?.find(p => p.id === activePage.id);
         if (updatedPage) setActivePage(updatedPage);
+        await fetchThemes(userId, activePage.id);
       }
     } catch (err) {
       console.error("Unexpected error fetching pages:", err);
@@ -531,6 +541,7 @@ export default function Dashboard() {
     setLiveAppearance(null);
 
     fetchLinks(page.id);
+    if (user) fetchThemes(user.id, page.id);
     setShowSidebar(false);
   };
 
@@ -546,7 +557,7 @@ export default function Dashboard() {
   const deriveActiveTheme = () => {
     if (editingThemePreview) return editingThemePreview;
     
-    const currentThemeId = liveAppearance?.theme_preset || activePage?.theme_preset;
+    const currentThemeId = liveAppearance?.theme_id || liveAppearance?.theme_preset || activePage?.theme_id || activePage?.theme_preset;
     if (!currentThemeId) return themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
     return themes.find(t => t.id === currentThemeId) || themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
   };
@@ -689,8 +700,9 @@ export default function Dashboard() {
                       updatePage={updatePage}
                       onAppearanceChange={handleAppearanceChange}
                       themes={themes}
+                      pages={pages}
                       user={user!}
-                      refreshThemes={async () => { if (user) await fetchThemes(user.id); }}
+                      refreshThemes={async () => { if (user) await fetchThemes(user.id, activePage.id); }}
                       onPreviewChange={setEditingThemePreview}
                     />
 

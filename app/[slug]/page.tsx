@@ -26,26 +26,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     // Fetch the link page by slug (optimizing column selection)
     const { data: linkPage, error: pageError } = await supabase
         .from("link_pages")
-        .select(`
-            id, 
-            user_id, 
-            slug, 
-            display_name, 
-            bio, 
-            avatar_url, 
-            avatar_shape,
-            page_bg_type,
-            page_bg_color,
-            page_bg_gradient_start,
-            page_bg_gradient_end,
-            page_bg_image,
-            theme_preset,
-            card_bg_color,
-            card_text_color,
-            card_border_radius,
-            card_style,
-            page_font
-        `)
+        .select("*")
         .eq("slug", slug)
         .single() as { data: LinkPage | null, error: PostgrestError | null };
 
@@ -88,11 +69,16 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
     // Fetch the active theme
     let activeTheme: DBTheme | null = null;
-    if (linkPage.theme_preset) {
+    
+    // Priority 1: theme_id (New system)
+    // Priority 2: theme_preset (Legacy system / Hardcoded presets)
+    const currentThemeIdentifier = linkPage.theme_id || linkPage.theme_preset;
+
+    if (currentThemeIdentifier) {
         const { data: themeData } = await supabase
             .from("themes")
             .select("*")
-            .eq("id", linkPage.theme_preset)
+            .eq("id", currentThemeIdentifier)
             .single() as { data: DBTheme | null };
         activeTheme = themeData;
     }
@@ -112,42 +98,18 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     // For avatar shape and font fallback
     const fontClass = "font-sans";
 
-    const getCardContainerStyle = () => {
-        if (!activeTheme) return {};
-        const style = activeTheme.config.card.style;
-        if (style === 'glass') {
-            return {
-                backgroundColor: 'rgba(255,255,255,0.05)',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                border: '1px solid rgba(255,255,255,0.1)'
-            };
-        } else if (style === 'bordered') {
-            return {
-                backgroundColor: 'transparent',
-                border: '1px solid var(--theme-bg-secondary)'
-            };
-        }
-        // flat
-        return {
-            backgroundColor: 'var(--theme-bg-secondary)',
-        };
-    };
+
 
     return (
         <AnimatedContainer>
             <div
                 className={`min-h-dvh flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
-                style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)' }}
+                style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}
             >
-            {/* Card / Box Container */}
+            {/* Main Content Card - Uses Primary BG */}
             <div
-                className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500"
-                style={{
-                    ...getCardContainerStyle(),
-                    boxShadow: "0 25px 60px -12px rgba(0, 0, 0, 0.5)",
-                    overflow: "clip",
-                }}
+                className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
+                style={{ backgroundColor: 'var(--theme-bg-primary)' }}
             >
                 <div className="absolute top-4 right-4 z-20">
                     <ShareTrigger
@@ -180,9 +142,27 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                                 </div>
                             </div>
                         )}
-                        <h1 className="text-xl sm:text-2xl font-bold mb-1 break-words px-2">{linkPage.display_name || "Untitled"}</h1>
+                        <h1 
+                            className="wrap-break-word px-2"
+                            style={{ 
+                                color: 'var(--theme-title-color)',
+                                fontSize: 'var(--theme-title-size)',
+                                fontWeight: 'var(--theme-title-weight)'
+                            }}
+                        >
+                            {linkPage.display_name || "Untitled"}
+                        </h1>
                         {linkPage.bio && (
-                            <p className="opacity-80 text-sm max-w-xs mx-auto break-words px-4">{linkPage.bio}</p>
+                            <p 
+                                className="max-w-xs mx-auto wrap-break-word px-4 mt-2"
+                                style={{
+                                    color: 'var(--theme-bio-color)',
+                                    fontSize: 'var(--theme-bio-size)',
+                                    fontWeight: 'var(--theme-bio-weight)'
+                                }}
+                            >
+                                {linkPage.bio}
+                            </p>
                         )}
                     </div>
 
