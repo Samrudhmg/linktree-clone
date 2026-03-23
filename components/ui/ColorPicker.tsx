@@ -4,30 +4,46 @@ interface ColorPickerProps {
   value: string;
   onChange: (value: string) => void;
   label?: string;
+  hideLabel?: boolean;
   className?: string;
 }
 
-export default function ColorPicker({ value, onChange, label, className = "" }: ColorPickerProps) {
+export default function ColorPicker({ value, onChange, label, hideLabel, className = "" }: ColorPickerProps) {
   return (
-    <div className={`space-y-1.5 ${className}`}>
-      {label && <label className="block text-gray-400 text-xs">{label}</label>}
-      <div className="flex items-center gap-2">
-        <div className="relative w-8 h-8 rounded overflow-hidden border border-gray-200 dark:border-gray-600">
+    <div className={`space-y-2 ${className}`}>
+      {label && !hideLabel && (
+        <label className="block text-[10px] font-bold text-text-secondary uppercase tracking-tight">
+          {label}
+        </label>
+      )}
+      <div className="flex items-center gap-3">
+        <label className="relative w-12 h-10 shrink-0 rounded-xl cursor-pointer shadow-sm border border-border-main/50 overflow-hidden group transition-transform active:scale-95">
+          <div 
+            className="absolute inset-0 z-0 transition-opacity group-hover:opacity-80" 
+            style={{ backgroundColor: value }} 
+          />
           <input
             type="color"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="absolute inset-x-[-10px] inset-y-[-10px] w-[calc(100%+20px)] h-[calc(100%+20px)] cursor-pointer"
-            style={{ backgroundColor: value }}
+            className="sr-only"
           />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/5">
+            {/* Removed "Pick" text */}
+          </div>
+        </label>
+        <div className="relative flex-1 group">
+          <input
+            type="text"
+            value={value.toUpperCase()}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full bg-bg-main/50 text-text-main px-3 py-2.5 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-all text-sm font-mono tracking-wider "
+            placeholder="#FFFFFF"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 group-hover:opacity-40 transition-opacity">
+             <span className="text-[10px] uppercase font-bold">HEX</span>
+          </div>
         </div>
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 text-xs transition-colors"
-          placeholder="#FFFFFF"
-        />
       </div>
     </div>
   );

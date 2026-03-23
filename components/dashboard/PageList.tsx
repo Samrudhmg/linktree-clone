@@ -21,13 +21,13 @@ export default function PageList({
   if (pages.length === 0) {
     return (
       <div className="text-center py-16">
-        <LinkIcon className="w-16 h-16 mx-auto mb-4 text-purple-400" />
-        <h3 className="text-white text-xl font-semibold mb-2">Start Creating Links!</h3>
-        <p className="text-gray-400 mb-6">Create your first page and add links to share with the world</p>
+        <LinkIcon className="w-16 h-16 mx-auto mb-4 text-text-secondary" />
+        <h3 className="text-text-main text-xl font-semibold mb-2">Start Creating Links!</h3>
+        <p className="text-text-secondary mb-6">Create your first page and add links to share with the world</p>
         <Button
           onClick={onCreatePage}
           size="lg"
-          className="rounded-full bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg"
+          className="rounded-full bg-btn-bg hover:bg-btn-hover text-btn-text shadow-main px-8"
         >
           Create Your First Page
         </Button>
@@ -38,10 +38,10 @@ export default function PageList({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-gray-400 text-sm">{pages.length} page{pages.length !== 1 ? "s" : ""}</p>
+        <p className="text-text-secondary text-sm">{pages.length} page{pages.length !== 1 ? "s" : ""}</p>
         <Button
           onClick={onCreatePage}
-          className="rounded-full bg-purple-600 hover:bg-purple-700 text-white"
+          className="rounded-full bg-btn-bg hover:bg-btn-hover text-btn-text border border-border-main"
           size="sm"
         >
           <Plus className="w-4 h-4 mr-2" />
@@ -51,20 +51,19 @@ export default function PageList({
       {pages.map((page) => (
         <Card
           key={page.id}
-          className="p-4 rounded-xl hover:bg-accent hover:text-accent-foreground transition-all group cursor-pointer shadow-sm border-gray-200 dark:border-gray-800"
+          className="p-4 rounded-radius-main hover:bg-muted transition-all group cursor-pointer shadow-main border border-border-main bg-bg-main"
           onClick={() => onSelectPage(page)}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: `linear-gradient(135deg, ${page.page_bg_gradient_start || "#6366F1"} 0%, ${page.page_bg_gradient_end || "#A855F7"} 100%)` }}
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-btn-bg border border-border-main shadow-sm"
               >
-                <FileText className="w-5 h-5 text-white" />
+                <FileText className="w-5 h-5 text-btn-text" />
               </div>
               <div>
-                <h3 className="dark:text-white text-gray-900 font-medium">{page.title}</h3>
-                <p className="text-gray-500 text-xs">/{page.slug}</p>
+                <h3 className="text-text-main font-medium">{page.title}</h3>
+                <p className="text-text-secondary text-xs">/{page.slug}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

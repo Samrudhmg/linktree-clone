@@ -31,10 +31,13 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 space-y-6 transition-colors shadow-sm">
+    <div className="bg-bg-main border border-border-main rounded-radius-main p-6 space-y-6 transition-colors shadow-main">
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <div className="relative group">
-          <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700 ring-4 ring-purple-500/10 dark:ring-purple-500/20">
+          <div 
+            className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted ring-4 ring-border-main transform translate-z-0"
+            style={{ isolation: 'isolate' }}
+          >
             {profile?.avatar_url ? (
               <Image
                 src={profile.avatar_url}
@@ -53,7 +56,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
               </div>
             )}
           </div>
-          <label className="absolute bottom-1 right-1 w-8 h-8 bg-purple-600 hover:bg-purple-700 text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg transition-all hover:scale-110">
+          <label className="absolute bottom-1 right-1 w-8 h-8 bg-btn-bg hover:bg-btn-hover text-btn-text rounded-full flex items-center justify-center cursor-pointer shadow-main transition-all hover:scale-110 border border-border-main">
             <Upload className="w-4 h-4" />
             <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
           </label>
@@ -68,7 +71,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
                 type="text"
                 value={profile?.username || ""}
                 onChange={(e) => updateProfile({ username: e.target.value })}
-                className="w-full bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white pl-8 pr-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-all"
+                className="w-full bg-bg-main text-text-main pl-8 pr-4 py-2.5 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-all"
                 placeholder="username"
               />
             </div>
@@ -78,7 +81,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
             <textarea
               value={profile?.bio || ""}
               onChange={(e) => updateProfile({ bio: e.target.value })}
-              className="w-full bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-all resize-none"
+              className="w-full bg-bg-main text-text-main px-4 py-2.5 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-all resize-none"
               placeholder="Tell the world about yourself..."
               rows={2}
             />

@@ -82,7 +82,7 @@ export default function LivePreview({
     return (
       <div>
         <div className="w-full flex justify-center">
-          <div className="w-[280px] h-[580px] rounded-[2.5rem] p-2 shadow-2xl border-4 border-gray-700 relative" style={getCardContainerStyle()}>
+          <div className="w-[280px] h-[580px] rounded-[2.5rem] p-2 shadow-2xl border-4 border-border-main relative" style={getCardContainerStyle()}>
             <div className="absolute left-1/2 -translate-x-1/2 top-4 w-20 h-5 bg-gray-900 rounded-full z-20" />
             <div className={`w-full h-full rounded-[2rem] overflow-hidden ${fontClass}`} style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-primary)', color: 'var(--theme-text-primary)' }}>
               <div className="flex items-center justify-center h-full">
@@ -106,7 +106,7 @@ export default function LivePreview({
         <div className="w-full flex justify-center py-8">
           {/* Mobile Frame Container - Refined Premium iPhone Design */}
           <div
-            className="w-[310px] h-[590px] rounded-[3.2rem] p-1.5 shadow-xl border-[6px] border-[#111] ring-1 ring-gray-800/50 relative bg-black transition-all duration-500 overflow-hidden"
+            className="w-[310px] h-[590px] rounded-[3.2rem] p-1.5 shadow-xl border-[6px] border-[#111] ring-1 ring-white/10 relative bg-black transition-all duration-500 overflow-hidden"
           >
             {/* Dynamic Island */}
             <div className="absolute left-1/2 -translate-x-1/2 top-4 w-24 h-6 bg-black rounded-full z-40 ring-1 ring-white/5" />
@@ -131,7 +131,7 @@ export default function LivePreview({
                         src={page.avatar_url}
                         alt={page?.display_name || "Profile"}
                         fill
-                        className={`object-cover ${avatarShapeClass} border-2 border-white/20`}
+                        className={`object-cover ${avatarShapeClass} border-2 border-white/20 shadow-sm`}
                       />
                     </div>
                   </div>
@@ -140,7 +140,7 @@ export default function LivePreview({
                 {/* Name */}
                 {page?.display_name && page.display_name.trim() !== "" && (
                   <h2
-                    className="mb-1 text-center break-words px-2"
+                    className="mb-1 text-center break-words px-4 leading-tight"
                     style={{
                       color: 'var(--theme-title-color)',
                       fontSize: 'var(--theme-title-size)',
@@ -154,10 +154,10 @@ export default function LivePreview({
                 {/* Bio */}
                 {page?.bio && page.bio.trim() !== "" && (
                   <p
-                    className="mb-4 text-center px-4 break-words"
+                    className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
                     style={{
                       color: 'var(--theme-bio-color)',
-                      fontSize: 'var(--theme-bio-size)',
+                      fontSize: 'calc(var(--theme-bio-size) * 0.75)',
                       fontWeight: 'var(--theme-bio-weight)'
                     }}
                   >
@@ -188,10 +188,10 @@ export default function LivePreview({
                           }
                         }}
                       >
-                        <div className="flex items-center gap-2">
-                          {/* Left Side: Thumbnail or Icon */}
-                          {(link.thumbnail_url || link.icon) && (
-                            <div className="shrink-0 w-6 h-6 flex items-center justify-center relative">
+                        <div className="flex items-center gap-3">
+                          {/* Left Side: Thumbnail, Icon, or Spacer for centering */}
+                          {(link.thumbnail_url || link.icon) ? (
+                            <div className="shrink-0 w-6 h-6 flex items-center justify-center relative shadow-sm">
                               {link.thumbnail_url ? (
                                 <Image
                                   src={link.thumbnail_url}
@@ -203,12 +203,14 @@ export default function LivePreview({
                                 <LinkIcon icon={link.icon} color={link.text_color || (theme?.config.text.primary || '#ffffff')} />
                               ) : null}
                             </div>
+                          ) : (
+                            <div className="shrink-0 w-6 h-6 px-0" />
                           )}
 
                           {/* Center: Title & Subtext */}
-                          <div className="flex-1 text-center min-w-0">
-                            <span className="font-medium text-sm block truncate max-w-[160px] mx-auto">{link.title}</span>
-                            {link.subtext && <span className="text-xs opacity-70 block truncate max-w-[160px] mx-auto">{link.subtext}</span>}
+                          <div className="flex-1 text-center min-w-0 flex flex-col justify-center">
+                            <span className="font-semibold text-sm block truncate">{link.title}</span>
+                            {link.subtext && <span className="text-[10px] opacity-80 block truncate mt-0.5">{link.subtext}</span>}
                           </div>
 
                           {/* Right Side: Three dots menu */}
@@ -224,9 +226,9 @@ export default function LivePreview({
                                 icon: link.icon ?? undefined,
                               });
                             }}
-                            className="shrink-0 w-6 h-6 flex items-center justify-center hover:bg-black/10 rounded transition-colors"
+                            className="shrink-0 w-6 h-6 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
                           >
-                            <MoreVertical className="w-4 h-4" />
+                            <MoreVertical className="w-3.5 h-3.5 opacity-60" />
                           </button>
                         </div>
                       </a>

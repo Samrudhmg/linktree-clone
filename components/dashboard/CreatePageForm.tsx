@@ -25,12 +25,12 @@ export default function CreatePageForm({
   const normalizedSlug = newPageSlug.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
 
   return (
-    <Card className="p-6 space-y-4 shadow-sm transition-colors border-0 dark:border-gray-800">
-      <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-        <Plus className="w-5 h-5 text-purple-400" />
+    <Card className="p-6 space-y-4 shadow-main transition-colors border border-border-main bg-bg-main rounded-radius-main">
+      <h3 className="text-text-main font-semibold text-lg flex items-center gap-2">
+        <Plus className="w-5 h-5 text-text-secondary" />
         New Link Page
       </h3>
-      <p className="text-gray-400 text-sm">Create a new page with its own set of links and appearance.</p>
+      <p className="text-text-secondary text-sm">Create a new page with its own set of links and appearance.</p>
 
       <div className="space-y-2">
         <label className="block text-gray-500 dark:text-gray-400 text-sm font-medium">Page Title *</label>
@@ -39,21 +39,21 @@ export default function CreatePageForm({
           value={newPageTitle}
           onChange={(e) => setNewPageTitle(e.target.value)}
           placeholder="My Social Links"
-          className="h-12"
+          className="h-12 bg-bg-main border-border-main text-text-main rounded-xl focus:ring-1 focus:ring-text-secondary"
           autoFocus
         />
       </div>
 
       <div className="space-y-2">
         <label className="block text-gray-500 dark:text-gray-400 text-sm font-medium">Page URL *</label>
-        <div className="flex items-center bg-background rounded-md border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden transition-colors">
-          <span className="px-3 text-muted-foreground text-sm whitespace-nowrap border-r bg-muted/50 h-[46px] flex items-center">/</span>
+        <div className="flex items-center bg-bg-main rounded-xl border border-border-main focus-within:ring-1 focus-within:ring-text-secondary overflow-hidden transition-colors">
+          <span className="px-3 text-text-secondary text-sm whitespace-nowrap border-r border-border-main bg-muted h-[46px] flex items-center">/</span>
           <Input
             type="text"
             value={newPageSlug}
             onChange={(e) => setNewPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
             placeholder="my-social-links"
-            className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-[46px]"
+            className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-[46px] bg-bg-main text-text-main"
             onKeyDown={(e) => e.key === "Enter" && onCreatePage()}
           />
         </div>
@@ -61,9 +61,9 @@ export default function CreatePageForm({
       </div>
 
       {newPageSlug.trim() && (
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 transition-colors">
-          <p className="text-gray-400 text-xs mb-1">Your page will be hosted at:</p>
-          <p className="text-green-400 text-sm font-mono">
+        <div className="bg-muted rounded-xl p-3 transition-colors border border-border-main">
+          <p className="text-text-secondary text-xs mb-1">Your page will be hosted at:</p>
+          <p className="text-green-500 text-sm font-mono">
             {typeof window !== "undefined" ? window.location.origin : ""}/{normalizedSlug}
           </p>
         </div>
@@ -80,7 +80,7 @@ export default function CreatePageForm({
         <Button
           onClick={onCreatePage}
           disabled={!newPageTitle.trim() || !newPageSlug.trim()}
-          className="flex-1 h-12 rounded-full bg-purple-600 hover:bg-purple-700 text-white"
+          className="flex-1 h-12 rounded-full bg-btn-bg hover:bg-btn-hover text-btn-text shadow-main font-bold border border-border-main"
         >
           Create Page
         </Button>

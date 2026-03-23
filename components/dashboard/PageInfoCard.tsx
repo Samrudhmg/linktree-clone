@@ -39,7 +39,7 @@ export default function PageInfoCard({
       </Button>
 
       {/* Page Info Card */}
-      <Card className="p-4 mb-6 shadow-sm transition-colors border-gray-200 dark:border-gray-800">
+      <Card className="p-4 mb-6 shadow-sm transition-colors border-border-main bg-bg-main">
         <h2 className="text-foreground font-semibold text-lg mb-2">{activePage.title}</h2>
         <div className="flex items-center gap-2">
           {editingPageSlug ? (

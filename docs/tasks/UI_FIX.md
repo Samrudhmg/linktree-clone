@@ -1,306 +1,257 @@
-# Feature Upgrade: Theme Editing, Copying & Stable Preview (Theme Editor Only)
+# Global Styling Refactor: Remove Hardcoded Colors & Implement Theme-Based System
 
 ## Objective
 
-Enhance the **Theme Editor** with:
-
-* Edit existing themes
-* Copy theme styles between pages
-* Keep all actions inside theme editor
-* Improve UI (smaller theme cards)
-* Fix unstable preview frame
-* Remove card-style interference from preview
+* Remove ALL hardcoded colors from the app
+* Centralize colors in `global.css`
+* Implement consistent dark/light mode backgrounds
+* Standardize buttons, hover states, and UI colors
+* Use **grainy gray gradient** system for modern UI
 
 ---
 
-## 🧠 Core Principles
+## ❗ Current Problems
 
-* All theme operations must happen **inside Theme Editor**
-* Themes are **page-based**
-* Preview must be **stable and consistent**
-* No UI styling should interfere with preview rendering
-
----
-
-## ✏️ 1. Edit Existing Theme
-
-### Requirement
-
-After a theme is created, user must be able to:
-
-* Edit colors
-* Edit fonts
-* Edit avatar style
-* Edit link styles
+* Colors are hardcoded across components
+* Inconsistent dark/light mode styling
+* Buttons and hover states not unified
+* Backgrounds differ between pages
+* Difficult to maintain or scale themes
 
 ---
 
-### Implementation
+## 🎯 Target System
 
-#### UI
-
-Add button on each theme:
+ALL colors must come from:
 
 ```ts
-[ Edit Theme ]
+global.css (CSS variables)
+```
+
+NO inline colors like:
+
+```ts
+style={{ background: "#000" }} ❌
+className="bg-black" ❌
 ```
 
 ---
 
-#### Behavior
+## 🎨 1. Global Background System
 
-* Load selected theme into editor
-* Update the same `theme_id`
+### Dark Mode
 
-```ts
-await updateTheme(themeId, updatedValues);
-```
-
----
-
-#### Important
-
-* Do NOT create new theme on edit
-* Do NOT break page linkage
-
----
-
-## 📋 2. Copy Theme Between Pages
-
-### Requirement
-
-User should be able to:
-
-* Copy a theme
-* Apply it to another page
-* Retain ALL styles
-
----
-
-### UI
-
-Inside Theme Editor:
-
-```ts
-[ Copy Theme ]
-[ Apply to Page ▼ ]
-```
-
----
-
-### Behavior
-
-#### Step 1: Copy Theme
-
-```ts
-const copiedTheme = theme;
-```
-
----
-
-#### Step 2: Apply to another page
-
-```ts
-await updatePage(targetPageId, {
-  theme_id: copiedTheme.id
-});
-```
-
----
-
-### Optional (Better UX)
-
-Clone theme before applying:
-
-```ts
-const newTheme = await createTheme({
-  ...copiedTheme,
-  id: newId
-});
-
-assignToPage(newTheme.id);
-```
-
----
-
-## 🎛️ 3. Keep Everything Inside Theme Editor
-
-### Rules
-
-* NO theme changes outside editor
-* NO quick-edit from page UI
-* NO hidden theme mutations
-
-All actions must go through:
-
-```ts
-ThemeEditor.tsx
-```
-
----
-
-## 🎨 4. Make Theme Cards Smaller (Page Appearance)
-
-### Problem
-
-Theme cards are too large → cluttered UI
-
----
-
-### Fix
-
-Reduce size:
+Use **grainy gray gradient**
 
 ```css
-.theme-card {
-  width: 140px;
-  height: 180px;
-  padding: 8px;
+:root.dark {
+  --bg-primary: linear-gradient(
+    135deg,
+    #0f0f0f,
+    #1a1a1a,
+    #121212
+  );
 }
 ```
 
 ---
 
-### Improvements
+### Light Mode
 
-* Show mini preview
-* Show theme name
-* Add hover actions (Edit / Apply)
-
----
-
-## 🖥️ 5. Fix Preview Frame (CRITICAL)
-
-### Problem
-
-Preview frame is:
-
-* Resizing
-* Jumping
-* Re-rendering inconsistently
-
----
-
-### Fix
-
-Lock preview container:
+Use **white-gray soft gradient**
 
 ```css
-.preview-frame {
-  width: 375px;
-  height: 667px;
-  overflow: hidden;
-  position: relative;
+:root.light {
+  --bg-primary: linear-gradient(
+    135deg,
+    #ffffff,
+    #f5f5f5,
+    #eaeaea
+  );
 }
 ```
 
 ---
 
-### Rules
-
-* Fixed dimensions
-* No layout shifts
-* No dynamic resizing
-* Only theme styles should change
-
----
-
-## 🚫 6. Remove Card Styling from Preview
-
-### Problem
-
-Theme preview is affected by:
-
-* Card UI styles
-* Borders / shadows
-* Container padding
-
----
-
-### Fix
-
-Preview must be **pure page render**
-
----
-
-### Implementation
-
-Wrap preview with reset:
+### Apply Globally
 
 ```css
-.preview-frame * {
-  all: unset;
-  box-sizing: border-box;
+body {
+  background: var(--bg-primary);
 }
 ```
 
-OR isolate with:
+---
 
-```ts
-<iframe />  // recommended
+## 🌫️ 2. Add Grain Effect (IMPORTANT)
+
+Add subtle noise texture:
+
+```css
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("/noise.png");
+  opacity: 0.04;
+  pointer-events: none;
+}
 ```
 
 ---
 
-### Rule
+## 🔘 3. Button System (Global)
 
-* Preview must match hosted page EXACTLY
-* No editor styles should leak inside preview
+### Base Button Colors
 
----
+```css
+:root.dark {
+  --btn-bg: #1a1a1a;
+  --btn-hover: #2a2a2a;
+  --btn-text: #ffffff;
+}
 
-## 🔁 7. Live Update Behavior
-
-When editing theme:
-
-```ts
-await updateTheme(themeId, data);
-await refetchPage();
+:root.light {
+  --btn-bg: #f2f2f2;
+  --btn-hover: #e0e0e0;
+  --btn-text: #111111;
+}
 ```
 
 ---
 
-### Requirement
+### Button Styles
 
-* Instant update in preview
-* No reload needed
+```css
+.button {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background: var(--btn-hover);
+}
+```
+
+---
+
+## 🎛️ 4. Remove Hardcoded Colors (CRITICAL)
+
+### Must Remove
+
+* Tailwind classes like:
+
+  * `bg-black`
+  * `text-white`
+  * `hover:bg-gray-800`
+
+* Inline styles:
+
+```ts
+style={{ color: "#fff" }} ❌
+```
+
+---
+
+### Replace With
+
+```ts
+className="bg-[var(--btn-bg)] text-[var(--btn-text)]"
+```
+
+OR predefined classes:
+
+```css
+.bg-primary { background: var(--bg-primary); }
+.text-primary { color: var(--text-primary); }
+```
+
+---
+
+## 🎨 5. Global Color Variables
+
+Define full system:
+
+```css
+:root.dark {
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1a1;
+  --border-color: #2a2a2a;
+}
+
+:root.light {
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --border-color: #dddddd;
+}
+```
+
+---
+
+## 🧩 6. Hover & Interaction Consistency
+
+ALL hover states must use variables:
+
+```css
+--hover-bg
+--hover-border
+--hover-text
+```
+
+Example:
+
+```css
+.card:hover {
+  background: var(--hover-bg);
+}
+```
+
+---
+
+## 🧱 7. Component Rules
+
+### Strict Rules
+
+* No component should define its own colors
+* All styling must come from global variables
+* Theme overrides (if any) must extend global system
 
 ---
 
 ## 🧪 Testing Checklist
 
-* [ ] Edit theme → updates correctly
-* [ ] Copy theme → applies to another page
-* [ ] Theme styles fully preserved
-* [ ] Theme editor is only control point
-* [ ] Theme cards are smaller and clean
-* [ ] Preview frame does NOT resize
-* [ ] Preview matches hosted page exactly
-* [ ] No card styles inside preview
+* [ ] No hardcoded hex values in components
+* [ ] Dark mode uses grainy gradient
+* [ ] Light mode uses soft gray-white gradient
+* [ ] Buttons consistent across app
+* [ ] Hover effects consistent
+* [ ] Noise overlay visible but subtle
+* [ ] Switching themes updates all UI instantly
 
 ---
 
 ## ⚠️ Do NOT Break
 
-* Page → Theme relationship
-* Slug page rendering
-* Existing themes
-* Preview consistency
+* Existing layouts
+* Theme editor functionality
+* Preview rendering
+* Page performance
 
 ---
 
 ## ✅ Summary
 
-This upgrade ensures:
+We are moving to:
 
-* Editable themes
-* Reusable themes across pages
-* Clean UI
-* Stable preview system
-* Accurate rendering (preview = production)
+* Centralized color system
+* Clean, modern gradient UI
+* Fully scalable styling
+* Zero hardcoded colors
 
 ---
 
 ## Priority
 
-HIGH — affects UX, preview accuracy, and theme usability
+HIGH — affects entire UI system

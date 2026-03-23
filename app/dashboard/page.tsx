@@ -134,7 +134,7 @@ export default function Dashboard() {
       let query = supabase
         .from("themes")
         .select("*");
-      
+
       if (pageId) {
         query = query.or(`type.eq.default,page_id.eq.${pageId}`);
       } else {
@@ -556,7 +556,7 @@ export default function Dashboard() {
 
   const deriveActiveTheme = () => {
     if (editingThemePreview) return editingThemePreview;
-    
+
     const currentThemeId = liveAppearance?.theme_id || liveAppearance?.theme_preset || activePage?.theme_id || activePage?.theme_preset;
     if (!currentThemeId) return themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
     return themes.find(t => t.id === currentThemeId) || themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
@@ -569,8 +569,8 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-bg-main">
+        <div className="text-text-main text-xl">Loading...</div>
       </div>
     );
   }
@@ -578,7 +578,7 @@ export default function Dashboard() {
   const enabledLinks = links.filter(l => l.enabled !== false);
 
   return (
-    <div className="min-h-screen font-inter bg-white dark:bg-[#101828] text-gray-900 dark:text-white flex transition-colors">
+    <div className="min-h-screen font-inter bg-transparent text-main flex transition-colors">
       {/* Mobile Overlay */}
       {showSidebar && (
         <div
@@ -608,7 +608,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row bg-gray-50 dark:bg-[#101828] transition-colors">
+      <div className="flex-1 flex flex-col lg:flex-row bg-transparent transition-colors">
         {/* Editor Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -630,7 +630,7 @@ export default function Dashboard() {
               <a
                 href={`/${activePage.slug}`}
                 target="_blank"
-                className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all text-sm"
+                className="sm:hidden flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-btn-bg text-text-secondary border border-border-main rounded-lg hover:bg-btn-hover transition-all text-sm"
               >
                 <span>View: /{activePage.slug}</span>
                 <ExternalLink className="w-4 h-4" />
@@ -709,7 +709,7 @@ export default function Dashboard() {
                     {/* Create New Link Button */}
                     <button
                       onClick={() => setActiveTab("create-link")}
-                      className="w-full py-3 sm:py-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full mb-6 transition-all flex items-center justify-center gap-2"
+                      className="w-full py-3 sm:py-4 bg-btn-bg hover:bg-btn-hover text-btn-text font-semibold rounded-full mb-6 transition-all flex items-center justify-center gap-2 shadow-main border border-border-main"
                     >
                       <Plus className="w-5 h-5" />
                       Create New Link
@@ -731,7 +731,7 @@ export default function Dashboard() {
 
         {/* Live Preview - Desktop (Fixed on right side, vertically centered) */}
         {activePage && (
-          <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-gray-100 dark:bg-gray-800 items-center justify-center border-l border-gray-200 dark:border-gray-700 transition-colors">
+          <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-bg-main items-center justify-center border-l border-border-main transition-colors">
             <LivePreview
               page={activePage}
               links={enabledLinks}
@@ -768,20 +768,24 @@ export default function Dashboard() {
 
       {/* Edit Profile Modal */}
       <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
-        <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-6 space-y-4 shadow-2xl transition-colors bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none [&>button]:hidden sm:rounded-xl">
-          <DialogTitle className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2 m-0">
-            <Pencil className="w-5 h-5 text-purple-400" />
-            Edit Profile
-          </DialogTitle>
+        <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-0 shadow-main transition-colors bg-muted border border-border-main rounded-radius-main outline-none [&>button]:hidden sm:rounded-radius-main overflow-hidden">
+          {/* Grain Overlay */}
+          <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg_viewBox=%220_0_200_200%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22noiseFilter%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%220.65%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
+          
+          <div className="relative z-10 p-6 space-y-4 bg-muted/50">
+            <DialogTitle className="text-text-main font-semibold text-lg flex items-center gap-2 m-0">
+              <Pencil className="w-5 h-5 text-text-secondary" />
+              Edit Profile
+            </DialogTitle>
 
           <div>
-            <label className="block text-gray-400 text-sm mb-1">Display Name</label>
+            <label className="block text-text-secondary text-sm mb-1 font-medium">Display Name</label>
             <input
               type="text"
               value={editDisplayName}
               onChange={(e) => setEditDisplayName(e.target.value)}
               placeholder="Your Name"
-              className="w-full bg-white dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+              className="w-full bg-bg-main text-text-main px-4 py-3 rounded-lg border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
               autoFocus
             />
           </div>
@@ -789,7 +793,7 @@ export default function Dashboard() {
           <div className="flex gap-3 pt-2">
             <button
               onClick={() => setShowEditProfile(false)}
-              className="flex-1 py-3 px-6 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+              className="flex-1 py-3 px-6 bg-btn-bg text-text-secondary font-semibold rounded-full hover:bg-btn-hover transition-all"
             >
               Cancel
             </button>
@@ -801,6 +805,7 @@ export default function Dashboard() {
               Save
             </button>
           </div>
+        </div>
         </DialogContent>
       </Dialog>
     </div>

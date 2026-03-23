@@ -128,13 +128,14 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
   };
 
   return (
-    <Card className="p-4 sm:p-6 mb-6 transition-colors border-0 dark:border-gray-800 shadow-sm">
+    <Card className="p-4 sm:p-6 mb-6 transition-colors border border-border-main shadow-main bg-bg-main rounded-radius-main">
       <div className="flex items-start gap-3 sm:gap-4">
         {/* Avatar */}
         <div className="relative">
           <button
             onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-            className={`w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-900 dark:text-white text-xl sm:text-2xl shrink-0 overflow-hidden hover:ring-2 hover:ring-purple-500 transition-all group ${page?.avatar_shape === "square" ? "rounded-none" :
+            style={{ isolation: 'isolate' }}
+            className={`w-12 h-12 sm:w-16 sm:h-16 bg-muted flex items-center justify-center text-text-main text-xl sm:text-2xl shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 ${page?.avatar_shape === "square" ? "rounded-none" :
               page?.avatar_shape === "rounded" ? "rounded-2xl" :
                 page?.avatar_shape === "full" ? "w-full aspect-video rounded-none" : "rounded-full"
               }`}
@@ -156,9 +157,9 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
 
           {/* Avatar Menu Dropdown */}
           {showAvatarMenu && (
-            <div className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-gray-700 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 z-50 overflow-hidden transition-colors">
+            <div className="absolute top-full left-0 mt-2 w-64 bg-bg-main rounded-radius-main shadow-main border border-border-main z-50 overflow-hidden transition-colors">
               <div className="p-3 space-y-3">
-                <p className="text-gray-900 dark:text-white text-sm font-medium">Update Avatar</p>
+                <p className="text-text-main text-sm font-medium">Update Avatar</p>
 
                 {/* Upload Button */}
                 <Button
@@ -292,7 +293,7 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
                 <Button
                   variant="link"
                   onClick={() => setIsEditing(true)}
-                  className="p-0 h-auto text-primary"
+                  className="p-0 h-auto text-text-main font-semibold hover:text-text-main/80"
                 >
                   + Add bio
                 </Button>

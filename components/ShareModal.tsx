@@ -133,93 +133,98 @@ export default function ShareModal({ isOpen, onClose, link }: ShareModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="flex flex-col sm:max-w-[360px] w-[95vw] p-0 overflow-hidden bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-2xl rounded-3xl gap-0 outline-none [&>button]:hidden">
-                {/* Header */}
-                <div className="relative flex items-center justify-center w-full px-5 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
-                    <DialogTitle className="text-base font-bold text-gray-900 dark:text-white m-0 text-center">
-                        Share link
-                    </DialogTitle>
-                    <button
-                        onClick={onClose}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
+            <DialogContent className="flex flex-col sm:max-w-[400px] w-[95vw] p-0 overflow-hidden bg-muted border border-border-main shadow-2xl rounded-3xl gap-0 outline-none [&>button]:hidden font-inter">
+                {/* Grain Overlay */}
+                <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg_viewBox=%220_0_200_200%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22noiseFilter%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%220.65%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
 
-                {/* Body - Forced centered */}
-                <div className="w-full px-4 py-8 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
-
-                    {/* Preview Card */}
-                    <div className="relative w-[260px] max-w-[90%] bg-gray-800 rounded-[24px] p-5 flex flex-col items-center text-center shadow-lg mb-8 border border-gray-700/50">
-                        <div className="w-16 h-16 mb-4 bg-gray-50 rounded-2xl flex flex-col items-center justify-center p-1.5 shadow-sm relative shrink-0">
-                            {activeLink.thumbnail_url ? (
-                                <Image src={activeLink.thumbnail_url} alt="" fill className="rounded-2xl object-cover p-1.5" />
-                            ) : (
-                                <>
-                                    <LinkIcon
-                                        icon={activeLink.icon || "link"}
-                                        color={activeLink.icon === "whatsapp" ? "#25D366" : "#4ade80"}
-                                        size="w-8 h-8"
-                                    />
-                                    {activeLink.icon === "whatsapp" && (
-                                        <span className="text-[#25D366] font-bold text-[10px] mt-0.5">
-                                            WhatsApp
-                                        </span>
-                                    )}
-                                </>
-                            )}
-                        </div>
-
-                        {/* Text Content */}
-                        <div className="w-full flex flex-col items-center">
-                            <h3 className="text-white font-semibold text-base leading-snug mb-1 truncate w-full px-2 text-center">
-                                {activeLink.title}
-                            </h3>
-                            <p className="text-white/80 text-[11px] truncate w-full mb-1 px-2 text-center">
-                                {activeLink.url.replace(/^https?:\/\//, "")}
-                            </p>
-                            {activeLink.url.includes("whatsapp.com") && (
-                                <p className="text-[#25D366] text-[10px] font-bold uppercase tracking-wider mt-1 text-center">
-                                    Group Invite
-                                </p>
-                            )}
-                        </div>
+                <div className="relative z-10 flex flex-col w-full h-full bg-muted/50">
+                    {/* Header */}
+                    <div className="relative flex items-center justify-center w-full px-5 py-4 border-b border-border-main bg-muted/30 backdrop-blur-md">
+                        <DialogTitle className="text-base font-bold text-text-main m-0 text-center">
+                            Share link
+                        </DialogTitle>
+                        <button
+                            onClick={onClose}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
                     </div>
 
-                    {/* Share Row - Slider */}
-                    <div
-                        ref={scrollRef}
-                        onMouseDown={handleMouseDown}
-                        onMouseLeave={handleMouseLeave}
-                        onMouseUp={handleMouseUp}
-                        onMouseMove={handleMouseMove}
-                        className="w-full flex justify-start gap-3 sm:gap-4 overflow-x-auto hide-scrollbar pb-2 pt-2 px-1 cursor-grab active:cursor-grabbing select-none"
-                    >
-                        {shareOptions.map((option) => (
-                            <div key={option.id} className="flex flex-col items-center justify-start gap-2 shrink-0 w-[64px]">
-                                <button
-                                    onClick={(e) => {
-                                        if (draggedSinceDown.current) {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            return;
-                                        }
-                                        option.action();
-                                    }}
-                                    className={`w-[48px] h-[48px] rounded-full flex flex-col items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform shrink-0 outline-none ${option.color} ${option.textColor}`}
-                                >
-                                    {option.id === "copy" && copied ? (
-                                        <Check className="w-5 h-5" />
-                                    ) : (
-                                        option.icon
-                                    )}
-                                </button>
-                                <span className="text-gray-700 dark:text-gray-300 text-[10px] font-medium text-center w-full whitespace-nowrap overflow-hidden text-ellipsis px-1 select-none pointer-events-none">
-                                    {option.id === "copy" && copied ? "Copied!" : option.name}
-                                </span>
+                    {/* Body - Forced centered */}
+                    <div className="w-full px-4 py-8 flex flex-col items-center justify-center bg-muted/20">
+
+                        {/* Preview Card */}
+                        <div className="relative w-[260px] max-w-[90%] bg-gray-800 rounded-[24px] p-5 flex flex-col items-center text-center shadow-lg mb-8 border border-gray-700/50">
+                            <div className="w-16 h-16 mb-4 bg-gray-50 rounded-2xl flex flex-col items-center justify-center p-1.5 shadow-sm relative shrink-0">
+                                {activeLink.thumbnail_url ? (
+                                    <Image src={activeLink.thumbnail_url} alt="" fill className="rounded-2xl object-cover p-1.5" />
+                                ) : (
+                                    <>
+                                        <LinkIcon
+                                            icon={activeLink.icon || "link"}
+                                            color={activeLink.icon === "whatsapp" ? "#25D366" : "#4ade80"}
+                                            size="w-8 h-8"
+                                        />
+                                        {activeLink.icon === "whatsapp" && (
+                                            <span className="text-[#25D366] font-bold text-[10px] mt-0.5">
+                                                WhatsApp
+                                            </span>
+                                        )}
+                                    </>
+                                )}
                             </div>
-                        ))}
+
+                            {/* Text Content */}
+                            <div className="w-full flex flex-col items-center">
+                                <h3 className="text-white font-semibold text-base leading-snug mb-1 w-full px-2 text-center wrap-break-word">
+                                    {activeLink.title}
+                                </h3>
+                                <p className="text-white/80 text-[11px] w-full mb-1 px-2 text-center break-all">
+                                    {activeLink.url.replace(/^https?:\/\//, "")}
+                                </p>
+                                {activeLink.url.includes("whatsapp.com") && (
+                                    <p className="text-[#25D366] text-[10px] font-bold uppercase tracking-wider mt-1 text-center">
+                                        Group Invite
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Share Row - Slider */}
+                        <div
+                            ref={scrollRef}
+                            onMouseDown={handleMouseDown}
+                            onMouseLeave={handleMouseLeave}
+                            onMouseUp={handleMouseUp}
+                            onMouseMove={handleMouseMove}
+                            className="w-full flex justify-start gap-3 sm:gap-4 overflow-x-auto hide-scrollbar pb-2 pt-2 px-1 cursor-grab active:cursor-grabbing select-none"
+                        >
+                            {shareOptions.map((option) => (
+                                <div key={option.id} className="flex flex-col items-center justify-start gap-2 shrink-0 w-[64px]">
+                                    <button
+                                        onClick={(e) => {
+                                            if (draggedSinceDown.current) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                return;
+                                            }
+                                            option.action();
+                                        }}
+                                        className={`w-[48px] h-[48px] rounded-full flex flex-col items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-transform shrink-0 outline-none ${option.color} ${option.textColor}`}
+                                    >
+                                        {option.id === "copy" && copied ? (
+                                            <Check className="w-5 h-5" />
+                                        ) : (
+                                            option.icon
+                                        )}
+                                    </button>
+                                    <span className="text-gray-700 dark:text-gray-300 text-[10px] font-medium text-center w-full whitespace-nowrap overflow-hidden text-ellipsis px-1 select-none pointer-events-none">
+                                        {option.id === "copy" && copied ? "Copied!" : option.name}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </DialogContent>

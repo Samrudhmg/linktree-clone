@@ -66,19 +66,19 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
 
   return (
     <>
-    <Card className="mb-6 overflow-hidden transition-colors border-0 dark:border-gray-800 shadow-sm">
+    <Card className="mb-6 overflow-hidden transition-colors border border-border-main shadow-main bg-bg-main rounded-radius-main">
       {/* Collapsible Header */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-btn-hover transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Palette className="w-5 h-5 text-purple-400" />
-          <span className="text-gray-900 dark:text-white font-semibold text-lg">Page Appearance</span>
+          <Palette className="w-5 h-5 text-text-secondary" />
+          <span className="text-text-main font-semibold text-lg">Page Appearance</span>
         </div>
         <div className="flex items-center gap-3">
           {autoSaveStatus === "saving" && (
-            <div className="flex items-center gap-1.5 text-purple-400 text-xs">
+            <div className="flex items-center gap-1.5 text-text-secondary text-xs font-medium">
               <Loader2 className="w-3 h-3 animate-spin" />
               <span className="hidden sm:inline">Saving...</span>
             </div>
@@ -89,7 +89,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
               <span className="hidden sm:inline">Saved</span>
             </div>
           )}
-          <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </button>
 
@@ -124,7 +124,9 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
         pages={pages}
         onSuccess={async (newTheme) => {
           await refreshThemes();
-          if (newTheme && !editingTheme) {
+          // If we created a new theme (either from scratch or by customizing a default)
+          // we want to automatically apply it to the page.
+          if (newTheme && (!editingTheme || newTheme.id !== editingTheme.id)) {
             handleUpdate({ theme_id: newTheme.id });
           }
         }}

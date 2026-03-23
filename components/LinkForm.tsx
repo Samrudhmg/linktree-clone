@@ -83,9 +83,9 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic Info Section */}
-      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
-        <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-          <LucideLink className="w-5 h-5 text-purple-400" />
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors bg-bg-main border border-border-main shadow-main rounded-radius-main">
+        <h3 className="text-text-main font-semibold text-lg flex items-center gap-2">
+          <LucideLink className="w-5 h-5 text-text-secondary" />
           Link Details
         </h3>
 
@@ -98,7 +98,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="My Awesome Link"
               required
-              className="h-12"
+              className="h-12 bg-bg-main border-border-main text-text-main focus:ring-1 focus:ring-text-secondary"
             />
           </div>
 
@@ -110,7 +110,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
               required
-              className="h-12"
+              className="h-12 bg-bg-main border-border-main text-text-main focus:ring-1 focus:ring-text-secondary"
             />
           </div>
 
@@ -121,16 +121,16 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
               value={subtext}
               onChange={(e) => setSubtext(e.target.value)}
               placeholder="Optional description below the title"
-              className="h-12"
+              className="h-12 bg-bg-main border-border-main text-text-main focus:ring-1 focus:ring-text-secondary"
             />
           </div>
         </div>
       </Card>
 
       {/* Icon Selection */}
-      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
-        <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-          <Palette className="w-5 h-5 text-purple-400" />
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors bg-bg-main border border-border-main shadow-main rounded-radius-main">
+        <h3 className="text-text-main font-semibold text-lg flex items-center gap-2">
+          <Palette className="w-5 h-5 text-text-secondary" />
           Icon & Thumbnail
         </h3>
 
@@ -139,7 +139,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
           <select
             value={icon}
             onChange={(e) => setIcon(e.target.value)}
-            className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 focus:outline-none focus:border-purple-500 transition-colors"
+            className="w-full bg-btn-bg text-text-main px-4 py-3 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
           >
             {ICON_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -152,15 +152,15 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
           <p className="text-gray-500 text-xs mt-1 mb-3 text-left">Upload an image to replace the preset icon. This will show on the left side of your link.</p>
 
           <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-200 dark:border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 hover:border-purple-500 transition-colors">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-border-main border-dashed rounded-xl cursor-pointer bg-btn-bg hover:bg-btn-hover hover:border-text-secondary transition-colors">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 {isUploading ? (
-                  <Loader2 className="animate-spin h-8 w-8 text-purple-400 mb-2" />
+                  <Loader2 className="animate-spin h-8 w-8 text-text-secondary mb-2" />
                 ) : (
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <Upload className="w-8 h-8 text-text-secondary mb-2" />
                 )}
-                <p className="mb-2 text-sm text-gray-400">
-                  {isUploading ? "Uploading..." : <><span className="font-semibold text-purple-400">Click to upload</span> or drag and drop</>}
+                <p className="mb-2 text-sm text-text-secondary">
+                  {isUploading ? "Uploading..." : <><span className="font-semibold text-text-main">Click to upload</span> or drag and drop</>}
                 </p>
                 <p className="text-xs text-gray-500">SVG, PNG, JPG (MAX. 5MB)</p>
               </div>
@@ -194,9 +194,9 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
       </Card>
 
       {/* Appearance Section */}
-      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
-        <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-          <Palette className="w-5 h-5 text-purple-400" />
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors bg-bg-main border border-border-main shadow-main rounded-radius-main">
+        <h3 className="text-text-main font-semibold text-lg flex items-center gap-2">
+          <Palette className="w-5 h-5 text-text-secondary" />
           Per-Link Styling
         </h3>
 
@@ -213,9 +213,9 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
                 type="button"
                 selected={bgType === type.value}
                 onClick={() => setBgType(type.value)}
-                className={`flex-1 py-2 px-4 rounded-lg border transition-all text-sm font-medium ${bgType === type.value
-                  ? "bg-purple-600 border-purple-500 text-white shadow-sm"
-                  : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                className={`flex-1 py-2 px-4 rounded-xl border transition-all text-sm font-medium ${bgType === type.value
+                  ? "bg-btn-bg border-text-secondary text-btn-text shadow-sm"
+                  : "bg-bg-main border-border-main text-text-secondary hover:border-text-secondary"
                   }`}
               >
                 {type.label}
@@ -265,9 +265,9 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
                 type="button"
                 selected={font === opt.value}
                 onClick={() => setFont(opt.value)}
-                className={`py-3 px-4 rounded-lg border transition-all text-sm ${opt.class} ${font === opt.value
-                  ? "bg-purple-600 border-purple-500 text-white shadow-sm"
-                  : "bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500"
+                className={`py-3 px-4 rounded-xl border transition-all text-sm ${opt.class} ${font === opt.value
+                  ? "bg-btn-bg border-text-secondary text-btn-text shadow-sm"
+                  : "bg-bg-main border-border-main text-text-secondary hover:border-text-secondary"
                   }`}
               >
                 {opt.label}
@@ -278,12 +278,12 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
       </Card>
 
       {/* Preview */}
-      <Card className="p-4 sm:p-6 space-y-4 transition-colors border-0 dark:border-gray-800 shadow-sm">
-        <h3 className="text-gray-900 dark:text-white font-semibold text-lg flex items-center gap-2">
-          <Eye className="w-5 h-5 text-purple-400" />
+      <Card className="p-4 sm:p-6 space-y-4 transition-colors bg-bg-main border border-border-main shadow-main rounded-radius-main">
+        <h3 className="text-text-main font-semibold text-lg flex items-center gap-2">
+          <Eye className="w-5 h-5 text-text-secondary" />
           Preview
         </h3>
-        <div className="bg-linear-to-br from-indigo-500 to-purple-600 p-4 rounded-xl">
+        <div className="bg-muted p-4 rounded-xl">
           <LinkPreviewItem
             title={title || "Your Link Title"}
             icon={icon}
@@ -310,7 +310,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
         </AnimatedButton>
         <AnimatedButton
           type="submit"
-          className="flex-1 rounded-full h-12 bg-purple-600 hover:bg-purple-700 shadow-md shadow-purple-500/20 text-white"
+          className="flex-1 rounded-full h-12 bg-btn-bg hover:bg-btn-hover shadow-main text-btn-text font-bold"
         >
           Create Link
         </AnimatedButton>

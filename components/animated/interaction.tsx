@@ -24,8 +24,8 @@ export function AnimatedButton({
     >
       <Button
         className={cn(
-          "transition-all duration-200",
-          selected && "ring-2 ring-primary shadow-md",
+          "transition-all duration-200 focus-visible:ring-1 focus-visible:ring-text-secondary",
+          selected && "ring-2 ring-text-secondary shadow-main",
           className
         )}
         {...props}

@@ -5,10 +5,10 @@ import { AnimatedButton } from "@/components/animated/interaction";
 
 export default function Sidebar({ profile, pages, activePage, activeTab, setActiveTab, onSelectPage, onCreatePage, onLogout, onClose, onEditProfile }: { profile: Profile | null, pages: LinkPage[], activePage: LinkPage | null, activeTab: string, setActiveTab: (tab: string) => void, onSelectPage: (page: LinkPage) => void, onCreatePage: () => void, onLogout: () => void, onClose?: () => void, onEditProfile: () => void }) {
   return (
-    <div className="w-72 lg:w-64 h-full bg-white dark:bg-[#101828] border-r border-gray-200 dark:border-gray-800 flex flex-col transition-colors">
+    <div className="w-72 lg:w-64 h-full bg-bg-main border-r border-border-main flex flex-col transition-colors">
       {/* Logo with Close Button for Mobile */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+      <div className="p-4 border-b border-border-main flex items-center justify-between">
+        <h1 className="text-xl font-extrabold bg-linear-to-r from-text-main to-text-secondary bg-clip-text text-transparent tracking-tighter">
           ELTLINKTREE
         </h1>
         {onClose && (
@@ -24,13 +24,13 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
       </div>
 
       {/* Profile */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="p-4 border-b border-border-main">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-900 dark:text-white transition-colors">
+          <div className="w-10 h-10 rounded-full bg-btn-bg flex items-center justify-center text-text-main transition-colors">
             {profile?.display_name?.[0]?.toUpperCase() || "@"}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-gray-900 dark:text-white font-medium truncate text-sm transition-colors">
+            <p className="text-text-main font-medium truncate text-sm transition-colors">
               {profile?.display_name || "User"}
             </p>
           </div>
@@ -38,7 +38,7 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
             variant="ghost"
             size="icon"
             onClick={onEditProfile}
-            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            className="h-8 w-8 text-text-secondary hover:text-text-main hover:bg-muted"
             title="Edit Profile"
           >
             <Pencil className="w-4 h-4" />
@@ -50,12 +50,12 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
       <div className="flex-1 overflow-y-auto">
         <div className="p-3">
           <div className="flex items-center justify-between mb-2 px-1">
-            <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider transition-colors">My Pages</p>
+            <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider transition-colors">My Pages</p>
             <Button
               variant="ghost"
               size="icon"
               onClick={onCreatePage}
-              className="h-6 w-6 text-primary hover:text-primary/80 transition-all"
+              className="h-6 w-6 text-text-main hover:text-text-secondary hover:bg-muted transition-all"
               title="Create New Page"
             >
               <Plus className="w-4 h-4" />
@@ -71,10 +71,10 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
                     variant={activePage?.id === page.id ? "secondary" : "ghost"}
                     selected={activePage?.id === page.id}
                     onClick={() => onSelectPage(page)}
-                    className={`w-full justify-start gap-2 h-10 ${
+                    className={`w-full justify-start gap-2 h-10 rounded-xl transition-all ${
                       activePage?.id === page.id
-                        ? "bg-primary/10 text-primary hover:text-primary hover:bg-primary/20 border border-primary/20"
-                        : "text-muted-foreground"
+                        ? "bg-btn-bg text-text-main border border-border-main shadow-main"
+                        : "text-text-secondary hover:bg-muted"
                     }`}
                   >
                     <FileText className="w-4 h-4 shrink-0" />
@@ -84,7 +84,7 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
                     asChild
                     variant="ghost"
                     size="icon"
-                    className="absolute right-1 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary h-8 w-8 transition-all"
+                    className="absolute right-1 opacity-0 group-hover:opacity-100 text-text-secondary hover:text-text-main h-8 w-8 transition-all"
                     title="Open hosted page"
                   >
                     <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
@@ -101,8 +101,8 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
 
         {/* Page Editor Tabs (shown when a page is selected) */}
         {activePage && (
-          <div className="p-3 border-t border-gray-200 dark:border-gray-800">
-            <p className="text-gray-400 dark:text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2 px-1">
+          <div className="p-3 border-t border-border-main">
+            <p className="text-text-secondary text-xs font-semibold uppercase tracking-wider mb-2 px-1">
               Page Editor
             </p>
             <div className="space-y-1">
@@ -128,7 +128,7 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
       </div>
 
       {/* Logout */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+      <div className="p-4 border-t border-border-main">
         <Button
           variant="ghost"
           onClick={onLogout}
