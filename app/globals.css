@@ -8,21 +8,26 @@
   --bg-main: #ffffff;
   --text-main: #111827;
   --text-secondary: #4b5563;
-  --border-main: #d1d5db; /* Slightly dark gray */
-  
+  --border-main: #d1d5db;
+  /* Slightly dark gray */
+
   --muted: #f3f4f6;
   --muted-foreground: #6b7280;
-  
-  --btn-bg: #1f1f23; /* Dark gray for light mode */
-  --btn-hover: #000000;
-  --btn-text: #ffffff;
-  
+
+  --btn-bg: #e5e7eb;
+  /* Light gray for light mode */
+  --btn-hover: #d1d5db;
+  --btn-text: #111827;
+
+  --dot-color: rgba(79, 70, 229, 0.25);
+  /* Enhanced indigo tint for clear visibility */
+
   --hover-bg: rgba(0, 0, 0, 0.02);
   --hover-border: #9ca3af;
-  
+
   --background: #f9fafb;
   --foreground: #111827;
-  
+
   --radius-main: 16px;
   --radius-btn: 24px;
   --shadow-main: 0 1px 2px rgba(0, 0, 0, 0.03);
@@ -34,25 +39,29 @@
   --bg-main: #09090b;
   --text-main: #fafafa;
   --text-secondary: #a1a1aa;
-  --border-main: #3f3f46; /* Light gray for dark mode */
-  
+  --border-main: #3f3f46;
+  /* Light gray for dark mode */
+
   --muted: #18181b;
   --muted-foreground: #a1a1aa;
-  
-  --btn-bg: #27272a; /* Slight gray for dark mode */
+
+  --btn-bg: #27272a;
+  /* Slight gray for dark mode */
   --btn-hover: #3f3f46;
   --btn-text: #ffffff;
-  
+
+  --dot-color: rgba(255, 255, 255, 0.05);
+
   --hover-bg: rgba(255, 255, 255, 0.04);
   --hover-border: #52525b;
-  
+
   --background: #09090b;
   --foreground: #fafafa;
-  
+
   --radius-main: 16px;
   --radius-btn: 24px;
   --shadow-main: 0 4px 12px rgba(0, 0, 0, 0.3);
-  
+
   /* Retain previous pink preference if needed */
   --color-purple-500: #FDAAAA;
 }
@@ -63,7 +72,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-inter: var(--font-inter);
-  
+
   /* Component tokens */
   --color-primary: var(--btn-bg);
   --color-primary-foreground: var(--btn-text);
@@ -75,7 +84,7 @@
   --color-bg-main: var(--bg-main);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --radius-main: var(--radius-main);
   --radius-btn: var(--radius-btn);
   --shadow-main: var(--shadow-main);
@@ -90,22 +99,33 @@ body {
   background-attachment: fixed;
 }
 
-/* Grain Effect */
+/* Dot Pattern */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: 50;
-  opacity: 0.03;
+  z-index: -1;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-image: radial-gradient(circle, var(--dot-color) 1.1px, transparent 1.1px);
+  background-size: 28px 28px;
 }
 
 /* Global Component Utility Classes */
-.bg-main { background: var(--bg-main); }
-.text-main { color: var(--text-main); }
-.text-secondary { color: var(--text-secondary); }
-.border-main { border-color: var(--border-main); }
+.bg-main {
+  background: var(--bg-main);
+}
+
+.text-main {
+  color: var(--text-main);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.border-main {
+  border-color: var(--border-main);
+}
 
 .btn-theme {
   background: var(--btn-bg);

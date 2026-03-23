@@ -25,42 +25,42 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-screen font-inter flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-4">
+    <div className="min-h-screen font-inter flex items-center justify-center bg-bg-main p-4">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         className="w-full max-w-[400px]"
       >
-        <Card className="rounded-2xl p-6 shadow-2xl text-center border-0 bg-white dark:bg-gray-900">
+        <Card className="rounded-2xl p-6 shadow-main text-center border border-border-main bg-muted">
         {/* Logo/Brand */}
         <div className="mb-8">
-          <h1 className="text-4xl font-extrabold bg-gradient-to-br from-indigo-500 to-purple-600 bg-clip-text text-transparent mb-2 tracking-tight">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-br from-indigo-400 to-purple-500 bg-clip-text text-transparent mb-2 tracking-tight">
             ELTLINKTREE
           </h1>
-          <p className="text-gray-500 text-base">
+          <p className="text-text-secondary text-base">
             All your links in one place
           </p>
         </div>
 
         {/* Error Message */}
         {error === "unauthorized" && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-red-600 text-sm font-medium">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+            <p className="text-red-400 text-sm font-medium">
               {message || "Access denied. Only authorized users can sign in."}
             </p>
           </div>
         )}
 
         {/* Decorative Icon */}
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mx-auto mb-8 flex items-center justify-center">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 mx-auto mb-8 flex items-center justify-center">
           <Link className="w-10 h-10 text-white" />
         </div>
 
         {/* Login Button */}
         <Button
           onClick={signIn}
-          className="w-full py-6 text-base font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-3 mt-4"
+          className="w-full py-6 text-base font-semibold rounded-full shadow-sm hover:opacity-90 transition-all duration-200 flex items-center justify-center gap-3 mt-4 bg-btn-bg text-btn-text hover:bg-btn-hover border border-border-main"
           size="lg"
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
@@ -73,7 +73,7 @@ function LoginContent() {
         </Button>
 
         {/* Footer */}
-        {/* <p className="mt-8 text-sm text-gray-400">
+        {/* <p className="mt-8 text-sm text-text-secondary">
           Only @eltglobal.in emails allowed
         </p> */}
         </Card>
@@ -85,8 +85,8 @@ function LoginContent() {
 export default function Login() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-bg-main">
+        <div className="text-text-main text-xl">Loading...</div>
       </div>
     }>
       <LoginContent />
