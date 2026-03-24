@@ -34,7 +34,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
     <div className="bg-bg-main border border-border-main rounded-radius-main p-6 space-y-6 transition-colors shadow-main">
       <div className="flex flex-col sm:flex-row items-center gap-6">
         <div className="relative group">
-          <div 
+          <div
             className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted ring-4 ring-border-main transform translate-z-0"
             style={{ isolation: 'isolate' }}
           >
