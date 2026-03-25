@@ -101,6 +101,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
             themes={themes}
             onThemeSelect={(theme: DBTheme) => handleUpdate({
               theme_id: theme.id,
+              theme: theme, // Pass the full theme object for immediate preview
             })}
             onEditTheme={(theme: DBTheme) => {
               setEditingTheme(theme);
@@ -127,7 +128,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
           // If we created a new theme (either from scratch or by customizing a default)
           // we want to automatically apply it to the page.
           if (newTheme && (!editingTheme || newTheme.id !== editingTheme.id)) {
-            handleUpdate({ theme_id: newTheme.id });
+            handleUpdate({ theme_id: newTheme.id, theme: newTheme });
           }
         }}
         onPreviewChange={onPreviewChange}

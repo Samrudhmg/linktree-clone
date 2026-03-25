@@ -31,6 +31,7 @@ export interface LinkPage {
   button_color?: string;
   button_text_color?: string;
   button_radius?: string;
+  theme?: any; // To hold joined theme data from themes table
 }
 
 export interface Link {

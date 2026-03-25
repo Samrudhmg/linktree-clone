@@ -12,6 +12,7 @@ import type { ShareLinkData } from "./ShareModal";
 import { MoreVertical } from "lucide-react";
 import { LinkPage, Link } from "@/lib/types";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function LivePreview({
   page,
@@ -27,6 +28,16 @@ export default function LivePreview({
   const [shareLink, setShareLink] = useState<ShareLinkData | null>(null);
 
   const themeStyles = theme ? getThemeStyles(theme.config) : {};
+  
+  // Combine theme styles with a global transition for background and color switches
+  const dynamicStyles: React.CSSProperties = {
+    ...themeStyles,
+    ...(theme ? {
+      backgroundColor: 'var(--theme-bg-primary)',
+      color: 'var(--theme-text-primary)',
+    } : {}),
+    transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+  };
 
   // For avatar shapes and fonts, we can use simple defaults since they aren't fully migrated yet 
   // or we can remove them if they aren't part of the new Theme spec
@@ -112,131 +123,154 @@ export default function LivePreview({
             <div className="absolute left-1/2 -translate-x-1/2 top-4 w-24 h-6 bg-black rounded-full z-40 ring-1 ring-white/5" />
 
             {/* Content Area - Isolated with themeStyles */}
-            <div
+            <motion.div
+              layout
               className={`w-full h-full rounded-[2.8rem] overflow-hidden flex flex-col relative ${fontClass}`}
-              style={{
-                ...themeStyles,
-                backgroundColor: 'var(--theme-bg-primary)',
-                color: 'var(--theme-text-primary)'
-              }}
+              style={dynamicStyles}
             >
               <div className="flex-1 overflow-y-auto p-6 pt-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {/* Avatar */}
-                {page?.avatar_url && (
-                  <div
-                    className="flex justify-center mb-3 mt-4"
-                  >
-                    <div className="relative w-16 h-16">
-                      <Image
-                        src={page.avatar_url}
-                        alt={page?.display_name || "Profile"}
-                        fill
-                        className={`object-cover ${avatarShapeClass} border-2 border-white/20 shadow-sm`}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Name */}
-                {page?.display_name && page.display_name.trim() !== "" && (
-                  <h2
-                    className="mb-1 text-center break-words px-4 leading-tight"
-                    style={{
-                      color: 'var(--theme-title-color)',
-                      fontSize: 'var(--theme-title-size)',
-                      fontWeight: 'var(--theme-title-weight)'
-                    }}
-                  >
-                    {page.display_name}
-                  </h2>
-                )}
-
-                {/* Bio */}
-                {page?.bio && page.bio.trim() !== "" && (
-                  <p
-                    className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
-                    style={{
-                      color: 'var(--theme-bio-color)',
-                      fontSize: 'calc(var(--theme-bio-size) * 0.75)',
-                      fontWeight: 'var(--theme-bio-weight)'
-                    }}
-                  >
-                    {page.bio}
-                  </p>
-                )}
-
-                {/* Links */}
-                <div className="space-y-2">
-                  {(!links || links.length === 0) ? (
-                    <p className="text-white/50 text-sm py-4 text-center">
-                      Your links will appear here
-                    </p>
-                  ) : (
-                    links.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`block py-3 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
-                        style={getCardStyle()}
-                        onClick={(e) => {
-                          if (onLinkClick) {
-                            e.preventDefault();
-                            onLinkClick(link);
-                            window.open(link.url, "_blank");
-                          }
-                        }}
-                      >
-                        <div className="flex items-center gap-3">
-                          {/* Left Side: Thumbnail, Icon, or Spacer for centering */}
-                          {(link.thumbnail_url || link.icon) ? (
-                            <div className="shrink-0 w-6 h-6 flex items-center justify-center relative shadow-sm">
-                              {link.thumbnail_url ? (
-                                <Image
-                                  src={link.thumbnail_url}
-                                  alt=""
-                                  fill
-                                  className="rounded object-cover"
-                                />
-                              ) : link.icon ? (
-                                <LinkIcon icon={link.icon} color={link.text_color || (theme?.config.text.primary || '#ffffff')} />
-                              ) : null}
-                            </div>
-                          ) : (
-                            <div className="shrink-0 w-6 h-6 px-0" />
-                          )}
-
-                          {/* Center: Title & Subtext */}
-                          <div className="flex-1 text-center min-w-0 flex flex-col justify-center">
-                            <span className="font-semibold text-sm block truncate">{link.title}</span>
-                            {link.subtext && <span className="text-[10px] opacity-80 block truncate mt-0.5">{link.subtext}</span>}
-                          </div>
-
-                          {/* Right Side: Three dots menu */}
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              setShareLink({
-                                url: link.url,
-                                title: link.title,
-                                thumbnail_url: link.thumbnail_url ?? undefined,
-                                icon: link.icon ?? undefined,
-                              });
-                            }}
-                            className="shrink-0 w-6 h-6 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
-                          >
-                            <MoreVertical className="w-3.5 h-3.5 opacity-60" />
-                          </button>
-                        </div>
-                      </a>
-                    ))
+                <AnimatePresence mode="popLayout" initial={false}>
+                  {/* Avatar */}
+                  {page?.avatar_url && (
+                    <motion.div
+                      key="avatar"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="flex justify-center mb-3 mt-4"
+                    >
+                      <div className="relative w-16 h-16">
+                        <Image
+                          src={page.avatar_url}
+                          alt={page?.display_name || "Profile"}
+                          fill
+                          className={`object-cover ${avatarShapeClass} border-2 border-white/20 shadow-sm`}
+                        />
+                      </div>
+                    </motion.div>
                   )}
-                </div>
+
+                  {/* Name */}
+                  {page?.display_name && page.display_name.trim() !== "" && (
+                    <motion.h2
+                      key="name"
+                      layout
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-1 text-center break-words px-4 leading-tight"
+                      style={{
+                        color: 'var(--theme-title-color)',
+                        fontSize: 'var(--theme-title-size)',
+                        fontWeight: 'var(--theme-title-weight)'
+                      }}
+                    >
+                      {page.display_name}
+                    </motion.h2>
+                  )}
+
+                  {/* Bio */}
+                  {page?.bio && page.bio.trim() !== "" && (
+                    <motion.p
+                      key="bio"
+                      layout
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
+                      style={{
+                        color: 'var(--theme-bio-color)',
+                        fontSize: 'calc(var(--theme-bio-size) * 0.75)',
+                        fontWeight: 'var(--theme-bio-weight)'
+                      }}
+                    >
+                      {page.bio}
+                    </motion.p>
+                  )}
+
+                  {/* Links Container */}
+                  <motion.div layout className="space-y-2">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {(!links || links.length === 0) ? (
+                        <motion.p 
+                          key="empty-state"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 0.5 }}
+                          exit={{ opacity: 0 }}
+                          className="text-white/50 text-sm py-4 text-center"
+                        >
+                          Your links will appear here
+                        </motion.p>
+                      ) : (
+                        links.map((link) => (
+                          <motion.a
+                            key={link.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`block py-3 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
+                            style={getCardStyle()}
+                            onClick={(e) => {
+                              if (onLinkClick) {
+                                e.preventDefault();
+                                onLinkClick(link);
+                                window.open(link.url, "_blank");
+                              }
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              {/* Left Side: Thumbnail, Icon, or Spacer */}
+                              {(link.thumbnail_url || link.icon) ? (
+                                <div className="shrink-0 w-6 h-6 flex items-center justify-center relative shadow-sm">
+                                  {link.thumbnail_url ? (
+                                    <Image
+                                      src={link.thumbnail_url}
+                                      alt=""
+                                      fill
+                                      className="rounded object-cover"
+                                    />
+                                  ) : link.icon ? (
+                                    <LinkIcon icon={link.icon} color={link.text_color || (theme?.config.text.primary || '#ffffff')} />
+                                  ) : null}
+                                </div>
+                              ) : (
+                                <div className="shrink-0 w-6 h-6 px-0" />
+                              )}
+
+                              {/* Center: Title & Subtext */}
+                              <div className="flex-1 text-center min-w-0 flex flex-col justify-center">
+                                <span className="font-semibold text-sm block truncate" style={{ color: 'var(--theme-link-text)' }}>{link.title}</span>
+                                {link.subtext && <span className="text-[10px] opacity-80 block truncate mt-0.5" style={{ color: 'var(--theme-link-subtext)' }}>{link.subtext}</span>}
+                              </div>
+
+                              {/* Right Side: Three dots menu */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setShareLink({
+                                    url: link.url,
+                                    title: link.title,
+                                    thumbnail_url: link.thumbnail_url ?? undefined,
+                                    icon: link.icon ?? undefined,
+                                  });
+                                }}
+                                className="shrink-0 w-6 h-6 flex items-center justify-center hover:bg-black/10 rounded-full transition-colors"
+                              >
+                                <MoreVertical className="w-3.5 h-3.5 opacity-60" />
+                              </button>
+                            </div>
+                          </motion.a>
+                        ))
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                </AnimatePresence>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </AnimatedContainer>

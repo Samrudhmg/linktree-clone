@@ -1,0 +1,66 @@
+﻿
+ RUN  v4.1.1 C:/dev/linktree-clone
+
+stdout | lib/theme-utils.test.ts > Theme Validation & Generation > generateRandomThemeConfig produces valid themes
+Invalid Theme Generated: {
+  "background": {
+    "primary": "#FAFAF9",
+    "secondary": "#E8E9E6"
+  },
+  "text": {
+    "primary": "#000000",
+    "secondary": "#4B5563"
+  },
+  "links": {
+    "style": "glass",
+    "radius": "rounded-full",
+    "shadow": "soft",
+    "textColor": "#000000",
+    "subtextColor": "#6D705C"
+  },
+  "button": {
+    "variant": "solid",
+    "accent": "#8EA50D"
+  },
+  "title": {
+    "color": "#000000",
+    "fontSize": "1.8rem",
+    "fontWeight": "semibold"
+  },
+  "bio": {
+    "color": "#4B5563",
+    "fontSize": "1.1rem",
+    "fontWeight": "semibold"
+  },
+  "avatar": {
+    "style": "circle"
+  }
+}
+BG Contrast: [33m20.106952181936492[39m
+Title Contrast: [33m20.106952181936492[39m
+Accent Contrast: [33m2.6674043888554397[39m
+
+ Γ¥» |0| lib/theme-utils.test.ts (17 tests | 1 failed) 11ms
+     Γ£ô maps background.primary to --theme-bg-primary 1ms
+     Γ£ô maps background.secondary to --theme-bg-secondary 0ms
+     Γ£ô maps text.primary to --theme-text-primary 0ms
+     Γ£ô maps text.secondary to --theme-text-secondary 0ms
+     Γ£ô maps button.accent to --theme-accent 0ms
+     Γ£ô maps title styling properties correctly 0ms
+     Γ£ô maps bio styling properties correctly 0ms
+     Γ£ô falls back to text.primary for --theme-title-color when title is missing 0ms
+     Γ£ô falls back to '1.5rem' for --theme-title-size when title is missing 0ms
+     Γ£ô falls back to text.secondary for --theme-bio-color when bio is missing 0ms
+     Γ£ô returns a plain object (not null/undefined) 0ms
+     Γ£ô converts hex to hsl and back 0ms
+     Γ£ô calculates luminance correctly 0ms
+     Γ£ô calculates contrast ratio correctly 0ms
+     Γ£ô isValidThemeConfig returns false for low contrast 0ms
+     Γ£ô isValidThemeConfig returns true for high contrast 0ms
+     ├ù generateRandomThemeConfig produces valid themes 6ms
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  12:16:52
+   Duration  1.66s (transform 38ms, setup 131ms, import 67ms, tests 11ms, environment 1.20s)
+
