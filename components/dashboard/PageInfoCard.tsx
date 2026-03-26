@@ -12,7 +12,9 @@ interface PageInfoCardProps {
   setEditingPageSlug: (editing: boolean) => void;
   editPageSlug: string;
   setEditPageSlug: (slug: string) => void;
-  onSavePageSlug: () => void;
+  editPageTitle: string;
+  setEditPageTitle: (title: string) => void;
+  onSavePageInfo: () => void;
   onBack: () => void;
 }
 
@@ -22,7 +24,9 @@ export default function PageInfoCard({
   setEditingPageSlug,
   editPageSlug,
   setEditPageSlug,
-  onSavePageSlug,
+  editPageTitle,
+  setEditPageTitle,
+  onSavePageInfo,
   onBack,
 }: PageInfoCardProps) {
   return (
@@ -39,39 +43,62 @@ export default function PageInfoCard({
       </Button>
 
       {/* Page Info Card */}
-      <Card className="p-4 mb-6 shadow-sm transition-colors border-border-main bg-bg-main">
-        <h2 className="text-foreground font-semibold text-lg mb-2">{activePage.title}</h2>
-        <div className="flex items-center gap-2">
-          {editingPageSlug ? (
-            <div className="flex-1 flex flex-wrap items-center gap-2">
-              <div className="flex items-center bg-background rounded-md border border-input focus-within:ring-1 focus-within:ring-ring overflow-hidden flex-1 transition-colors">
-                <span className="px-3 py-2 text-muted-foreground text-sm bg-muted/50 border-r h-9 flex items-center">/</span>
+      <Card className="p-5 mb-6 shadow-sm transition-colors border-border-main bg-bg-main">
+        {editingPageSlug ? (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider text-text-secondary font-bold ml-1">Page Name</label>
+              <Input
+                type="text"
+                value={editPageTitle}
+                onChange={(e) => setEditPageTitle(e.target.value)}
+                placeholder="Page Name"
+                className="w-full bg-bg-main border-border-main focus:border-text-secondary h-10 transition-all font-semibold text-lg"
+                autoFocus
+              />
+            </div>
+            
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider text-text-secondary font-bold ml-1">Page URL</label>
+              <div className="flex items-center bg-bg-main rounded-md border border-border-main focus-within:border-text-secondary overflow-hidden flex-1 transition-all h-10">
+                <span className="px-3 text-text-secondary text-sm bg-muted/30 border-r border-border-main h-full flex items-center">/</span>
                 <Input
                   type="text"
                   value={editPageSlug}
                   onChange={(e) => setEditPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                  className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-9"
-                  autoFocus
+                  className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-full bg-transparent text-text-main"
                 />
               </div>
-              <Button size="sm" onClick={onSavePageSlug}>Save</Button>
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" onClick={onSavePageInfo} className="px-6">Save</Button>
               <Button size="sm" variant="secondary" onClick={() => setEditingPageSlug(false)}>Cancel</Button>
             </div>
-          ) : (
-            <>
-              <p className="text-muted-foreground text-sm flex-1">/{activePage.slug}</p>
+          </div>
+        ) : (
+          <>
+            <h2 className="text-text-main font-bold text-xl mb-1 flex items-center gap-2">
+              {activePage.title}
+            </h2>
+            <div className="flex items-center gap-2">
+              <p className="text-text-secondary text-sm font-medium flex-1">/{activePage.slug}</p>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => { setEditPageSlug(activePage.slug); setEditingPageSlug(true); }}
-                className="h-8 w-8 text-muted-foreground hover:text-primary transition-all"
-                title="Edit URL"
+                onClick={() => { 
+                  setEditPageTitle(activePage.title);
+                  setEditPageSlug(activePage.slug); 
+                  setEditingPageSlug(true); 
+                }}
+                className="h-8 w-8 text-text-secondary hover:text-text-main transition-all"
+                title="Edit Page"
               >
                 <Pencil className="w-4 h-4" />
               </Button>
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
       </Card>
     </>
   );

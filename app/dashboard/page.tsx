@@ -54,6 +54,7 @@ export default function Dashboard() {
   // Auto-edit profile for new pages
   const [autoEditProfile, setAutoEditProfile] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [editPageTitle, setEditPageTitle] = useState("");
 
 
   useEffect(() => {
@@ -522,35 +523,40 @@ export default function Dashboard() {
     setShowEditProfile(false);
   };
 
-  const savePageSlug = async () => {
-    if (!activePage || !editPageSlug.trim()) return;
+  const savePageInfo = async () => {
+    if (!activePage || !editPageSlug.trim() || !editPageTitle.trim()) return;
 
-    // Check if slug is available globally (not just for this user)
-    const { data } = await supabase
-      .from("link_pages")
-      .select("slug")
-      .eq("slug", editPageSlug)
-      .neq("id", activePage.id)
-      .single();
+    // Check if slug is available (only if changed)
+    if (editPageSlug !== activePage.slug) {
+      const { data } = await supabase
+        .from("link_pages")
+        .select("slug")
+        .eq("slug", editPageSlug)
+        .neq("id", activePage.id)
+        .single();
 
-    if (data) {
-      setError("This URL is already taken. Please choose a different one.");
-      return;
+      if (data) {
+        setError("This URL is already taken. Please choose a different one.");
+        return;
+      }
     }
 
     const { error } = await supabase
       .from("link_pages")
-      .update({ slug: editPageSlug })
+      .update({ 
+        slug: editPageSlug,
+        title: editPageTitle
+      })
       .eq("id", activePage.id)
       .eq("user_id", user?.id);
 
     if (error) {
-      console.error("Error updating page slug:", error);
-      setError("Failed to update page URL");
+      console.error("Error updating page info:", error);
+      setError("Failed to update page information");
       return;
     }
 
-    setActivePage({ ...activePage, slug: editPageSlug });
+    setActivePage({ ...activePage, slug: editPageSlug, title: editPageTitle });
     setEditingPageSlug(false);
     if (user) await fetchPages(user.id);
   };
@@ -700,7 +706,9 @@ export default function Dashboard() {
                   setEditingPageSlug={setEditingPageSlug}
                   editPageSlug={editPageSlug}
                   setEditPageSlug={setEditPageSlug}
-                  onSavePageSlug={savePageSlug}
+                  editPageTitle={editPageTitle}
+                  setEditPageTitle={setEditPageTitle}
+                  onSavePageInfo={savePageInfo}
                   onBack={() => { setActivePage(null); setLiveAppearance(null); }}
                 />
 
