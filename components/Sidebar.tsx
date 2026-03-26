@@ -1,9 +1,17 @@
+import { useState } from "react";
 import { Pencil, Plus, FileText, ExternalLink, Link as LinkIcon, LogOut, X } from "lucide-react";
 import { Profile, LinkPage } from "@/lib/types";
+import { User } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { AnimatedButton } from "@/components/animated/interaction";
 
-export default function Sidebar({ profile, pages, activePage, activeTab, setActiveTab, onSelectPage, onCreatePage, onLogout, onClose, onEditProfile }: { profile: Profile | null, pages: LinkPage[], activePage: LinkPage | null, activeTab: string, setActiveTab: (tab: string) => void, onSelectPage: (page: LinkPage) => void, onCreatePage: () => void, onLogout: () => void, onClose?: () => void, onEditProfile: () => void }) {
+export default function Sidebar({ user, profile, pages, activePage, activeTab, setActiveTab, onSelectPage, onCreatePage, onLogout, onClose, onEditProfile }: { user: User | null, profile: Profile | null, pages: LinkPage[], activePage: LinkPage | null, activeTab: string, setActiveTab: (tab: string) => void, onSelectPage: (page: LinkPage) => void, onCreatePage: () => void, onLogout: () => void, onClose?: () => void, onEditProfile: () => void }) {
+  const [imageError, setImageError] = useState(false);
+  const accountName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "User";
+  const displayName = profile?.display_name || accountName;
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url;
+  const fallbackChar = (displayName || user?.email || "U")[0]?.toUpperCase();
+
   return (
     <div className="w-72 lg:w-64 h-full bg-bg-main border-r border-border-main flex flex-col transition-colors">
       {/* Logo with Close Button for Mobile */}
@@ -26,12 +34,21 @@ export default function Sidebar({ profile, pages, activePage, activeTab, setActi
       {/* Profile */}
       <div className="p-4 border-b border-border-main">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-btn-bg flex items-center justify-center text-text-main transition-colors">
-            {profile?.display_name?.[0]?.toUpperCase() || "@"}
+          <div className="w-10 h-10 rounded-full bg-btn-bg flex items-center justify-center text-text-main transition-colors overflow-hidden">
+            {avatarUrl && !imageError ? (
+              <img 
+                src={avatarUrl} 
+                alt="" 
+                className="w-full h-full object-cover" 
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              fallbackChar
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-text-main font-medium truncate text-sm transition-colors">
-              {profile?.display_name || "User"}
+              {displayName}
             </p>
           </div>
           <Button

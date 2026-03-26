@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { LinkIcon } from "../LinkIcon";
 import { AvatarStyle } from "@/lib/types";
@@ -12,6 +13,7 @@ interface LinkThumbnailProps {
   pixels?: number; // Custom pixel size
   shape?: AvatarStyle;
   className?: string;
+  fallback?: string;
 }
 
 export default function LinkThumbnail({ 
@@ -21,8 +23,10 @@ export default function LinkThumbnail({
   size = "w-6 h-6",
   pixels,
   shape = 'circle',
-  className = ""
+  className = "",
+  fallback
 }: LinkThumbnailProps) {
+  const [imageError, setImageError] = useState(false);
   const getRadiusClass = (s: AvatarStyle) => {
     switch (s) {
       case 'circle': return 'rounded-full';
@@ -37,7 +41,7 @@ export default function LinkThumbnail({
   const finalSizeClass = pixels ? "" : size;
   const radiusClass = getRadiusClass(shape);
 
-  if (thumbnailUrl) {
+  if (thumbnailUrl && !imageError) {
     return (
       <div 
         className={`${finalSizeClass} relative shrink-0 overflow-hidden ${radiusClass} ${className}`}
@@ -48,7 +52,19 @@ export default function LinkThumbnail({
           alt="" 
           fill
           className="object-cover" 
+          onError={() => setImageError(true)}
         />
+      </div>
+    );
+  }
+
+  if (fallback) {
+    return (
+      <div 
+        className={`${finalSizeClass} flex items-center justify-center shrink-0 bg-muted text-text-main font-bold ${radiusClass} ${className}`}
+        style={{ ...containerStyle, fontSize: pixels ? `${pixels * 0.4}px` : undefined }}
+      >
+        {fallback}
       </div>
     );
   }

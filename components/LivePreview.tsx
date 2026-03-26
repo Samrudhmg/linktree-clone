@@ -12,15 +12,18 @@ import ShareModal from "./ShareModal";
 import type { ShareLinkData } from "./ShareModal";
 import { MoreVertical } from "lucide-react";
 import { LinkPage, Link } from "@/lib/types";
+import { User } from "@supabase/supabase-js";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LivePreview({
+  user,
   page,
   links,
   theme,
   onLinkClick
 }: {
+  user?: User | null,
   page: LinkPage | null,
   links: Link[],
   theme: DBTheme | null,
@@ -84,8 +87,8 @@ export default function LivePreview({
   };
 
   // Check if there's any meaningful content to display
-  const hasContent = (page?.avatar_url && page.avatar_url !== "") ||
-    (page?.display_name && page.display_name !== "") ||
+  const hasContent = (page?.avatar_url || user?.user_metadata?.avatar_url) ||
+    (page?.display_name || user?.user_metadata?.full_name) ||
     (page?.bio && page.bio !== "") ||
     (links && links.length > 0);
 
@@ -132,7 +135,7 @@ export default function LivePreview({
               <div className="flex-1 overflow-y-auto p-6 pt-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {/* Avatar */}
-                  {page?.avatar_url && (
+                  {(page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && (
                     <motion.div
                       key="avatar"
                       initial={{ opacity: 0, scale: 0.8 }}
@@ -141,16 +144,17 @@ export default function LivePreview({
                       className="flex justify-center mb-3 mt-4"
                     >
                       <LinkThumbnail
-                        thumbnailUrl={page.avatar_url}
-                        shape={theme?.config.avatar?.style || page.avatar_style || 'circle'}
-                        pixels={theme?.config.avatar?.size || page.avatar_size || 64}
+                        thumbnailUrl={page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url}
+                        shape={theme?.config.avatar?.style || page?.avatar_style || 'circle'}
+                        pixels={theme?.config.avatar?.size || page?.avatar_size || 64}
                         className="border-2 border-white/20 shadow-sm"
+                        fallback={(page?.display_name || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()}
                       />
                     </motion.div>
                   )}
 
                   {/* Name */}
-                  {page?.display_name && page.display_name.trim() !== "" && (
+                  {(page?.display_name || user?.user_metadata?.full_name) && (
                     <motion.h2
                       key="name"
                       layout
@@ -163,7 +167,7 @@ export default function LivePreview({
                         fontWeight: 'var(--theme-title-weight)'
                       }}
                     >
-                      {page.display_name}
+                      {page?.display_name || user?.user_metadata?.full_name}
                     </motion.h2>
                   )}
 

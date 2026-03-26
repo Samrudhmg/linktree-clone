@@ -3,16 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
-import {
-  Camera,
-  Loader2,
-  Upload,
-  Trash2,
-  Pencil,
-  Check,
-  X
-} from "lucide-react";
+import { Camera, Loader2, Upload, Trash2, Pencil, Check, X, RefreshCw } from "lucide-react";
 import { LinkPage, AvatarStyle } from "@/lib/types";
+import { User } from "@supabase/supabase-js";
 import { DBTheme } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,12 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfileHeader({ 
+  user,
   page, 
   updatePage, 
   autoEdit, 
   onEditComplete,
   theme 
 }: { 
+  user: User,
   page: LinkPage | null, 
   updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, 
   autoEdit?: boolean, 
@@ -39,6 +34,7 @@ export default function ProfileHeader({
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
   const [avatarUrlInput, setAvatarUrlInput] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const supabase = createClient();
 
@@ -47,6 +43,7 @@ export default function ProfileHeader({
     setDisplayName(page?.display_name || "");
     setBio(page?.bio || "");
     setAvatarUrl(page?.avatar_url || "");
+    setImageError(false);
   }, [page?.id, page?.display_name, page?.bio, page?.avatar_url]);
 
   // Auto-enable edit mode when autoEdit prop is true
@@ -139,6 +136,32 @@ export default function ProfileHeader({
     setShowAvatarMenu(false);
   };
 
+  const handleSyncFromAccount = async () => {
+    const fullName = user?.user_metadata?.full_name;
+    const accountAvatarUrl = user?.user_metadata?.picture || user?.user_metadata?.avatar_url;
+
+    if (!fullName && !accountAvatarUrl) {
+      alert("No profile data found in your account.");
+      return;
+    }
+
+    const updates: Partial<LinkPage> = {};
+    if (fullName) {
+      setDisplayName(fullName);
+      updates.display_name = fullName;
+    }
+    if (accountAvatarUrl) {
+      setAvatarUrl(accountAvatarUrl);
+      updates.avatar_url = accountAvatarUrl;
+    }
+
+    const result = await updatePage(updates);
+    if (result?.error) {
+      alert("Failed to sync profile. Please try again.");
+    }
+    setShowAvatarMenu(false);
+  };
+
   return (
     <Card className="p-4 sm:p-6 mb-6 transition-colors border border-border-main shadow-main bg-bg-main rounded-radius-main">
       <div className="flex items-start gap-3 sm:gap-4">
@@ -159,16 +182,17 @@ export default function ProfileHeader({
               (theme?.config.avatar?.style || page?.avatar_style) === "full" ? "w-full aspect-square rounded-none" : "rounded-full"
             }`}
           >
-            {avatarUrl || page?.avatar_url ? (
+            {(avatarUrl || page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
               <Image
-                src={avatarUrl || page?.avatar_url || ""}
+                src={avatarUrl || page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""}
                 alt="Avatar"
                 fill
                 className="object-cover"
+                onError={() => setImageError(true)}
               />
             ) : (
               <span style={{ fontSize: (theme?.config.avatar?.size || page?.avatar_size) ? `${(theme?.config.avatar?.size || page?.avatar_size || 80) * 0.4}px` : undefined }}>
-                {page?.display_name?.[0]?.toUpperCase() || "@"}
+                {(displayName || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()}
               </span>
             )}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -230,6 +254,16 @@ export default function ProfileHeader({
                     </Button>
                   </div>
                 </div>
+
+                {/* Sync Button */}
+                <Button
+                  variant="outline"
+                  onClick={handleSyncFromAccount}
+                  className="w-full border-dashed border-text-secondary/50 text-text-secondary hover:text-text-main hover:border-text-secondary transition-all"
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Sync from Account
+                </Button>
 
                 {/* Remove Button */}
                 {(avatarUrl || page?.avatar_url) && (
@@ -304,7 +338,7 @@ export default function ProfileHeader({
                     fontWeight: 'var(--theme-title-weight)'
                   }}
                 >
-                  {page?.display_name || "Your Name"}
+                  {page?.display_name || user?.user_metadata?.full_name || "Your Name"}
                 </h2>
                 <Button
                   variant="ghost"

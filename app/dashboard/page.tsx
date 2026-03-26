@@ -53,6 +53,7 @@ export default function Dashboard() {
   const [editPageSlug, setEditPageSlug] = useState("");
   // Auto-edit profile for new pages
   const [autoEditProfile, setAutoEditProfile] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
 
   useEffect(() => {
@@ -615,6 +616,7 @@ export default function Dashboard() {
       <div className={`fixed inset-y-0 left-0 lg:relative z-50 lg:z-auto transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}>
         <Sidebar
+          user={user}
           profile={profile}
           pages={pages}
           activePage={activePage}
@@ -626,6 +628,7 @@ export default function Dashboard() {
           onClose={() => setShowSidebar(false)}
           onEditProfile={() => {
             setEditDisplayName(profile?.display_name || "");
+            setImageError(false);
             setShowEditProfile(true);
           }}
         />
@@ -712,6 +715,7 @@ export default function Dashboard() {
                   <>
                     {/* Profile Header Card */}
                     <ProfileHeader
+                      user={user!}
                       page={activePage}
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
@@ -758,6 +762,7 @@ export default function Dashboard() {
         {activePage && (
           <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-bg-main items-center justify-center border-l border-border-main transition-colors">
             <LivePreview
+              user={user}
               page={activePage}
               links={enabledLinks}
               theme={deriveActiveTheme()}
@@ -798,10 +803,26 @@ export default function Dashboard() {
           <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg_viewBox=%220_0_200_200%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22noiseFilter%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%220.65%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
 
           <div className="relative z-10 p-6 space-y-4 bg-muted/50">
-            <DialogTitle className="text-text-main font-semibold text-lg flex items-center gap-2 m-0">
-              <Pencil className="w-5 h-5 text-text-secondary" />
-              Edit Profile
-            </DialogTitle>
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-16 h-16 rounded-full bg-btn-bg flex items-center justify-center text-text-main text-2xl font-bold border border-border-main overflow-hidden shadow-sm">
+                {(profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
+                  <img 
+                    src={profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  (profile?.display_name || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()
+                )}
+              </div>
+              <div className="space-y-1">
+                <DialogTitle className="text-xl font-bold text-text-main flex items-center gap-2 m-0 mt-2">
+                  <Pencil className="w-5 h-5 text-text-secondary" /> Edit Profile
+                </DialogTitle>
+                <p className="text-text-secondary text-xs">Update your display name</p>
+              </div>
+            </div>
 
             <div>
               <label className="block text-text-secondary text-sm mb-1 font-medium">Display Name</label>
