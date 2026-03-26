@@ -12,13 +12,26 @@ import {
   Check,
   X
 } from "lucide-react";
-import { LinkPage } from "@/lib/types";
+import { LinkPage, AvatarStyle } from "@/lib/types";
+import { DBTheme } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function ProfileHeader({ page, updatePage, autoEdit, onEditComplete }: { page: LinkPage | null, updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, autoEdit?: boolean, onEditComplete?: () => void }) {
+export default function ProfileHeader({ 
+  page, 
+  updatePage, 
+  autoEdit, 
+  onEditComplete,
+  theme 
+}: { 
+  page: LinkPage | null, 
+  updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, 
+  autoEdit?: boolean, 
+  onEditComplete?: () => void,
+  theme?: DBTheme | null 
+}) {
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(page?.display_name || "");
   const [bio, setBio] = useState(page?.bio || "");
@@ -133,11 +146,18 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
         <div className="relative">
           <button
             onClick={() => setShowAvatarMenu(!showAvatarMenu)}
-            style={{ isolation: 'isolate' }}
-            className={`w-12 h-12 sm:w-16 sm:h-16 bg-muted flex items-center justify-center text-text-main text-xl sm:text-2xl shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 ${page?.avatar_shape === "square" ? "rounded-none" :
-              page?.avatar_shape === "rounded" ? "rounded-2xl" :
-                page?.avatar_shape === "full" ? "w-full aspect-video rounded-none" : "rounded-full"
-              }`}
+            style={{ 
+              isolation: 'isolate',
+              width: (theme?.config.avatar?.size || page?.avatar_size) ? `${theme?.config.avatar?.size || page?.avatar_size}px` : undefined,
+              height: (theme?.config.avatar?.size || page?.avatar_size) ? `${theme?.config.avatar?.size || page?.avatar_size}px` : undefined
+            }}
+            className={`bg-muted flex items-center justify-center text-text-main shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 ${
+              !(theme?.config.avatar?.size || page?.avatar_size) ? 'w-12 h-12 sm:w-16 sm:h-16' : ''
+            } ${
+              (theme?.config.avatar?.style || page?.avatar_style) === "square" ? "rounded-none" :
+              (theme?.config.avatar?.style || page?.avatar_style) === "rounded" ? "rounded-2xl" :
+              (theme?.config.avatar?.style || page?.avatar_style) === "full" ? "w-full aspect-square rounded-none" : "rounded-full"
+            }`}
           >
             {avatarUrl || page?.avatar_url ? (
               <Image
@@ -147,7 +167,9 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
                 className="object-cover"
               />
             ) : (
-              page?.display_name?.[0]?.toUpperCase() || "@"
+              <span style={{ fontSize: (theme?.config.avatar?.size || page?.avatar_size) ? `${(theme?.config.avatar?.size || page?.avatar_size || 80) * 0.4}px` : undefined }}>
+                {page?.display_name?.[0]?.toUpperCase() || "@"}
+              </span>
             )}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-5 h-5 text-white" />
@@ -274,7 +296,14 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
           ) : (
             <>
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-foreground font-semibold text-lg transition-colors">
+                <h2 
+                  className="transition-colors truncate"
+                  style={{ 
+                    color: 'var(--theme-title-color)',
+                    fontSize: 'var(--theme-title-size)',
+                    fontWeight: 'var(--theme-title-weight)'
+                  }}
+                >
                   {page?.display_name || "Your Name"}
                 </h2>
                 <Button
@@ -286,9 +315,19 @@ export default function ProfileHeader({ page, updatePage, autoEdit, onEditComple
                   <Pencil className="w-4 h-4" />
                 </Button>
               </div>
-              {page?.bio ? (
-                <p className="text-muted-foreground text-sm break-words overflow-hidden">{page?.bio}</p>
-              ) : (
+              {page?.bio && (
+                <p 
+                  className="transition-colors break-words line-clamp-2"
+                  style={{ 
+                    color: 'var(--theme-bio-color)',
+                    fontSize: 'var(--theme-bio-size)',
+                    fontWeight: 'var(--theme-bio-weight)'
+                  }}
+                >
+                  {page.bio}
+                </p>
+              )}
+              {!page?.bio && (
                 <Button
                   variant="link"
                   onClick={() => setIsEditing(true)}

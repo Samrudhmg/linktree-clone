@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { LinkIcon } from "./LinkIcon";
+import LinkThumbnail from "./ui/LinkThumbnail";
 import {
   getThemeStyles
 } from "@/lib/theme-utils";
@@ -28,7 +29,7 @@ export default function LivePreview({
   const [shareLink, setShareLink] = useState<ShareLinkData | null>(null);
 
   const themeStyles = theme ? getThemeStyles(theme.config) : {};
-  
+
   // Combine theme styles with a global transition for background and color switches
   const dynamicStyles: React.CSSProperties = {
     ...themeStyles,
@@ -139,14 +140,12 @@ export default function LivePreview({
                       exit={{ opacity: 0, scale: 0.8 }}
                       className="flex justify-center mb-3 mt-4"
                     >
-                      <div className="relative w-16 h-16">
-                        <Image
-                          src={page.avatar_url}
-                          alt={page?.display_name || "Profile"}
-                          fill
-                          className={`object-cover ${avatarShapeClass} border-2 border-white/20 shadow-sm`}
-                        />
-                      </div>
+                      <LinkThumbnail
+                        thumbnailUrl={page.avatar_url}
+                        shape={theme?.config.avatar?.style || page.avatar_style || 'circle'}
+                        pixels={theme?.config.avatar?.size || page.avatar_size || 64}
+                        className="border-2 border-white/20 shadow-sm"
+                      />
                     </motion.div>
                   )}
 
@@ -190,7 +189,7 @@ export default function LivePreview({
                   <motion.div layout className="space-y-2">
                     <AnimatePresence mode="popLayout" initial={false}>
                       {(!links || links.length === 0) ? (
-                        <motion.p 
+                        <motion.p
                           key="empty-state"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 0.5 }}
@@ -222,22 +221,13 @@ export default function LivePreview({
                           >
                             <div className="flex items-center gap-3">
                               {/* Left Side: Thumbnail, Icon, or Spacer */}
-                              {(link.thumbnail_url || link.icon) ? (
-                                <div className="shrink-0 w-6 h-6 flex items-center justify-center relative shadow-sm">
-                                  {link.thumbnail_url ? (
-                                    <Image
-                                      src={link.thumbnail_url}
-                                      alt=""
-                                      fill
-                                      className="rounded object-cover"
-                                    />
-                                  ) : link.icon ? (
-                                    <LinkIcon icon={link.icon} color={link.text_color || (theme?.config.text.primary || '#ffffff')} />
-                                  ) : null}
-                                </div>
-                              ) : (
-                                <div className="shrink-0 w-6 h-6 px-0" />
-                              )}
+                              <LinkThumbnail
+                                thumbnailUrl={link.thumbnail_url || undefined}
+                                icon={link.icon || undefined}
+                                color={link.text_color || (theme?.config.text.primary || '#ffffff')}
+                                shape={link.thumbnail_style || theme?.config.link_thumbnails?.style || 'circle'}
+                                pixels={link.thumbnail_size || theme?.config.link_thumbnails?.size || 24}
+                              />
 
                               {/* Center: Title & Subtext */}
                               <div className="flex-1 text-center min-w-0 flex flex-col justify-center">

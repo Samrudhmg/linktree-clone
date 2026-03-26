@@ -467,8 +467,27 @@ export default function Dashboard() {
 
     console.log("[Dashboard] Updating page:", activePage.id, "with:", updates);
 
-    // Filter out joined data that doesn't belong in the DB
-    const { theme: _, ...dbUpdates } = updates;
+    // Filter to only include actual database columns
+    const ALLOWED_COLUMNS = [
+      "slug",
+      "title",
+      "display_name",
+      "bio",
+      "avatar_url",
+      "theme_id",
+      "is_default",
+      "avatar_style",
+      "avatar_size"
+    ];
+
+    const dbUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => ALLOWED_COLUMNS.includes(key))
+    );
+
+    if (Object.keys(dbUpdates).length === 0) {
+      console.log("[Dashboard] No valid DB columns to update");
+      return { success: true };
+    }
 
     const { error, data } = await supabase
       .from("link_pages")
@@ -563,11 +582,11 @@ export default function Dashboard() {
   const deriveActiveTheme = () => {
     if (editingThemePreview) return editingThemePreview;
 
-    const currentThemeId = liveAppearance?.theme_id || liveAppearance?.theme_preset || activePage?.theme_id || activePage?.theme_preset;
-    
+    const currentThemeId = liveAppearance?.theme_id || activePage?.theme_id;
+
     // Prioritize pre-fetched theme data from activePage
-    const prefetchedTheme = Array.isArray(activePage?.theme) 
-      ? activePage.theme[0] 
+    const prefetchedTheme = Array.isArray(activePage?.theme)
+      ? activePage.theme[0]
       : (activePage?.theme as DBTheme | undefined);
 
     if (prefetchedTheme && (prefetchedTheme.id === currentThemeId)) {
@@ -575,9 +594,9 @@ export default function Dashboard() {
     }
 
     if (!currentThemeId) return themes.find(t => t.type === 'default') || null;
-    
+
     const matchedTheme = themes.find(t => t.id === currentThemeId);
-    
+
     // Fallback logic: stay at current if possible, otherwise null
     return matchedTheme || null;
   };
@@ -710,6 +729,7 @@ export default function Dashboard() {
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
                       onEditComplete={() => setAutoEditProfile(false)}
+                      theme={deriveActiveTheme()}
                     />
 
                     {/* Page Appearance (collapsible, inline) */}

@@ -1,27 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useRef } from "react";
 import {
   GripVertical,
   Trash2,
   Pencil,
   Check,
-  ChevronDown,
-  Upload,
   X,
-  Palette,
   AlertCircle,
   BarChart2
 } from "lucide-react";
-import { LinkIcon } from "./LinkIcon";
-import {
-  ICON_OPTIONS,
-  FONT_OPTIONS,
-  uploadLinkImage
-} from "@/lib/themes";
-import ColorPicker from "./ui/ColorPicker";
-import LinkThumbnail from "./ui/LinkThumbnail";
 import { createClient } from "@/lib/supabase-browser";
 import { Link } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -40,15 +28,7 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
   const [title, setTitle] = useState(link.title);
   const [url, setUrl] = useState(link.url);
   const [subtext, setSubtext] = useState(link.subtext || "");
-  const [icon, setIcon] = useState(link.icon || "");
-  const [thumbnailUrl, setThumbnailUrl] = useState(link.thumbnail_url || "");
-  const [bgColor, setBgColor] = useState(link.bg_color || "#FFFFFF");
-  const [textColor, setTextColor] = useState(link.text_color || "#1F2937");
-  const [font, setFont] = useState(link.font || "sans");
-  const [showAppearance, setShowAppearance] = useState(false);
-  const [showIconPicker, setShowIconPicker] = useState(false);
   const [isEnabled, setIsEnabled] = useState(link.enabled);
-  const [isUploading, setIsUploading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isToggling = useRef(false);
   const supabase = createClient();
@@ -59,28 +39,14 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
     setShowDeleteConfirm(false);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const publicUrl = await uploadLinkImage(supabase, file);
-      setThumbnailUrl(publicUrl);
-      setIcon("");
-    } catch (error: unknown) {
-      console.error("Upload error:", error);
-      alert(error instanceof Error ? error.message : "Failed to upload image.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSave = () => {
-    updateLink(link.id, { title, url, subtext, icon, thumbnail_url: thumbnailUrl, bg_color: bgColor, text_color: textColor, font });
+    updateLink(link.id, { 
+      title, 
+      url, 
+      subtext
+    });
     setEditing(false);
-    setShowAppearance(false);
-    setShowIconPicker(false);
   };
 
   const handleToggle = () => {
@@ -124,127 +90,11 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
                 className="h-10 text-sm sm:text-base"
               />
 
-              <div>
-                <button
-                  type="button"
-                  onClick={() => setShowIconPicker(!showIconPicker)}
-                  className="flex items-center gap-2 text-text-secondary hover:text-text-main transition-all text-sm"
-                >
-                  <LinkThumbnail
-                    thumbnailUrl={thumbnailUrl || undefined}
-                    icon={icon || undefined}
-                    size="w-5 h-5"
-                  />
-                  Icon / Image
-                  <ChevronDown className={`w-3 h-3 transition-transform ${showIconPicker ? 'rotate-180' : ''}`} />
-                </button>
-
-                {showIconPicker && (
-                  <div className="mt-2 bg-muted rounded-lg p-3 space-y-3 border border-border-main transition-colors">
-                    <div>
-                      <label className="block text-gray-400 text-xs mb-1.5">Upload Custom Icon</label>
-                      <div className="flex items-center gap-2">
-                        {thumbnailUrl && (
-                          <div className="relative">
-                            <div className="relative w-10 h-10 shadow-sm">
-                              <Image
-                                src={thumbnailUrl}
-                                alt=""
-                                fill
-                                className="rounded-md object-cover"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => setThumbnailUrl("")}
-                              className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center z-10"
-                            >
-                              <X className="w-2.5 h-2.5 text-white" />
-                            </button>
-                          </div>
-                        )}
-                        <label className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-bg-main border border-border-main border-dashed rounded-xl cursor-pointer hover:border-text-secondary transition-all">
-                          <Upload className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-400 text-xs">{isUploading ? "Uploading..." : "Upload image"}</span>
-                          <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={isUploading} />
-                        </label>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-gray-400 text-xs mb-1.5">Or choose a preset icon</label>
-                      <div className="grid grid-cols-6 gap-1.5">
-                        {ICON_OPTIONS.map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => { setIcon(opt.value); if (opt.value) setThumbnailUrl(""); }}
-                            className={`p-2 rounded-xl border transition-all flex items-center justify-center ${icon === opt.value && !thumbnailUrl
-                              ? "bg-btn-bg border-text-secondary shadow-sm"
-                              : "bg-bg-main border-border-main hover:border-text-secondary"
-                              }`}
-                            title={opt.label}
-                          >
-                            <LinkIcon icon={opt.value} color={icon === opt.value && !thumbnailUrl ? "#FFFFFF" : "#9CA3AF"} size="w-4 h-4" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowAppearance(!showAppearance)}
-                className="flex items-center gap-2 text-text-secondary hover:text-text-main transition-all text-sm"
-              >
-                <Palette className="w-4 h-4" />
-                Appearance
-                <ChevronDown className={`w-3 h-3 transition-transform ${showAppearance ? 'rotate-180' : ''}`} />
-              </button>
-
-              {showAppearance && (
-                <div className="mt-2 bg-muted rounded-lg p-3 space-y-3 border border-border-main transition-colors">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <ColorPicker
-                      value={bgColor}
-                      onChange={setBgColor}
-                      label="Background"
-                    />
-                    <ColorPicker
-                      value={textColor}
-                      onChange={setTextColor}
-                      label="Text"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-gray-400 text-xs mb-1.5">Font</label>
-                    <div className="flex gap-1.5">
-                      {FONT_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setFont(opt.value)}
-                          className={`flex-1 py-1.5 px-2 rounded-xl border text-xs transition-all ${opt.class} ${font === opt.value
-                            ? "bg-btn-bg border-text-secondary text-btn-text shadow-sm"
-                            : "bg-bg-main border-border-main text-text-main hover:border-text-secondary"
-                            }`}
-                        >
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
               <div className="flex gap-2 mt-4">
                 <Button onClick={handleSave} className="bg-btn-bg text-btn-text hover:bg-btn-hover shadow-main flex items-center gap-2 rounded-full px-6 transition-all">
                   <Check className="w-4 h-4" /> Save
                 </Button>
-                <Button onClick={() => { setEditing(false); setShowAppearance(false); }} variant="outline" className="flex items-center gap-2">
+                <Button onClick={() => setEditing(false)} variant="outline" className="flex items-center gap-2">
                   <X className="w-4 h-4" /> Cancel
                 </Button>
               </div>
@@ -252,10 +102,6 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
           ) : (
             <div>
               <div className="flex items-center gap-2">
-                <LinkThumbnail
-                  thumbnailUrl={link.thumbnail_url || undefined}
-                  icon={link.icon || undefined}
-                />
                 <div className="min-w-0 flex-1">
                   <h3 className="text-text-main font-medium text-sm sm:text-base truncate">{link.title}</h3>
                   {link.subtext && <p className="text-text-secondary text-xs truncate">{link.subtext}</p>}

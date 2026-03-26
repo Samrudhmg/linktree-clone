@@ -460,11 +460,31 @@ export default function Dashboard() {
   const updatePage = async (updates: Partial<LinkPage>) => {
     if (!activePage) return { error: "No active page" };
 
-    console.log("[Dashboard] Updating page:", activePage.id, "with:", updates);
+    // Filter to only include actual database columns
+    const ALLOWED_COLUMNS = [
+      "slug",
+      "title",
+      "display_name",
+      "bio",
+      "avatar_url",
+      "theme_id",
+      "is_default",
+      "avatar_style",
+      "avatar_size"
+    ];
+
+    const dbUpdates = Object.fromEntries(
+      Object.entries(updates).filter(([key]) => ALLOWED_COLUMNS.includes(key))
+    );
+
+    if (Object.keys(dbUpdates).length === 0) {
+      console.log("[Dashboard] No valid DB columns to update");
+      return { success: true };
+    }
 
     const { error, data } = await supabase
       .from("link_pages")
-      .update(updates)
+      .update(dbUpdates)
       .eq("id", activePage.id)
       .eq("user_id", user?.id)
       .select();
@@ -556,9 +576,14 @@ export default function Dashboard() {
   const deriveActiveTheme = () => {
     if (editingThemePreview) return editingThemePreview;
 
-    const currentThemeId = liveAppearance?.theme_id || liveAppearance?.theme_preset || activePage?.theme_id || activePage?.theme_preset;
-    if (!currentThemeId) return themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
-    return themes.find(t => t.id === currentThemeId) || themes.find(t => t.id === 'default') || themes.find(t => t.type === 'default') || null;
+    const currentThemeId = liveAppearance?.theme_id || activePage?.theme_id;
+
+    if (!currentThemeId) return themes.find(t => t.type === 'default') || null;
+
+    const matchedTheme = themes.find(t => t.id === currentThemeId);
+
+    // Fallback logic: stay at current if possible, otherwise null
+    return matchedTheme || null;
   };
 
   const handleLogout = async () => {
@@ -691,6 +716,7 @@ export default function Dashboard() {
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
                       onEditComplete={() => setAutoEditProfile(false)}
+                      theme={deriveActiveTheme()}
                     />
 
                     {/* Page Appearance (collapsible, inline) */}
@@ -770,41 +796,41 @@ export default function Dashboard() {
         <DialogContent className="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-0 shadow-main transition-colors bg-muted border border-border-main rounded-radius-main outline-none [&>button]:hidden sm:rounded-radius-main overflow-hidden">
           {/* Grain Overlay */}
           <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg_viewBox=%220_0_200_200%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22noiseFilter%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%220.65%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
-          
+
           <div className="relative z-10 p-6 space-y-4 bg-muted/50">
             <DialogTitle className="text-text-main font-semibold text-lg flex items-center gap-2 m-0">
               <Pencil className="w-5 h-5 text-text-secondary" />
               Edit Profile
             </DialogTitle>
 
-          <div>
-            <label className="block text-text-secondary text-sm mb-1 font-medium">Display Name</label>
-            <input
-              type="text"
-              value={editDisplayName}
-              onChange={(e) => setEditDisplayName(e.target.value)}
-              placeholder="Your Name"
-              className="w-full bg-bg-main text-text-main px-4 py-3 rounded-lg border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
-              autoFocus
-            />
-          </div>
+            <div>
+              <label className="block text-text-secondary text-sm mb-1 font-medium">Display Name</label>
+              <input
+                type="text"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                placeholder="Your Name"
+                className="w-full bg-bg-main text-text-main px-4 py-3 rounded-lg border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
+                autoFocus
+              />
+            </div>
 
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => setShowEditProfile(false)}
-              className="flex-1 py-3 px-6 bg-btn-bg text-text-secondary font-semibold rounded-full hover:bg-btn-hover transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={saveEditProfile}
-              disabled={!editDisplayName.trim()}
-              className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
-            >
-              Save
-            </button>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowEditProfile(false)}
+                className="flex-1 py-3 px-6 bg-btn-bg text-text-secondary font-semibold rounded-full hover:bg-btn-hover transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveEditProfile}
+                disabled={!editDisplayName.trim()}
+                className="flex-1 py-3 px-6 bg-purple-600 text-white font-semibold rounded-full hover:bg-purple-700 disabled:bg-purple-600/50 transition-all"
+              >
+                Save
+              </button>
+            </div>
           </div>
-        </div>
         </DialogContent>
       </Dialog>
     </div>

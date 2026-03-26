@@ -3,6 +3,7 @@ import type { PostgrestError } from "@supabase/supabase-js";
 import PublicLinkItem from "@/components/PublicLinkItem";
 import { unstable_noStore as noStore } from 'next/cache';
 import Image from "next/image";
+import LinkThumbnail from "@/components/ui/LinkThumbnail";
 import ShareTrigger from "@/components/shareTrigger";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 import {
@@ -41,38 +42,25 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
         );
     }
 
-    // Fetch links for this specific page (only enabled links, optimizing columns)
-    const { data: links, error: linksError } = await supabase
+    // Fetch links for this specific page (optimizing normalization to match dashboard)
+    const { data: allLinks, error: linksError } = await supabase
         .from("links")
-        .select(`
-            id,
-            title,
-            url,
-            subtext,
-            icon,
-            thumbnail_url,
-            enabled,
-            position,
-            bg_type,
-            bg_color,
-            bg_image,
-            text_color,
-            font
-        `)
+        .select("*")
         .eq("page_id", linkPage.id)
-        .neq("enabled", false)
         .order("position", { ascending: true }) as { data: Link[] | null, error: PostgrestError | null };
 
     if (linksError) {
         console.error("Error fetching links:", linksError);
     }
 
-    // Fetch the active theme
+    // Normalize and filter enabled links (matching dashboard's logic for NULL/undefined)
+    const links = (allLinks || []).filter(link => 
+        link.enabled === true || link.enabled === null || (link.enabled as any) === undefined
+    );
+
+    // Fetch the active theme (New system: theme_id only)
     let activeTheme: DBTheme | null = null;
-    
-    // Priority 1: theme_id (New system)
-    // Priority 2: theme_preset (Legacy system / Hardcoded presets)
-    const currentThemeIdentifier = linkPage.theme_id || linkPage.theme_preset;
+    const currentThemeIdentifier = linkPage.theme_id;
 
     if (currentThemeIdentifier) {
         const { data: themeData } = await supabase
@@ -106,82 +94,76 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                 className={`min-h-dvh flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
                 style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}
             >
-            {/* Main Content Card - Uses Primary BG */}
-            <div
-                className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
-                style={{ backgroundColor: 'var(--theme-bg-primary)' }}
-            >
-                <div className="absolute top-4 right-4 z-20">
-                    <ShareTrigger
-                        link={{
-                            url: typeof window !== "undefined" ? window.location.href : "",
-                            title: linkPage.display_name || "My links",
-                            thumbnail_url: linkPage.avatar_url || undefined
-                        }}
-                    />
-                </div>
-                {/* Gradient overlay has been removed for CSS Var spec */}
+                {/* Main Content Card - Uses Primary BG */}
+                <div
+                    className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
+                    style={{ backgroundColor: 'var(--theme-bg-primary)' }}
+                >
+                    <div className="absolute top-4 right-4 z-20">
+                        <ShareTrigger
+                            link={{
+                                url: typeof window !== "undefined" ? window.location.href : "",
+                                title: linkPage.display_name || "My links",
+                                thumbnail_url: linkPage.avatar_url || undefined
+                            }}
+                        />
+                    </div>
+                    {/* Gradient overlay has been removed for CSS Var spec */}
 
-                <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-10">
-                    {/* Profile Header */}
-                    <div className="text-center mb-6 sm:mb-8">
-                        {/* Avatar */}
-                        {linkPage.avatar_url && (
-                            <div className={`${linkPage.avatar_shape === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-6 border-b border-white/10" : "flex justify-center mb-4"}`}>
-                                <div className={`relative overflow-hidden ${linkPage.avatar_shape === "square" ? "w-20 h-20 mt-10 sm:w-24 sm:h-24 rounded-none border-2 border-white/20" :
-                                    linkPage.avatar_shape === "rounded" ? "w-20 h-20 mt-10 sm:w-24 sm:h-24 rounded-3xl border-2 border-white/20" :
-                                        linkPage.avatar_shape === "full" ? "w-[50%] h-20 mt-20 mx-auto aspect-video" :
-                                            "w-20 h-20 mt-10 sm:w-24 sm:h-24 rounded-full border-2 border-white/20"
-                                    }`}>
-                                    <Image
-                                        src={linkPage.avatar_url}
-                                        alt={linkPage.display_name || "Profile"}
-                                        fill
-                                        className="object-cover"
+                    <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-10">
+                        {/* Profile Header */}
+                        <div className="text-center mb-6 sm:mb-8 flex flex-col items-center">
+                            {/* Avatar */}
+                            {linkPage.avatar_url && (
+                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-6 border-b border-white/10" : "flex justify-center mb-6"}`}>
+                                    <LinkThumbnail
+                                        thumbnailUrl={linkPage.avatar_url}
+                                        shape={activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle'}
+                                        pixels={activeTheme?.config.avatar?.size || linkPage.avatar_size || 96}
+                                        className="border-2 border-white/20 shadow-main"
                                     />
                                 </div>
-                            </div>
-                        )}
-                        <h1 
-                            className="wrap-break-word px-2"
-                            style={{ 
-                                color: 'var(--theme-title-color)',
-                                fontSize: 'var(--theme-title-size)',
-                                fontWeight: 'var(--theme-title-weight)'
-                            }}
-                        >
-                            {linkPage.display_name || "Untitled"}
-                        </h1>
-                        {linkPage.bio && (
-                            <p 
-                                className="max-w-xs mx-auto wrap-break-word px-4 mt-2"
+                            )}
+                            <h1
+                                className="wrap-break-word px-2"
                                 style={{
-                                    color: 'var(--theme-bio-color)',
-                                    fontSize: 'var(--theme-bio-size)',
-                                    fontWeight: 'var(--theme-bio-weight)'
+                                    color: 'var(--theme-title-color)',
+                                    fontSize: 'var(--theme-title-size)',
+                                    fontWeight: 'var(--theme-title-weight)'
                                 }}
                             >
-                                {linkPage.bio}
-                            </p>
-                        )}
-                    </div>
+                                {linkPage.display_name || "Untitled"}
+                            </h1>
+                            {linkPage.bio && (
+                                <p
+                                    className="max-w-xs mx-auto wrap-break-word px-4 mt-2"
+                                    style={{
+                                        color: 'var(--theme-bio-color)',
+                                        fontSize: 'var(--theme-bio-size)',
+                                        fontWeight: 'var(--theme-bio-weight)'
+                                    }}
+                                >
+                                    {linkPage.bio}
+                                </p>
+                            )}
+                        </div>
 
-                    {/* Links */}
-                    <div className="flex flex-col gap-2 sm:gap-3">
-                        {(!links || links.length === 0) ? (
-                            <p className="opacity-70 text-sm sm:text-base text-center">No links available</p>
-                        ) : (
-                            links.map((link) => (
-                                <PublicLinkItem
-                                    key={link.id}
-                                    link={link}
-                                    theme={activeTheme}
-                                />
-                            ))
-                        )}
+                        {/* Links */}
+                        <div className="flex flex-col gap-2 sm:gap-3">
+                            {(!links || links.length === 0) ? (
+                                <p className="opacity-70 text-sm sm:text-base text-center">No links available</p>
+                            ) : (
+                                links.map((link) => (
+                                    <PublicLinkItem
+                                        key={link.id}
+                                        link={link}
+                                        theme={activeTheme}
+                                    />
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         </AnimatedContainer>
     );

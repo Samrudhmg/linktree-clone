@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Palette, ChevronDown, Check, Loader2 } from "lucide-react";
 import ThemeSection from "./appearance/ThemeSection";
-import { LinkPage } from "@/lib/types";
+import AvatarSection from "./appearance/AvatarSection";
+import { LinkPage, AvatarStyle } from "@/lib/types";
 import { DBTheme } from "@/lib/theme-utils";
 import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
@@ -26,15 +27,29 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingTheme, setEditingTheme] = useState<DBTheme | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [optimisticThemeId, setOptimisticThemeId] = useState<string | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sync optimistic state when page.theme_id updates from DB
+  useEffect(() => {
+    if (page?.theme_id) {
+      setOptimisticThemeId(page.theme_id);
+    }
+  }, [page?.theme_id]);
 
   const handleUpdate = async (data: Partial<LinkPage>): Promise<{ success?: boolean; error?: unknown }> => {
     if (!updatePage) return { error: "No update function" };
+
+    // Update optimistic state for instant UI feedback
+    if (data.theme_id) {
+      setOptimisticThemeId(data.theme_id);
+    }
 
     // Call onAppearanceChange immediately for instant preview performance
     if (onAppearanceChange) {
       onAppearanceChange({ ...page, ...data });
     }
+// ... (rest of the handleUpdate function follows correctly)
 
     // Debounced auto-save
     setAutoSaveStatus("saving");
@@ -66,75 +81,76 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
 
   return (
     <>
-    <Card className="mb-6 overflow-hidden transition-colors border border-border-main shadow-main bg-bg-main rounded-radius-main">
-      {/* Collapsible Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-btn-hover transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <Palette className="w-5 h-5 text-text-secondary" />
-          <span className="text-text-main font-semibold text-lg">Page Appearance</span>
-        </div>
-        <div className="flex items-center gap-3">
-          {autoSaveStatus === "saving" && (
-            <div className="flex items-center gap-1.5 text-text-secondary text-xs font-medium">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              <span className="hidden sm:inline">Saving...</span>
-            </div>
-          )}
-          {autoSaveStatus === "saved" && (
-            <div className="flex items-center gap-1.5 text-green-400 text-xs">
-              <Check className="w-3 h-3" />
-              <span className="hidden sm:inline">Saved</span>
-            </div>
-          )}
-          <ChevronDown className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-        </div>
-      </button>
+      <Card className="mb-6 overflow-hidden transition-colors border border-border-main shadow-main bg-bg-main rounded-radius-main">
+        {/* Collapsible Header */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-btn-hover transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <Palette className="w-5 h-5 text-text-secondary" />
+            <span className="text-text-main font-semibold text-lg">Page Appearance</span>
+          </div>
+          <div className="flex items-center gap-3">
+            {autoSaveStatus === "saving" && (
+              <div className="flex items-center gap-1.5 text-text-secondary text-xs font-medium">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                <span className="hidden sm:inline">Saving...</span>
+              </div>
+            )}
+            {autoSaveStatus === "saved" && (
+              <div className="flex items-center gap-1.5 text-green-400 text-xs">
+                <Check className="w-3 h-3" />
+                <span className="hidden sm:inline">Saved</span>
+              </div>
+            )}
+            <ChevronDown className={`w-5 h-5 text-text-secondary transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          </div>
+        </button>
 
-      {/* Expandable Content */}
-      <AnimatedPanel open={isExpanded}>
-        <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-6">
-          <ThemeSection
-            currentThemeId={page?.theme_id || page?.theme_preset}
-            themes={themes}
-            onThemeSelect={(theme: DBTheme) => handleUpdate({
-              theme_id: theme.id,
-              theme: theme, // Pass the full theme object for immediate preview
-            })}
-            onEditTheme={(theme: DBTheme) => {
-              setEditingTheme(theme);
-              setIsEditorOpen(true);
-            }}
-            onAddTheme={() => {
-              setEditingTheme(null);
-              setIsEditorOpen(true);
-            }}
-          />
-        </div>
-      </AnimatedPanel>
-    </Card>
-    
-    {user && (
-      <ThemeEditorSheet
-        open={isEditorOpen}
-        onOpenChange={setIsEditorOpen}
-        userId={user.id}
-        editingTheme={editingTheme}
-        pages={pages}
-        onSuccess={async (newTheme) => {
-          await refreshThemes();
-          // If we created a new theme (either from scratch or by customizing a default)
-          // we want to automatically apply it to the page.
-          if (newTheme && (!editingTheme || newTheme.id !== editingTheme.id)) {
-            handleUpdate({ theme_id: newTheme.id, theme: newTheme });
-          }
-        }}
-        onPreviewChange={onPreviewChange}
-        pageId={page.id}
-      />
-    )}
+        {/* Expandable Content */}
+        <AnimatedPanel open={isExpanded}>
+          <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-6">
+            <ThemeSection
+              currentThemeId={optimisticThemeId}
+              themes={themes}
+              onThemeSelect={(theme: DBTheme) => handleUpdate({
+                theme_id: theme.id,
+                theme: theme, // Pass the full theme object for immediate preview
+              })}
+              onEditTheme={(theme: DBTheme) => {
+                setEditingTheme(theme);
+                setIsEditorOpen(true);
+              }}
+              onAddTheme={() => {
+                setEditingTheme(null);
+                setIsEditorOpen(true);
+              }}
+            />
+
+          </div>
+        </AnimatedPanel>
+      </Card>
+
+      {user && (
+        <ThemeEditorSheet
+          open={isEditorOpen}
+          onOpenChange={setIsEditorOpen}
+          userId={user.id}
+          editingTheme={editingTheme}
+          pages={pages}
+          onSuccess={async (newTheme) => {
+            await refreshThemes();
+            // If we created a new theme (either from scratch or by customizing a default)
+            // we want to automatically apply it to the page.
+            if (newTheme && (!editingTheme || newTheme.id !== editingTheme.id)) {
+              handleUpdate({ theme_id: newTheme.id, theme: newTheme });
+            }
+          }}
+          onPreviewChange={onPreviewChange}
+          pageId={page.id}
+        />
+      )}
     </>
   );
 }

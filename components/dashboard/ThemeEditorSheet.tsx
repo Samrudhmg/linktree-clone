@@ -8,9 +8,10 @@ import { Label } from "@/components/ui/label";
 import { ThemeConfig, DBTheme } from "@/lib/theme-utils";
 import ColorPicker from "@/components/ui/ColorPicker";
 import { createClient } from "@/lib/supabase-browser";
-import { Copy, Save, Smartphone, Palette, Check, Loader2, ClipboardCopy, ClipboardPaste, FileText } from "lucide-react";
+import { Copy, Save, Smartphone, Palette, Check, Loader2, ClipboardCopy, ClipboardPaste, FileText, Lock, Unlock, Shuffle } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { LinkPage } from "@/lib/types";
+import { LinkPage, AvatarStyle } from "@/lib/types";
+import { generateRandomThemeConfig } from "@/lib/theme-utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,8 +37,10 @@ const DEFAULT_CONFIG: ThemeConfig = {
   text: { primary: "#ffffff", secondary: "#a1a1aa" },
   links: { style: "flat", radius: "rounded-xl", shadow: "soft" },
   button: { variant: "solid", accent: "#3b82f6" },
-  title: { color: "#ffffff", fontSize: "1.5rem", fontWeight: "bold" },
-  bio: { color: "#a1a1aa", fontSize: "1.1rem", fontWeight: "normal" }
+  title: { color: "#ffffff", fontSize: "1.5rem", fontWeight: "700" },
+  bio: { color: "#a1a1aa", fontSize: "1.1rem", fontWeight: "400" },
+  avatar: { style: "full", size: 80 },
+  link_thumbnails: { style: "circle", size: 40 }
 };
 
 export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTheme, pages, onSuccess, onPreviewChange, pageId }: ThemeEditorSheetProps) {
@@ -49,6 +52,11 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
   const isDefaultTheme = editingTheme?.type === "default";
   const isUpdating = editingTheme && !isDefaultTheme;
   const [hasCopiedStyles, setHasCopiedStyles] = useState(false);
+  const [lockedFields, setLockedFields] = useState<Record<string, boolean>>({
+    bg: false,
+    text: false,
+    links: false
+  });
   const supabase = createClient();
 
   // Load editing theme
@@ -246,6 +254,15 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
     }));
   };
 
+  const handleGenerateTheme = () => {
+    const newConfig = generateRandomThemeConfig(lockedFields, config);
+    setConfig(newConfig);
+  };
+
+  const toggleLock = (field: string) => {
+    setLockedFields(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showOverlay={false} className="w-full sm:max-w-2xl lg:left-[calc(50%-72px)] lg:translate-x-[-50%] max-h-[90vh] overflow-y-auto pb-0 p-0 bg-muted border-border-main text-text-main rounded-radius-main shadow-main overflow-hidden group">
@@ -258,8 +275,19 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
               <DialogTitle className="text-text-main text-xl font-bold tracking-tight">
                 {isDefaultTheme ? "Customize Theme" : editingTheme ? "Edit Theme" : "Create Custom Theme"}
               </DialogTitle>
-
+              
               <div className="flex gap-2 items-center">
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateTheme}
+                  className="h-9 px-4 text-xs gap-2 font-bold uppercase tracking-widest text-purple-600 border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500 transition-all rounded-full shadow-sm"
+                >
+                  <Shuffle className="w-3.5 h-3.5" />
+                  Generate Theme
+                </Button>
+
                 {editingTheme && (
                   <>
                     <Button
@@ -340,9 +368,21 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                 </section>
 
                 <section className="space-y-4 pt-4 border-t border-border-main/50">
-                  <div className="flex items-center gap-2 text-text-main">
-                    <div className="w-4 h-4 rounded-full border border-border-main" style={{ background: config.background.primary }} />
-                    <h3 className="font-bold text-sm tracking-wide uppercase">Core Colors</h3>
+                  <div className="flex items-center justify-between text-text-main">
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full border border-border-main" style={{ background: config.background.primary }} />
+                      <h3 className="font-bold text-sm tracking-wide uppercase">Core Colors</h3>
+                    </div>
+                    <button 
+                      onClick={() => toggleLock('bg')}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
+                        lockedFields.bg ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-bg-main border-border-main text-text-secondary hover:text-text-main"
+                      )}
+                    >
+                      {lockedFields.bg ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      {lockedFields.bg ? "Locked" : "Lock BG"}
+                    </button>
                   </div>
                   <div className="flex flex-col gap-6 bg-muted/30 p-5 rounded-2xl border border-border-main/50">
                     <ColorPicker
@@ -370,12 +410,50 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                 </section>
 
                 <section className="space-y-4 pt-4 border-t border-border-main/50">
-                  <div className="flex items-center gap-2 text-text-main">
-                    <Smartphone className="w-4 h-4 text-text-secondary" />
-                    <h3 className="font-bold text-sm tracking-wide uppercase">Button Styling</h3>
+                  <div className="flex items-center justify-between text-text-main">
+                    <div className="flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-text-secondary" />
+                      <h3 className="font-bold text-sm tracking-wide uppercase">Button Styling</h3>
+                    </div>
+                    <button 
+                      onClick={() => toggleLock('links')}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
+                        lockedFields.links ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-bg-main border-border-main text-text-secondary hover:text-text-main"
+                      )}
+                    >
+                      {lockedFields.links ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      {lockedFields.links ? "Locked" : "Lock Links"}
+                    </button>
                   </div>
                   <div className="space-y-4 bg-muted/30 p-4 rounded-2xl border border-border-main/50">
                     <ColorPicker label="Accent Color" value={config.button.accent} onChange={(c) => updateConfig("button", "accent", c)} />
+                    
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-text-secondary uppercase">Link Visual Style</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: 'Full', value: 'flat' },
+                          { label: 'White', value: 'white' },
+                          { label: 'Outline', value: 'outline' },
+                          { label: 'Glass', value: 'glass' },
+                        ].map(style => (
+                          <Button
+                            key={style.value}
+                            variant={config.links.style === style.value ? "default" : "outline"}
+                            onClick={() => updateConfig("links", "style", style.value)}
+                            className={`h-11 text-[10px] uppercase font-bold border-2 transition-all rounded-xl ${
+                              config.links.style === style.value 
+                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
+                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
+                            }`}
+                          >
+                            {style.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-text-secondary uppercase">Link Corner Style</Label>
                       <div className="flex gap-2">
@@ -401,9 +479,21 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
               {/* Right Column: Typography & Style */}
               <div className="space-y-8">
                 <section className="space-y-4">
-                  <div className="flex items-center gap-2 text-text-main">
-                    <FileText className="w-4 h-4 text-text-secondary" />
-                    <h3 className="font-bold text-sm tracking-wide uppercase">Typography</h3>
+                  <div className="flex items-center justify-between text-text-main">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-text-secondary" />
+                      <h3 className="font-bold text-sm tracking-wide uppercase">Typography</h3>
+                    </div>
+                    <button 
+                      onClick={() => toggleLock('text')}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
+                        lockedFields.text ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-bg-main border-border-main text-text-secondary hover:text-text-main"
+                      )}
+                    >
+                      {lockedFields.text ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      {lockedFields.text ? "Locked" : "Lock Text"}
+                    </button>
                   </div>
                   <div className="space-y-6 bg-muted/30 p-4 rounded-2xl border border-border-main/50">
                     {/* Title Settings */}
@@ -448,20 +538,25 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold text-text-secondary uppercase tracking-tight">Weight</label>
                           <div className="flex gap-1 bg-bg-main/50 p-1 rounded-lg border border-border-main/30">
-                            {['normal', 'semibold', 'bold', 'extrabold'].map(w => (
+                            {[
+                              { label: 'N', value: '400', title: 'Normal' },
+                              { label: 'S', value: '600', title: 'Semi' },
+                              { label: 'B', value: '700', title: 'Bold' },
+                              { label: 'X', value: '800', title: 'Extra' },
+                            ].map(w => (
                               <button
-                                key={w}
-                                onClick={() => updateConfig("title", "fontWeight", w)}
+                                key={w.value}
+                                onClick={() => updateConfig("title", "fontWeight", w.value)}
                                 className={cn(
                                   "flex-1 h-8 flex items-center justify-center text-[10px] uppercase font-bold rounded transition-all",
-                                  (config.title?.fontWeight || 'bold') === w
+                                  (config.title?.fontWeight || '700') === w.value
                                     ? 'bg-text-main text-bg-main shadow-sm'
                                     : 'text-text-secondary hover:text-text-main hover:bg-btn-hover'
                                 )}
-                                style={{ fontWeight: w }}
-                                title={w}
+                                style={{ fontWeight: w.value }}
+                                title={w.title}
                               >
-                                {w === 'normal' ? 'N' : w === 'semibold' ? 'S' : w === 'bold' ? 'B' : 'X'}
+                                {w.label}
                               </button>
                             ))}
                           </div>
@@ -511,20 +606,25 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                         <div className="flex flex-col gap-2">
                           <label className="text-[10px] font-bold text-text-secondary uppercase tracking-tight">Weight</label>
                           <div className="flex gap-1 bg-bg-main/50 p-1 rounded-lg border border-border-main/30">
-                            {['light', 'normal', 'medium', 'semibold'].map(w => (
+                            {[
+                              { label: 'L', value: '300', title: 'Light' },
+                              { label: 'N', value: '400', title: 'Normal' },
+                              { label: 'M', value: '500', title: 'Medium' },
+                              { label: 'S', value: '600', title: 'Semi' },
+                            ].map(w => (
                               <button
-                                key={w}
-                                onClick={() => updateConfig("bio", "fontWeight", w)}
+                                key={w.value}
+                                onClick={() => updateConfig("bio", "fontWeight", w.value)}
                                 className={cn(
                                   "flex-1 h-8 flex items-center justify-center text-[10px] uppercase font-bold rounded transition-all",
-                                  (config.bio?.fontWeight || 'normal') === w
+                                  (config.bio?.fontWeight || '400') === w.value
                                     ? 'bg-text-main text-bg-main shadow-sm'
                                     : 'text-text-secondary hover:text-text-main hover:bg-btn-hover'
                                 )}
-                                style={{ fontWeight: w }}
-                                title={w}
+                                style={{ fontWeight: w.value }}
+                                title={w.title}
                               >
-                                {w === 'light' ? 'L' : w === 'normal' ? 'N' : w === 'medium' ? 'M' : 'S'}
+                                {w.label}
                               </button>
                             ))}
                           </div>
@@ -537,26 +637,97 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                 <section className="space-y-4 pt-4 border-t border-border-main/50">
                   <div className="flex items-center gap-2 text-text-main">
                     <Smartphone className="w-4 h-4 text-text-secondary" />
-                    <h3 className="font-bold text-sm tracking-wide uppercase">Link Aesthetics</h3>
+                    <h3 className="font-bold text-sm tracking-wide uppercase">Avatar & Thumbnails</h3>
                   </div>
-                  <div className="space-y-4 bg-muted/30 p-4 rounded-2xl border border-border-main/50">
-                    <div className="grid grid-cols-2 gap-2">
-                      {(['outline', 'flat', 'white', 'glass'] as const).map(style => (
-                        <Button
-                          key={style}
-                          variant={config.links.style === style ? "default" : "outline"}
-                          onClick={() => updateConfig("links", "style", style)}
-                          className={`capitalize h-11 text-xs rounded-xl border-2 transition-all ${config.links.style === style
-                            ? 'border-text-main bg-btn-bg text-btn-text shadow-main'
-                            : 'border-border-main bg-bg-main text-text-secondary'
+                  <div className="space-y-6 bg-muted/30 p-4 rounded-2xl border border-border-main/50">
+                    {/* Profile Avatar Defaults */}
+                    <div className="space-y-4">
+                      <Label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Profile Avatar Style</Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {(['circle', 'rounded', 'square', 'full'] as const).map(style => (
+                          <Button
+                            key={style}
+                            variant={config.avatar?.style === style ? "default" : "outline"}
+                            onClick={() => setConfig(prev => ({
+                              ...prev,
+                              avatar: { ...prev.avatar!, style }
+                            }))}
+                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${
+                              config.avatar?.style === style 
+                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
+                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
                             }`}
-                        >
-                          {style}
-                        </Button>
-                      ))}
+                          >
+                            {style}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className="space-y-3 px-1">
+                        <div className="flex justify-between items-center">
+                          <Label className="text-[10px] font-bold text-text-secondary uppercase">Scale</Label>
+                          <span className="text-[10px] font-mono bg-muted px-2 py-0.5 rounded border border-border-main">{config.avatar?.size || 80}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="40"
+                          max="160"
+                          step="4"
+                          value={config.avatar?.size || 80}
+                          onChange={(e) => setConfig(prev => ({
+                            ...prev,
+                            avatar: { ...prev.avatar!, size: parseInt(e.target.value) }
+                          }))}
+                          className="w-full h-1.5 bg-border-main rounded-lg appearance-none cursor-pointer accent-text-main"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-border-main/10" />
+
+                    {/* Link Thumbnail Defaults */}
+                    <div className="space-y-4">
+                      <Label className="text-xs font-bold text-text-secondary uppercase tracking-widest">Link Thumbnail Style</Label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {(['circle', 'rounded', 'square', 'full'] as const).map(style => (
+                          <Button
+                            key={style}
+                            variant={config.link_thumbnails?.style === style ? "default" : "outline"}
+                            onClick={() => setConfig(prev => ({
+                              ...prev,
+                              link_thumbnails: { ...prev.link_thumbnails!, style }
+                            }))}
+                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${
+                              config.link_thumbnails?.style === style 
+                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
+                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
+                            }`}
+                          >
+                            {style}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className="space-y-3 px-1">
+                        <div className="flex justify-between items-center">
+                          <Label className="text-[10px] font-bold text-text-secondary uppercase">Scale</Label>
+                          <span className="text-[10px] font-mono bg-muted px-2 py-0.5 rounded border border-border-main">{config.link_thumbnails?.size || 40}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="20"
+                          max="80"
+                          step="2"
+                          value={config.link_thumbnails?.size || 40}
+                          onChange={(e) => setConfig(prev => ({
+                            ...prev,
+                            link_thumbnails: { ...prev.link_thumbnails!, size: parseInt(e.target.value) }
+                          }))}
+                          className="w-full h-1.5 bg-border-main rounded-lg appearance-none cursor-pointer accent-text-main"
+                        />
+                      </div>
                     </div>
                   </div>
                 </section>
+
               </div>
             </div>
           </div>

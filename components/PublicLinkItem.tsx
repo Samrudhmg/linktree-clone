@@ -8,11 +8,11 @@ import ShareModal from "./ShareModal";
 import { Link, LinkPage } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
-export default function PublicLinkItem({ 
-  link, 
+export default function PublicLinkItem({
+  link,
   theme
-}: { 
-  link: Link; 
+}: {
+  link: Link;
   theme: DBTheme | null;
 }) {
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -34,7 +34,7 @@ export default function PublicLinkItem({
   const getCardStyle = () => {
     if (!theme) return {};
     const style = theme.config.links.style;
-    
+
     let baseStyle: React.CSSProperties = {};
 
     if (style === 'outline') {
@@ -44,13 +44,13 @@ export default function PublicLinkItem({
     } else if (style === 'white') {
       baseStyle = { backgroundColor: '#ffffff', color: '#000000' };
     } else {
-        // Simple robust accent style (Solid with subtle gradient for depth)
-        baseStyle = { 
-            background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent))', 
-            color: '#ffffff', 
-            border: 'none',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-        };
+      // Simple robust accent style (Solid with subtle gradient for depth)
+      baseStyle = {
+        background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent))',
+        color: '#ffffff',
+        border: 'none',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      };
     }
 
     return baseStyle;
@@ -77,11 +77,12 @@ export default function PublicLinkItem({
         style={cardStyle}
       >
         <div className="flex items-center gap-3">
-          <LinkThumbnail 
-            thumbnailUrl={link.thumbnail_url || undefined} 
-            icon={link.icon || undefined} 
-            color={cardStyle.color} 
-            size="w-10 h-10" 
+          <LinkThumbnail
+            thumbnailUrl={link.thumbnail_url || undefined}
+            icon={link.icon || undefined}
+            color={cardStyle.color}
+            shape={link.thumbnail_style || theme?.config.link_thumbnails?.style || 'circle'}
+            pixels={link.thumbnail_size || theme?.config.link_thumbnails?.size || 40}
           />
 
           {/* Center: Title & Subtext */}

@@ -18,7 +18,7 @@ import {
 import ColorPicker from "./ui/ColorPicker";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import { createClient } from "@/lib/supabase-browser";
-import { Link } from "@/lib/types";
+import { Link, AvatarStyle } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { AnimatedButton } from "@/components/animated/interaction";
@@ -34,6 +34,8 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
   const [subtext, setSubtext] = useState("");
   const [icon, setIcon] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [thumbnailStyle, setThumbnailStyle] = useState<AvatarStyle>("circle");
+  const [thumbnailSize, setThumbnailSize] = useState(40);
   const [bgType, setBgType] = useState("color"); // 'color' or 'image'
   const [bgColor, setBgColor] = useState("#FFFFFF");
   const [bgImage, setBgImage] = useState("");
@@ -72,6 +74,8 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
       subtext: subtext.trim(),
       icon,
       thumbnail_url: thumbnailUrl,
+      thumbnail_style: thumbnailStyle,
+      thumbnail_size: thumbnailSize,
       bg_type: bgType,
       bg_color: bgColor,
       bg_image: bgImage,
@@ -190,6 +194,43 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
               </div>
             </div>
           )}
+        </div>
+
+        <div className="pt-4 border-t border-border-main/50 space-y-4">
+          <div>
+            <label className="block text-gray-400 text-xs mb-2 uppercase font-bold tracking-wider">Thumbnail Shape</label>
+            <div className="grid grid-cols-4 gap-2">
+              {(['circle', 'rounded', 'square', 'full'] as const).map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  onClick={() => setThumbnailStyle(style)}
+                  className={`py-2 rounded-xl border text-[10px] font-bold uppercase transition-all ${
+                    thumbnailStyle === style 
+                      ? "bg-btn-bg border-text-secondary text-btn-text shadow-sm"
+                      : "bg-bg-main border-border-main text-text-secondary hover:border-text-secondary"
+                  }`}
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="block text-gray-400 text-xs uppercase font-bold tracking-wider">Thumbnail Size</label>
+              <span className="text-[10px] font-mono text-text-secondary opacity-50">{thumbnailSize}px</span>
+            </div>
+            <input 
+              type="range"
+              min="20"
+              max="80"
+              value={thumbnailSize}
+              onChange={(e) => setThumbnailSize(parseInt(e.target.value))}
+              className="w-full h-1.5 bg-border-main rounded-lg appearance-none cursor-pointer accent-text-secondary"
+            />
+          </div>
         </div>
       </Card>
 

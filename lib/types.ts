@@ -6,31 +6,37 @@ export interface Profile {
   avatar_url: string | null;
 }
 
+export type AvatarStyle = 'full' | 'square' | 'circle' | 'rounded';
+
 export interface LinkPage {
   id: string;
   user_id: string;
   slug: string;
-  username?: string | null;
-  title?: string;
+  title: string;
   display_name?: string | null;
   bio?: string | null;
   avatar_url?: string | null;
-  avatar_shape?: string;
+  is_default?: boolean;
+  theme_id?: string | null;
+  avatar_style?: AvatarStyle;
+  avatar_size?: number;
+  // Legacy styling (to be moved to themes/config)
+  theme_preset?: string | null;
   page_bg_type?: string;
   page_bg_color?: string;
   page_bg_gradient_start?: string;
   page_bg_gradient_end?: string;
   page_bg_image?: string;
-  card_bg_color?: string;
-  card_text_color?: string;
-  card_border_radius?: string;
-  card_style?: string;
-  page_font?: string;
-  theme_preset?: string | null;
-  theme_id?: string | null;
   button_color?: string;
   button_text_color?: string;
   button_radius?: string;
+  card_bg_color?: string;
+  card_text_color?: string;
+  card_style?: string;
+  page_font?: string;
+  created_at?: string;
+  updated_at?: string;
+  // Joined/Virtual data
   theme?: any; // To hold joined theme data from themes table
 }
 
@@ -50,21 +56,18 @@ export interface Link {
   bg_image?: string | null;
   text_color?: string;
   font?: string;
+  thumbnail_style?: AvatarStyle;
+  thumbnail_size?: number;
   click_events?: { count: number }[];
 }
 
 export interface Theme {
   id: string;
   name: string;
-  preview_bg: string;
-  preview_button: string;
-  page_bg_type?: string;
-  page_bg_color?: string;
-  page_bg_gradient_start?: string;
-  page_bg_gradient_end?: string;
-  page_bg_image?: string;
-  button_color?: string;
-  button_text_color?: string;
-  button_radius?: string;
-  page_font?: string;
+  type: "default" | "user";
+  user_id?: string | null;
+  page_id?: string | null;
+  config: any; // Using any for now to match joined data, ideally DBTheme
+  created_at: string;
+  updated_at: string;
 }

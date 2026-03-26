@@ -22,7 +22,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
       const publicUrl = await uploadLinkImage(supabase, file);
       await updateProfile({
         page_bg_image: publicUrl,
-        theme_preset: null
+        theme_id: null
       });
     } catch (error: unknown) {
       console.error("BG Upload error:", error);
@@ -76,7 +76,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                     setBgType(type);
                     updateProfile({
                       page_bg_type: type,
-                      theme_preset: null
+                      theme_id: null
                     });
                   }}
                   className={`flex-1 py-1.5 px-3 rounded-xl border text-xs font-semibold transition-all ${bgType === type
@@ -99,7 +99,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                   setPageBgColor(val);
                   updateProfile({
                     page_bg_color: val,
-                    theme_preset: null
+                    theme_id: null
                   });
                 }}
               />
@@ -114,7 +114,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                     setPageBgGradStart(val);
                     updateProfile({
                       page_bg_gradient_start: val,
-                      theme_preset: null
+                      theme_id: null
                     });
                   }}
                 />
@@ -125,7 +125,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                     setPageBgGradEnd(val);
                     updateProfile({
                       page_bg_gradient_end: val,
-                      theme_preset: null
+                      theme_id: null
                     });
                   }}
                 />
@@ -158,7 +158,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                       value={profile?.page_bg_image || ""}
                       onChange={(e) => updateProfile({
                         page_bg_image: e.target.value,
-                        theme_preset: null
+                        theme_id: null
                       })}
                       placeholder="https://..."
                       className="w-full bg-bg-main text-text-main px-3 py-1.5 rounded-xl border border-border-main text-xs focus:outline-none focus:border-text-secondary"
@@ -190,7 +190,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                 setAvatarShape(opt.value);
                 updateProfile({
                   avatar_shape: opt.value,
-                  theme_preset: null
+                  theme_id: null
                 });
               }}
               className={`flex-1 py-2 px-1 rounded-xl border text-[10px] font-semibold transition-all ${avatarShape === opt.value
@@ -229,7 +229,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                       card_style: opt.style,
                       card_bg_color: opt.bg,
                       card_text_color: opt.text,
-                      theme_preset: null
+                      theme_id: null
                     });
                   }}
                   className={`py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${cardStyle === opt.style && (opt.style === 'glass' || cardBgColor === opt.bg)
@@ -259,7 +259,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                     setRadius(opt.value);
                     updateProfile({
                       button_radius: opt.value,
-                      theme_preset: null
+                      theme_id: null
                     });
                   }}
                   className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${radius === opt.value
@@ -289,7 +289,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
                 setFont(opt.value);
                 updateProfile({
                   page_font: opt.value,
-                  theme_preset: null
+                  theme_id: null
                 });
               }}
               className={`p-4 rounded-radius-main border-2 transition-all flex flex-col items-center gap-2 hover:scale-[1.02] active:scale-[0.98] ${font === opt.value

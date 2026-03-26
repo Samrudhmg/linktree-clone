@@ -56,6 +56,9 @@ CREATE TABLE IF NOT EXISTS public.link_pages (
     -- Active theme reference
     theme_id UUID REFERENCES public.themes(id) ON DELETE SET NULL, -- Prevents page deletion if theme is removed
     
+    avatar_style TEXT DEFAULT 'full' CHECK (avatar_style IN ('full', 'square', 'circle', 'rounded')),
+    avatar_size INTEGER DEFAULT 80,
+    
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -94,6 +97,9 @@ CREATE TABLE IF NOT EXISTS public.links (
     bg_image TEXT,
     text_color TEXT,
     font TEXT DEFAULT 'sans',
+    
+    thumbnail_style TEXT DEFAULT 'circle' CHECK (thumbnail_style IN ('full', 'square', 'circle', 'rounded')),
+    thumbnail_size INTEGER DEFAULT 40,
     
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
