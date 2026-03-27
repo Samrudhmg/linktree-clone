@@ -17,10 +17,15 @@ import {
   X,
   Plus,
   Pencil,
-  ExternalLink
+  ExternalLink,
+  User as UserIcon,
+  Loader2,
+  Upload,
+  RefreshCw
 } from "lucide-react";
 import { Link, LinkPage, Profile } from "@/lib/types";
 import { DBTheme } from "@/lib/theme-utils";
+import { uploadLinkImage } from "@/lib/themes";
 import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -48,6 +53,8 @@ export default function Dashboard() {
   // Profile editing
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState("");
+  const [editAvatarUrl, setEditAvatarUrl] = useState("");
+  const [isUploadingProfileAvatar, setIsUploadingProfileAvatar] = useState(false);
   // Page URL editing
   const [editingPageSlug, setEditingPageSlug] = useState(false);
   const [editPageSlug, setEditPageSlug] = useState("");
@@ -182,10 +189,12 @@ export default function Dashboard() {
             .from("link_pages")
             .insert([{
               user_id: userId,
-              title: prof.display_name || "My Links",
-              slug: prof.username,
+              title: "",
+              slug: prof.username || `user-${userId.substring(0, 5)}`,
               is_default: true,
-              display_name: prof.display_name || "",
+              display_name: "",
+              bio: "",
+              avatar_url: null
             }])
             .select()
             .single();
@@ -503,13 +512,30 @@ export default function Dashboard() {
     return { success: true };
   };
 
+  const handleProfileAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingProfileAvatar(true);
+    try {
+      const publicUrl = await uploadLinkImage(supabase, file, "avatars");
+      setEditAvatarUrl(publicUrl);
+    } catch (error: unknown) {
+      console.error("Error uploading profile avatar:", error);
+      alert(error instanceof Error ? error.message : "Failed to upload image.");
+    } finally {
+      setIsUploadingProfileAvatar(false);
+    }
+  };
+
   const saveEditProfile = async () => {
-    if (!user || !editDisplayName.trim()) return;
+    if (!user) return;
 
     const { error } = await supabase
       .from("profiles")
       .update({
-        display_name: editDisplayName
+        display_name: editDisplayName,
+        avatar_url: editAvatarUrl
       })
       .eq("id", user.id);
 
@@ -519,7 +545,7 @@ export default function Dashboard() {
       return;
     }
 
-    if (profile) setProfile({ ...profile, display_name: editDisplayName } as Profile);
+    if (profile) setProfile({ ...profile, display_name: editDisplayName, avatar_url: editAvatarUrl } as Profile);
     setShowEditProfile(false);
   };
 
@@ -633,7 +659,8 @@ export default function Dashboard() {
           onLogout={handleLogout}
           onClose={() => setShowSidebar(false)}
           onEditProfile={() => {
-            setEditDisplayName(profile?.display_name || "");
+            setEditDisplayName(profile?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "");
+            setEditAvatarUrl(profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || "");
             setImageError(false);
             setShowEditProfile(true);
           }}
@@ -812,28 +839,67 @@ export default function Dashboard() {
 
           <div className="relative z-10 p-6 space-y-4 bg-muted/50">
             <div className="flex items-center gap-4 mb-2">
-              <div className="w-16 h-16 rounded-full bg-btn-bg flex items-center justify-center text-text-main text-2xl font-bold border border-border-main overflow-hidden shadow-sm">
-                {(profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
-                  <img 
-                    src={profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""} 
-                    alt="Avatar" 
-                    className="w-full h-full object-cover"
-                    onError={() => setImageError(true)}
-                  />
-                ) : (
-                  (profile?.display_name || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()
-                )}
+            </div>
+
+            <div className="flex flex-col items-center gap-4 py-2">
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full overflow-hidden bg-muted border-4 border-border-main relative">
+                  {(editAvatarUrl || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={editAvatarUrl || user?.user_metadata?.picture || user?.user_metadata?.avatar_url}
+                      alt="Profile preview"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-text-secondary">
+                      <UserIcon className="w-10 h-10" />
+                    </div>
+                  )}
+                  {isUploadingProfileAvatar && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div className="absolute bottom-0 right-0 flex gap-2 translate-y-1">
+                  <label className="w-8 h-8 bg-btn-bg hover:bg-btn-hover text-btn-text rounded-full flex items-center justify-center cursor-pointer shadow-main border border-border-main transition-transform hover:scale-110">
+                    <Upload className="w-4 h-4" />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleProfileAvatarUpload}
+                      disabled={isUploadingProfileAvatar}
+                    />
+                  </label>
+                  {editAvatarUrl && (
+                    <button
+                      onClick={() => setEditAvatarUrl("")}
+                      className="w-8 h-8 bg-black/80 hover:bg-black text-white rounded-full flex items-center justify-center shadow-main border border-white/20 transition-transform hover:scale-110"
+                      title="Reset to Google Image"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="space-y-1">
-                <DialogTitle className="text-xl font-bold text-text-main flex items-center gap-2 m-0 mt-2">
-                  <Pencil className="w-5 h-5 text-text-secondary" /> Edit Profile
-                </DialogTitle>
-                <p className="text-text-secondary text-xs">Update your display name</p>
-              </div>
+              <p className="text-[10px] uppercase tracking-widest text-text-secondary font-bold">Account</p>
             </div>
 
             <div>
-              <label className="block text-text-secondary text-sm mb-1 font-medium">Display Name</label>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-text-secondary text-sm font-medium">Display Name</label>
+                {(editDisplayName !== (user?.user_metadata?.full_name || user?.email?.split('@')[0])) && (
+                  <button
+                    onClick={() => setEditDisplayName(user?.user_metadata?.full_name || user?.email?.split('@')[0] || "")}
+                    className="text-xs text-text-secondary/60 hover:text-text-secondary flex items-center gap-1 transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Reset to Account Name
+                  </button>
+                )}
+              </div>
               <input
                 type="text"
                 value={editDisplayName}

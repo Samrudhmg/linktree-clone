@@ -184,7 +184,7 @@ export default function ProfileHeader({
               />
             ) : (
               <span className="text-xl sm:text-2xl font-bold">
-                {(displayName || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()}
+                {(displayName || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase()}
               </span>
             )}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -330,7 +330,7 @@ export default function ProfileHeader({
                     fontWeight: 'var(--theme-title-weight)'
                   }}
                 >
-                  {page?.display_name || user?.user_metadata?.full_name || "Your Name"}
+                  {page?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
                 </h2>
                 <Button
                   variant="ghost"

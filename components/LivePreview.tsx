@@ -87,8 +87,9 @@ export default function LivePreview({
   };
 
   // Check if there's any meaningful content to display
-  const hasContent = (page?.avatar_url || user?.user_metadata?.avatar_url) ||
-    (page?.display_name || user?.user_metadata?.full_name) ||
+  const hasContent = page?.avatar_url ||
+    page?.display_name ||
+    page?.title ||
     (page?.bio && page.bio !== "") ||
     (links && links.length > 0);
 
@@ -135,59 +136,53 @@ export default function LivePreview({
               <div className="flex-1 overflow-y-auto p-6 pt-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {/* Avatar */}
-                  {(page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && (
-                    <motion.div
-                      key="avatar"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.8 }}
-                      className="flex justify-center mb-3 mt-4"
-                    >
-                      <LinkThumbnail
-                        thumbnailUrl={page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url}
-                        shape={theme?.config.avatar?.style || page?.avatar_style || 'circle'}
-                        pixels={theme?.config.avatar?.size || page?.avatar_size || 64}
-                        className="border-2 border-white/20 shadow-sm"
-                        fallback={(page?.display_name || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()}
-                      />
-                    </motion.div>
-                  )}
+                  <motion.div
+                    key="avatar"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="flex justify-center mb-3 mt-4"
+                  >
+                    <LinkThumbnail
+                      thumbnailUrl={page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || undefined}
+                      shape={theme?.config.avatar?.style || page?.avatar_style || 'circle'}
+                      pixels={theme?.config.avatar?.size || page?.avatar_size || 64}
+                      className="border-2 border-white/20 shadow-sm"
+                      fallback={(page?.display_name || page?.title || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase() || "U"}
+                    />
+                  </motion.div>
 
                   {/* Name */}
-                  {(page?.display_name || user?.user_metadata?.full_name) && (
-                    <motion.h2
-                      key="name"
-                      layout
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-1 text-center break-words px-4 leading-tight"
-                      style={{
-                        color: 'var(--theme-title-color)',
-                        fontSize: 'var(--theme-title-size)',
-                        fontWeight: 'var(--theme-title-weight)'
-                      }}
-                    >
-                      {page?.display_name || user?.user_metadata?.full_name}
-                    </motion.h2>
-                  )}
+                  <motion.h2
+                    key="name"
+                    layout
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-1 text-center break-words px-4 leading-tight"
+                    style={{
+                      color: 'var(--theme-title-color)',
+                      fontSize: 'var(--theme-title-size)',
+                      fontWeight: 'var(--theme-title-weight)'
+                    }}
+                  >
+                    {page?.display_name || page?.title || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
+                  </motion.h2>
 
                   {/* Bio */}
-                  {page?.bio && page.bio.trim() !== "" && (
-                    <motion.p
-                      key="bio"
-                      layout
-                      initial={{ opacity: 0, y: 5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
-                      style={{
-                        color: 'var(--theme-bio-color)',
-                        fontSize: 'calc(var(--theme-bio-size) * 0.75)',
-                        fontWeight: 'var(--theme-bio-weight)'
-                      }}
-                    >
-                      {page.bio}
-                    </motion.p>
-                  )}
+                  <motion.p
+                    key="bio"
+                    layout
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
+                    style={{
+                      color: 'var(--theme-bio-color)',
+                      fontSize: 'calc(var(--theme-bio-size) * 0.75)',
+                      fontWeight: 'var(--theme-bio-weight)'
+                    }}
+                  >
+                    {page?.bio && page.bio.trim() !== "" ? page.bio : "Your bio will appear here"}
+                  </motion.p>
 
                   {/* Links Container */}
                   <motion.div layout className="space-y-2">

@@ -6,13 +6,12 @@
 
 Refactor the theme system so that:
 
-* Themes are applied **per page**, NOT per user
-* Each page has its own theme
-* Users can create multiple pages with different themes
-* Themes can be:
-
-  * Default (global)
-  * Page-specific (customized for that page)
+- Themes are applied **per page**, NOT per user
+- Each page has its own theme
+- Users can create multiple pages with different themes
+- Themes can be:
+  - Default (global)
+  - Page-specific (customized for that page)
 
 ---
 
@@ -45,13 +44,13 @@ theme_id UUID REFERENCES themes(id)
 
 ## 💡 KEY IDEA
 
-* Theme is NOT tied to user
-* Theme is tied to page
+- Theme is NOT tied to user
+- Theme is tied to page
 
 👉 A user can have:
 
-* Page A → Theme 1
-* Page B → Theme 2
+- Page A → Theme 1
+- Page B → Theme 2
 
 ---
 
@@ -90,13 +89,13 @@ Each theme MUST include:
 
 ### `default`
 
-* Predefined themes
-* Available to all pages
+- Predefined themes
+- Available to all pages
 
 ### `custom`
 
-* Created from editor
-* Stored per page (not shared globally)
+- Created from editor
+- Stored per page (not shared globally)
 
 ---
 
@@ -117,8 +116,8 @@ WHERE type = 'default'
 On page load:
 
 ```ts
-const theme = getTheme(page.theme_id)
-applyTheme(theme.config)
+const theme = getTheme(page.theme_id);
+applyTheme(theme.config);
 ```
 
 ---
@@ -127,11 +126,17 @@ applyTheme(theme.config)
 
 Agent MUST:
 
-* Convert theme config → CSS variables
+- Convert theme config → CSS variables
 
 ```ts
-document.documentElement.style.setProperty("--bg-primary", config.background.primary)
-document.documentElement.style.setProperty("--text-primary", config.text.primary)
+document.documentElement.style.setProperty(
+  "--bg-primary",
+  config.background.primary,
+);
+document.documentElement.style.setProperty(
+  "--text-primary",
+  config.text.primary,
+);
 ```
 
 ---
@@ -149,12 +154,12 @@ document.documentElement.style.setProperty("--text-primary", config.text.primary
 const theme = await createTheme({
   name: "Custom Theme",
   type: "custom",
-  config
-})
+  config,
+});
 
 await updatePage(page.id, {
-  theme_id: theme.id
-})
+  theme_id: theme.id,
+});
 ```
 
 ---
@@ -163,8 +168,8 @@ await updatePage(page.id, {
 
 👉 Custom theme is ONLY used by that page
 
-* No user-wide sharing
-* No global visibility
+- No user-wide sharing
+- No global visibility
 
 ---
 
@@ -172,11 +177,11 @@ await updatePage(page.id, {
 
 When editing:
 
-* Load current page theme into editor
-* Update same theme record
+- Load current page theme into editor
+- Update same theme record
 
 ```ts
-updateTheme(theme.id, config)
+updateTheme(theme.id, config);
 ```
 
 ---
@@ -187,52 +192,51 @@ updateTheme(theme.id, config)
 
 ### REMOVE:
 
-* ❌ Custom vs Theme toggle
-* ❌ User-based theme logic
+- ❌ Custom vs Theme toggle
+- ❌ User-based theme logic
 
 ---
 
 ### ADD:
 
-* Theme grid
-* * Add Theme card
+- Theme grid
+- - Add Theme card
 
 ---
 
 ### BEHAVIOR:
 
-* Clicking theme → assigns to page
-* Clicking + → opens editor
-* Saving → creates new theme AND assigns to page
+- Clicking theme → assigns to page
+- Clicking + → opens editor
+- Saving → creates new theme AND assigns to page
 
 ---
 
 ## 🧪 STEP 10: VALIDATION
 
-* [ ] Each page has its own theme
-* [ ] Switching pages changes theme
-* [ ] Custom themes only affect one page
-* [ ] Default themes reusable
-* [ ] Theme persists after reload
+- [ ] Each page has its own theme
+- [ ] Switching pages changes theme
+- [ ] Custom themes only affect one page
+- [ ] Default themes reusable
+- [ ] Theme persists after reload
 
 ---
 
 ## 🧹 STEP 11: CLEANUP
 
-* Remove user-based theme storage
-* Remove old custom logic
-* Remove duplicate styles
+- Remove user-based theme storage
+- Remove old custom logic
+- Remove duplicate styles
 
 ---
 
 ## 🚀 FINAL RESULT
 
-* Page-based theming system
-* Clean architecture
-* Scalable for:
-
-  * multiple pages
-  * different styles per page
+- Page-based theming system
+- Clean architecture
+- Scalable for:
+  - multiple pages
+  - different styles per page
 
 ---
 
