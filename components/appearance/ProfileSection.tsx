@@ -36,7 +36,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
         <div className="relative group">
           <div
             className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted ring-4 ring-border-main transform translate-z-0"
-            style={{ isolation: 'isolate' }}
+            style={{ isolation: 'isolate' as any }}
           >
             {profile?.avatar_url ? (
               <Image
@@ -64,15 +64,15 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
 
         <div className="flex-1 space-y-4 w-full">
           <div>
-            <label className="block text-gray-500 dark:text-gray-400 text-sm font-medium mb-1.5">Username</label>
+            <label className="block text-gray-500 dark:text-gray-400 text-sm font-medium mb-1.5">Page URL</label>
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">@</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">/</span>
               <input
                 type="text"
-                value={profile?.username || ""}
-                onChange={(e) => updateProfile({ username: e.target.value })}
+                value={profile?.slug || ""}
+                onChange={(e) => updateProfile({ slug: e.target.value })}
                 className="w-full bg-bg-main text-text-main pl-8 pr-4 py-2.5 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-all"
-                placeholder="username"
+                placeholder="slug"
               />
             </div>
           </div>

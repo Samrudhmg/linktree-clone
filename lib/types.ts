@@ -59,6 +59,8 @@ export interface Link {
   thumbnail_style?: AvatarStyle;
   thumbnail_size?: number;
   click_events?: { count: number }[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Theme {

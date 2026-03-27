@@ -10,7 +10,7 @@ export const THEME_DEFAULT: ThemeConfig = {
   button: { variant: "solid", accent: "#3b82f6" },
   title: { color: "#111827", fontSize: "1.5rem", fontWeight: "bold" },
   bio: { color: "#4b5563", fontSize: "1.1rem", fontWeight: "normal" },
-  avatar: { style: "circle" }
+  avatar: { style: "circle", size: 80 }
 };
 
 export const THEME_DARK: ThemeConfig = {
@@ -20,7 +20,7 @@ export const THEME_DARK: ThemeConfig = {
   button: { variant: "solid", accent: "#3b82f6" },
   title: { color: "#ffffff", fontSize: "1.5rem", fontWeight: "bold" },
   bio: { color: "#a1a1aa", fontSize: "1.1rem", fontWeight: "normal" },
-  avatar: { style: "rounded" }
+  avatar: { style: "rounded", size: 80 }
 };
 
 export const THEME_PASTEL: ThemeConfig = {
@@ -30,7 +30,7 @@ export const THEME_PASTEL: ThemeConfig = {
   button: { variant: "solid", accent: "#ec4899" },
   title: { color: "#831843", fontSize: "1.8rem", fontWeight: "bold" },
   bio: { color: "#9d174d", fontSize: "1.2rem", fontWeight: "medium" },
-  avatar: { style: "circle" }
+  avatar: { style: "circle", size: 80 }
 };
 
 export const THEME_HIGH_CONTRAST: ThemeConfig = {
@@ -40,7 +40,7 @@ export const THEME_HIGH_CONTRAST: ThemeConfig = {
   button: { variant: "solid", accent: "#ffffff" },
   title: { color: "#ffffff", fontSize: "2.2rem", fontWeight: "extrabold" },
   bio: { color: "#ffffff", fontSize: "1.5rem", fontWeight: "bold" },
-  avatar: { style: "square" }
+  avatar: { style: "square", size: 80 }
 };
 
 export const MOCK_THEMES: Record<string, DBTheme> = {
@@ -86,6 +86,7 @@ export const MOCK_PAGE: LinkPage = {
   id: "page_123",
   user_id: MOCK_USER_ID,
   slug: "johndoe",
+  title: "John Doe's Page",
   display_name: "John Doe",
   bio: "Fullstack Developer & UI Enthusiast. Building the future of personal landing pages.",
   avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
@@ -103,8 +104,8 @@ export const MOCK_LINKS: Link[] = [
     url: "https://example.com/portfolio",
     subtext: "Check out my latest projects and case studies.",
     icon: "Globe",
-    is_active: true,
-    order_index: 0,
+    enabled: true,
+    position: 0,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -116,8 +117,8 @@ export const MOCK_LINKS: Link[] = [
     url: "https://twitter.com/example",
     subtext: "Follow me for daily coding tips.",
     icon: "Twitter",
-    is_active: true,
-    order_index: 1,
+    enabled: true,
+    position: 1,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   },
@@ -128,8 +129,8 @@ export const MOCK_LINKS: Link[] = [
     title: "GitHub",
     url: "https://github.com/example",
     icon: "Github",
-    is_active: true,
-    order_index: 2,
+    enabled: true,
+    position: 2,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString()
   }

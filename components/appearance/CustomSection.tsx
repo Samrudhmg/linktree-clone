@@ -34,7 +34,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
 
   const [radius, setRadius] = useState(profile?.button_radius ?? "rounded");
   const [bgType, setBgType] = useState(profile?.page_bg_type ?? "color");
-  const [avatarShape, setAvatarShape] = useState(profile?.avatar_shape ?? "circle");
+  const [avatarStyle, setAvatarStyle] = useState(profile?.avatar_style ?? "circle");
   const [cardStyle, setCardStyle] = useState(profile?.card_style ?? "filled");
   const [font, setFont] = useState(profile?.page_font ?? "sans");
   const [cardBgColor, setCardBgColor] = useState(profile?.card_bg_color ?? profile?.button_color ?? "#FFFFFF");
@@ -47,7 +47,7 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
   useEffect(() => {
     if (profile?.button_radius) setRadius(profile.button_radius);
     if (profile?.page_bg_type) setBgType(profile.page_bg_type);
-    if (profile?.avatar_shape) setAvatarShape(profile.avatar_shape);
+    if (profile?.avatar_style) setAvatarStyle(profile.avatar_style);
     if (profile?.card_style) setCardStyle(profile.card_style);
     if (profile?.page_font) setFont(profile.page_font);
     setCardBgColor(profile?.card_bg_color ?? profile?.button_color ?? "#FFFFFF");
@@ -187,13 +187,13 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
             <button
               key={opt.value}
               onClick={() => {
-                setAvatarShape(opt.value);
+                setAvatarStyle(opt.value as any);
                 updateProfile({
-                  avatar_shape: opt.value,
+                  avatar_style: opt.value as any,
                   theme_id: null
                 });
               }}
-              className={`flex-1 py-2 px-1 rounded-xl border text-[10px] font-semibold transition-all ${avatarShape === opt.value
+              className={`flex-1 py-2 px-1 rounded-xl border text-[10px] font-semibold transition-all ${avatarStyle === opt.value
                 ? 'bg-btn-bg border-text-secondary text-btn-text shadow-main'
                 : 'bg-bg-main border-border-main text-text-secondary hover:bg-btn-hover hover:border-text-secondary'
                 }`}

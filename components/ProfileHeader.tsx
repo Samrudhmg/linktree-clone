@@ -170,17 +170,9 @@ export default function ProfileHeader({
           <button
             onClick={() => setShowAvatarMenu(!showAvatarMenu)}
             style={{ 
-              isolation: 'isolate',
-              width: (theme?.config.avatar?.size || page?.avatar_size) ? `${theme?.config.avatar?.size || page?.avatar_size}px` : undefined,
-              height: (theme?.config.avatar?.size || page?.avatar_size) ? `${theme?.config.avatar?.size || page?.avatar_size}px` : undefined
+              isolation: 'isolate'
             }}
-            className={`bg-muted flex items-center justify-center text-text-main shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 ${
-              !(theme?.config.avatar?.size || page?.avatar_size) ? 'w-12 h-12 sm:w-16 sm:h-16' : ''
-            } ${
-              (theme?.config.avatar?.style || page?.avatar_style) === "square" ? "rounded-none" :
-              (theme?.config.avatar?.style || page?.avatar_style) === "rounded" ? "rounded-2xl" :
-              (theme?.config.avatar?.style || page?.avatar_style) === "full" ? "w-full aspect-square rounded-none" : "rounded-full"
-            }`}
+            className="w-12 h-12 sm:w-16 sm:h-16 bg-muted flex items-center justify-center text-text-main shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 rounded-full"
           >
             {(avatarUrl || page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
               <Image
@@ -191,7 +183,7 @@ export default function ProfileHeader({
                 onError={() => setImageError(true)}
               />
             ) : (
-              <span style={{ fontSize: (theme?.config.avatar?.size || page?.avatar_size) ? `${(theme?.config.avatar?.size || page?.avatar_size || 80) * 0.4}px` : undefined }}>
+              <span className="text-xl sm:text-2xl font-bold">
                 {(displayName || user?.user_metadata?.full_name || user?.email || "U")[0]?.toUpperCase()}
               </span>
             )}
