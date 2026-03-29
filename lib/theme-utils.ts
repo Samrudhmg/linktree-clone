@@ -137,6 +137,10 @@ export function applyTheme(config: ThemeConfig) {
   root.style.setProperty("--theme-bio-color", config.bio?.color || config.text.secondary);
   root.style.setProperty("--theme-bio-size", config.bio?.fontSize || "1rem");
   root.style.setProperty("--theme-bio-weight", config.bio?.fontWeight || "400");
+
+  // Link Text Defaults
+  root.style.setProperty("--theme-link-text", config.text.primary);
+  root.style.setProperty("--theme-link-subtext", config.text.secondary);
 }
 
 export function getThemeStyles(config: ThemeConfig, page?: LinkPage | null): React.CSSProperties {
@@ -161,6 +165,8 @@ export function getThemeStyles(config: ThemeConfig, page?: LinkPage | null): Rea
     "--theme-bio-color": config.bio?.color || config.text.secondary,
     "--theme-bio-size": config.bio?.fontSize || "1rem",
     "--theme-bio-weight": config.bio?.fontWeight || "400",
+    "--theme-link-text": config.text.primary,
+    "--theme-link-subtext": config.text.secondary,
   } as React.CSSProperties;
 }
 

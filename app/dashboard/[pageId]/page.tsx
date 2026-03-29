@@ -762,6 +762,7 @@ export default function Dashboard() {
                     {/* Profile Header Card */}
                     <ProfileHeader
                       user={user!}
+                      profile={profile}
                       page={activePage}
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
@@ -808,6 +809,8 @@ export default function Dashboard() {
         {activePage && (
           <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-bg-main items-center justify-center border-l border-border-main transition-colors">
             <LivePreview
+              user={user}
+              profile={profile}
               page={activePage}
               links={enabledLinks}
               theme={stableTheme}
@@ -830,6 +833,8 @@ export default function Dashboard() {
                 <X className="w-8 h-8" />
               </button>
               <LivePreview
+                user={user}
+                profile={profile}
                 page={activePage}
                 links={enabledLinks}
                 theme={stableTheme}

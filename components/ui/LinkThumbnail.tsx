@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { LinkIcon } from "../LinkIcon";
 import { AvatarStyle } from "@/lib/types";
@@ -27,6 +27,12 @@ export default function LinkThumbnail({
   fallback
 }: LinkThumbnailProps) {
   const [imageError, setImageError] = useState(false);
+
+  // Reset error state when URL changes to allow retrying/instantly showing new uploads
+  useEffect(() => {
+    setImageError(false);
+  }, [thumbnailUrl]);
+
   const getRadiusClass = (s: AvatarStyle) => {
     switch (s) {
       case 'circle': return 'rounded-full';

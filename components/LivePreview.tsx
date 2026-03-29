@@ -11,19 +11,21 @@ import type { DBTheme } from "@/lib/theme-utils";
 import ShareModal from "./ShareModal";
 import type { ShareLinkData } from "./ShareModal";
 import { MoreVertical } from "lucide-react";
-import { LinkPage, Link } from "@/lib/types";
+import { LinkPage, Link, Profile } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function LivePreview({
   user,
+  profile,
   page,
   links,
   theme,
   onLinkClick
 }: {
   user?: User | null,
+  profile?: Profile | null,
   page: LinkPage | null,
   links: Link[],
   theme: DBTheme | null,
@@ -60,12 +62,17 @@ export default function LivePreview({
     } else if (style === 'glass') {
       baseStyle = { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--theme-text-primary)' };
     } else if (style === 'white') {
-      baseStyle = { backgroundColor: '#ffffff', color: '#000000' };
+      baseStyle = { 
+        backgroundColor: '#ffffff', 
+        color: '#000000',
+        '--theme-link-text': '#000000',
+        '--theme-link-subtext': '#666666'
+      } as any;
     } else {
       // Simple robust accent style (Solid with subtle gradient for depth)
       baseStyle = {
         background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent))',
-        color: '#ffffff',
+        color: 'var(--theme-link-text)',
         border: 'none',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
       };
@@ -144,7 +151,7 @@ export default function LivePreview({
                     className="flex justify-center mb-3 mt-4"
                   >
                     <LinkThumbnail
-                      thumbnailUrl={page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || undefined}
+                      thumbnailUrl={page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || undefined}
                       shape={theme?.config.avatar?.style || page?.avatar_style || 'circle'}
                       pixels={theme?.config.avatar?.size || page?.avatar_size || 64}
                       className="border-2 border-white/20 shadow-sm"
@@ -165,7 +172,7 @@ export default function LivePreview({
                       fontWeight: 'var(--theme-title-weight)'
                     }}
                   >
-                    {page?.display_name || page?.title || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
+                    {page?.display_name || page?.title || profile?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
                   </motion.h2>
 
                   {/* Bio */}

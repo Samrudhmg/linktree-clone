@@ -42,12 +42,17 @@ export default function PublicLinkItem({
     } else if (style === 'glass') {
       baseStyle = { backgroundColor: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.2)', color: 'var(--theme-text-primary)' };
     } else if (style === 'white') {
-      baseStyle = { backgroundColor: '#ffffff', color: '#000000' };
+      baseStyle = { 
+        backgroundColor: '#ffffff', 
+        color: '#000000',
+        '--theme-link-text': '#000000',
+        '--theme-link-subtext': '#666666'
+      } as any;
     } else {
       // Simple robust accent style (Solid with subtle gradient for depth)
       baseStyle = {
         background: 'linear-gradient(135deg, var(--theme-accent), var(--theme-accent))',
-        color: '#ffffff',
+        color: 'var(--theme-link-text)',
         border: 'none',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
       };
@@ -87,8 +92,8 @@ export default function PublicLinkItem({
 
           {/* Center: Title & Subtext */}
           <div className="flex-1 text-center min-w-0">
-            <span className="font-semibold wrap-break-word whitespace-normal block text-[15px] leading-tight">{link.title}</span>
-            {link.subtext && <span className="text-xs opacity-70 wrap-break-word whitespace-normal block mt-0.5">{link.subtext}</span>}
+            <span className="font-semibold wrap-break-word whitespace-normal block text-[15px] leading-tight" style={{ color: 'var(--theme-link-text)' }}>{link.title}</span>
+            {link.subtext && <span className="text-xs wrap-break-word whitespace-normal block mt-0.5" style={{ color: 'var(--theme-link-subtext)' }}>{link.subtext}</span>}
           </div>
 
           {/* Right Side: Three dots menu */}

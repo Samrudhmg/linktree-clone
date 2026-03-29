@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
 import { Camera, Loader2, Upload, Trash2, Pencil, Check, X, RefreshCw } from "lucide-react";
-import { LinkPage, AvatarStyle } from "@/lib/types";
+import { LinkPage, AvatarStyle, Profile } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
 import { DBTheme } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfileHeader({ 
   user,
+  profile,
   page, 
   updatePage, 
   autoEdit, 
@@ -21,6 +22,7 @@ export default function ProfileHeader({
   theme 
 }: { 
   user: User,
+  profile: Profile | null,
   page: LinkPage | null, 
   updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, 
   autoEdit?: boolean, 
@@ -174,9 +176,9 @@ export default function ProfileHeader({
             }}
             className="w-12 h-12 sm:w-16 sm:h-16 bg-muted flex items-center justify-center text-text-main shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 rounded-full"
           >
-            {(avatarUrl || page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
+            {(avatarUrl || page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
               <Image
-                src={avatarUrl || page?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""}
+                src={avatarUrl || page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""}
                 alt="Avatar"
                 fill
                 className="object-cover"
@@ -258,7 +260,7 @@ export default function ProfileHeader({
                 </Button>
 
                 {/* Remove Button */}
-                {(avatarUrl || page?.avatar_url) && (
+                {(avatarUrl || page?.avatar_url || profile?.avatar_url) && (
                   <Button
                     variant="destructive"
                     onClick={handleRemoveAvatar}
@@ -330,7 +332,7 @@ export default function ProfileHeader({
                     fontWeight: 'var(--theme-title-weight)'
                   }}
                 >
-                  {page?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
+                  {page?.display_name || profile?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Your Name"}
                 </h2>
                 <Button
                   variant="ghost"

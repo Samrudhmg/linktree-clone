@@ -275,7 +275,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
               <DialogTitle className="text-text-main text-xl font-bold tracking-tight">
                 {isDefaultTheme ? "Customize Theme" : editingTheme ? "Edit Theme" : "Create Custom Theme"}
               </DialogTitle>
-              
+
               <div className="flex gap-2 items-center">
 
                 <Button
@@ -373,7 +373,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                       <div className="w-4 h-4 rounded-full border border-border-main" style={{ background: config.background.primary }} />
                       <h3 className="font-bold text-sm tracking-wide uppercase">Core Colors</h3>
                     </div>
-                    <button 
+                    <button
                       onClick={() => toggleLock('bg')}
                       className={cn(
                         "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
@@ -415,7 +415,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                       <Smartphone className="w-4 h-4 text-text-secondary" />
                       <h3 className="font-bold text-sm tracking-wide uppercase">Button Styling</h3>
                     </div>
-                    <button 
+                    <button
                       onClick={() => toggleLock('links')}
                       className={cn(
                         "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
@@ -428,7 +428,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                   </div>
                   <div className="space-y-4 bg-muted/30 p-4 rounded-2xl border border-border-main/50">
                     <ColorPicker label="Accent Color" value={config.button.accent} onChange={(c) => updateConfig("button", "accent", c)} />
-                    
+
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-text-secondary uppercase">Link Visual Style</Label>
                       <div className="grid grid-cols-2 gap-2">
@@ -442,11 +442,10 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                             key={style.value}
                             variant={config.links.style === style.value ? "default" : "outline"}
                             onClick={() => updateConfig("links", "style", style.value)}
-                            className={`h-11 text-[10px] uppercase font-bold border-2 transition-all rounded-xl ${
-                              config.links.style === style.value 
-                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
-                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
-                            }`}
+                            className={`h-11 text-[10px] uppercase font-bold border-2 transition-all rounded-xl ${config.links.style === style.value
+                              ? 'border-text-main bg-btn-bg text-btn-text shadow-main'
+                              : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
+                              }`}
                           >
                             {style.label}
                           </Button>
@@ -484,7 +483,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                       <FileText className="w-4 h-4 text-text-secondary" />
                       <h3 className="font-bold text-sm tracking-wide uppercase">Typography</h3>
                     </div>
-                    <button 
+                    <button
                       onClick={() => toggleLock('text')}
                       className={cn(
                         "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase font-bold transition-all border",
@@ -652,11 +651,10 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                               ...prev,
                               avatar: { ...prev.avatar!, style }
                             }))}
-                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${
-                              config.avatar?.style === style 
-                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
-                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
-                            }`}
+                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${config.avatar?.style === style
+                              ? 'border-text-main bg-btn-bg text-btn-text shadow-main'
+                              : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
+                              }`}
                           >
                             {style}
                           </Button>
@@ -696,11 +694,10 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                               ...prev,
                               link_thumbnails: { ...prev.link_thumbnails!, style }
                             }))}
-                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${
-                              config.link_thumbnails?.style === style 
-                                ? 'border-text-main bg-btn-bg text-btn-text shadow-main' 
-                                : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
-                            }`}
+                            className={`h-11 text-[9px] uppercase font-bold border-2 transition-all rounded-xl ${config.link_thumbnails?.style === style
+                              ? 'border-text-main bg-btn-bg text-btn-text shadow-main'
+                              : 'border-border-main bg-bg-main text-text-secondary hover:border-text-secondary'
+                              }`}
                           >
                             {style}
                           </Button>

@@ -52,6 +52,7 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
     try {
       const publicUrl = await uploadLinkImage(supabase, file);
       setThumbnailUrl(publicUrl);
+      setIcon(""); // Clear preset icon when custom image is uploaded
     } catch (error: unknown) {
       console.error("Error uploading image:", error);
       alert(error instanceof Error ? error.message : "Failed to upload image.");
@@ -142,7 +143,10 @@ export default function LinkForm({ onSubmit, onCancel }: LinkFormProps) {
           <label className="block text-gray-400 text-sm mb-2">Preset Icon</label>
           <select
             value={icon}
-            onChange={(e) => setIcon(e.target.value)}
+            onChange={(e) => {
+              setIcon(e.target.value);
+              if (e.target.value) setThumbnailUrl(""); // Clear thumbnail if icon is selected
+            }}
             className="w-full bg-btn-bg text-text-main px-4 py-3 rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
           >
             {ICON_OPTIONS.map((opt) => (

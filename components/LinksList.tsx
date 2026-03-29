@@ -73,7 +73,7 @@ export default function LinksList({ links, updateLink, deleteLink, reorderLinks 
       className="space-y-4 sm:space-y-6"
     >
       {links.length === 0 ? (
-        <Card className="text-center py-12 text-gray-400 dark:text-gray-500 transition-colors border-dashed bg-gray-50 dark:bg-gray-800/50 shadow-none">
+        <Card className="text-center py-12 text-text-secondary transition-colors border-dashed border-border-main bg-transparent shadow-none">
           <LucideLink className="w-12 h-12 mx-auto mb-4 opacity-50" />
           <p>No links yet. Click &quot;Create New Link&quot; to add your first link!</p>
         </Card>

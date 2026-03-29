@@ -635,7 +635,7 @@ export default function Dashboard() {
   const enabledLinks = links.filter(l => l.enabled !== false);
 
   return (
-    <div className="min-h-screen font-inter bg-transparent text-main flex transition-colors">
+    <div className="h-screen overflow-hidden font-inter bg-transparent text-main flex transition-colors">
       {/* Mobile Overlay */}
       {showSidebar && (
         <div
@@ -645,7 +645,7 @@ export default function Dashboard() {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 lg:relative z-50 lg:z-auto transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+      <div className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 ${showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}>
         <Sidebar
           user={user}
@@ -667,8 +667,7 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col lg:flex-row bg-transparent transition-colors">
+      <div className="flex-1 flex flex-col lg:flex-row bg-transparent transition-colors lg:pl-64">
         {/* Editor Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -751,6 +750,7 @@ export default function Dashboard() {
                     {/* Profile Header Card */}
                     <ProfileHeader
                       user={user!}
+                      profile={profile}
                       page={activePage}
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
@@ -798,6 +798,7 @@ export default function Dashboard() {
           <div className="hidden lg:flex fixed right-0 top-0 bottom-0 w-96 bg-bg-main items-center justify-center border-l border-border-main transition-colors">
             <LivePreview
               user={user}
+              profile={profile}
               page={activePage}
               links={enabledLinks}
               theme={deriveActiveTheme()}
@@ -820,6 +821,8 @@ export default function Dashboard() {
                 <X className="w-8 h-8" />
               </button>
               <LivePreview
+                user={user}
+                profile={profile}
                 page={activePage}
                 links={enabledLinks}
                 theme={deriveActiveTheme()}

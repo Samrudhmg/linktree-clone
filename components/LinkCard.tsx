@@ -8,10 +8,16 @@ import {
   Check,
   X,
   AlertCircle,
-  BarChart2
+  BarChart2,
+  Upload,
+  Loader2,
+  Image as ImageIcon
 } from "lucide-react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase-browser";
 import { Link } from "@/lib/types";
+import { ICON_OPTIONS, uploadLinkImage } from "@/lib/themes";
+import LinkThumbnail from "./ui/LinkThumbnail";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,7 +34,10 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
   const [title, setTitle] = useState(link.title);
   const [url, setUrl] = useState(link.url);
   const [subtext, setSubtext] = useState(link.subtext || "");
+  const [icon, setIcon] = useState(link.icon || "");
+  const [thumbnailUrl, setThumbnailUrl] = useState(link.thumbnail_url || "");
   const [isEnabled, setIsEnabled] = useState(link.enabled);
+  const [isUploading, setIsUploading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const isToggling = useRef(false);
   const supabase = createClient();
@@ -39,12 +48,31 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
     setShowDeleteConfirm(false);
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const publicUrl = await uploadLinkImage(supabase, file);
+      setThumbnailUrl(publicUrl);
+      setIcon(""); // Clear preset icon when custom image is uploaded
+    } catch (error: unknown) {
+      console.error("Error uploading image:", error);
+      alert(error instanceof Error ? error.message : "Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
 
   const handleSave = () => {
     updateLink(link.id, { 
       title, 
       url, 
-      subtext
+      subtext,
+      icon,
+      thumbnail_url: thumbnailUrl
     });
     setEditing(false);
   };
@@ -87,8 +115,65 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
                 value={subtext}
                 onChange={(e) => setSubtext(e.target.value)}
                 placeholder="Subtext (optional)"
-                className="h-10 text-sm sm:text-base"
+                className="h-10 text-sm sm:text-base bg-bg-main border-border-main text-text-main focus:ring-1 focus:ring-text-secondary"
               />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-text-secondary tracking-widest pl-1">Preset Icon</label>
+                  <select
+                    value={icon}
+                    onChange={(e) => {
+                      setIcon(e.target.value);
+                      if (e.target.value) setThumbnailUrl(""); // Clear thumbnail if icon is selected
+                    }}
+                    className="w-full bg-bg-main text-text-main px-3 h-10 text-sm rounded-xl border border-border-main focus:outline-none focus:border-text-secondary transition-colors"
+                  >
+                    {ICON_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase font-bold text-text-secondary tracking-widest pl-1">Thumbnail</label>
+                  <div className="flex items-center gap-2">
+                    <label className="flex-1 flex items-center justify-center h-10 border border-border-main border-dashed rounded-xl cursor-pointer bg-bg-main hover:bg-btn-hover hover:border-text-secondary transition-colors overflow-hidden">
+                      <div className="flex items-center gap-2 px-3">
+                        {isUploading ? (
+                          <Loader2 className="animate-spin h-3.5 w-3.5 text-text-secondary" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5 text-text-secondary" />
+                        )}
+                        <span className="text-xs text-text-secondary font-medium">
+                          {isUploading ? "Uploading..." : "Upload"}
+                        </span>
+                      </div>
+                      <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={isUploading} />
+                    </label>
+
+                    {(thumbnailUrl || icon) && (
+                      <div className="w-10 h-10 relative flex items-center justify-center bg-muted rounded-xl border border-border-main overflow-hidden shrink-0">
+                        {thumbnailUrl ? (
+                          <>
+                            <Image src={thumbnailUrl} alt="" fill className="object-cover" />
+                            <button 
+                              onClick={() => setThumbnailUrl("")}
+                              className="absolute top-0 right-0 bg-red-500 text-white p-0.5 rounded-bl-lg z-10 hover:bg-red-600 transition-colors"
+                            >
+                              <X className="w-2.5 h-2.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="text-text-secondary">
+                            <ImageIcon className="w-5 h-5" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               <div className="flex gap-2 mt-4">
                 <Button onClick={handleSave} className="bg-btn-bg text-btn-text hover:bg-btn-hover shadow-main flex items-center gap-2 rounded-full px-6 transition-all">
@@ -101,7 +186,14 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
             </div>
           ) : (
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0">
+                  <LinkThumbnail
+                    thumbnailUrl={link.thumbnail_url || undefined}
+                    icon={link.icon || undefined}
+                    size="w-10 h-10"
+                  />
+                </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="text-text-main font-medium text-sm sm:text-base truncate">{link.title}</h3>
                   {link.subtext && <p className="text-text-secondary text-xs truncate">{link.subtext}</p>}
