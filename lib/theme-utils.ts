@@ -211,28 +211,42 @@ export function generateRandomThemeConfig(
     const baseHue = Math.floor(Math.random() * 360);
     const isDark = Math.random() > 0.5;
 
+    // Expand saturation vastly for vibrant themes (0 to 100)
+    const saturateBg = Math.floor(Math.random() * 101);
+    const saturateCard = Math.floor(Math.random() * 101);
+
+    // Expand lightness but keep distinct dark and light ends for contrast
+    // Making sure there's enough distance between primary and secondary for isValidTheme check
+    const lightBg = isDark ? Math.floor(Math.random() * 15) : Math.floor(Math.random() * 15) + 85; 
+    const lightCard = isDark ? Math.floor(Math.random() * 20) + 20 : Math.floor(Math.random() * 20) + 60;
+
     // Backgrounds
     const bgPrimary = locks.bg && prevConfig 
       ? prevConfig.background.primary 
-      : hslToHex(baseHue, isDark ? 30 : 20, isDark ? 10 : 95);
+      : hslToHex(baseHue, saturateBg, lightBg);
     
     const bgSecondary = locks.bg && prevConfig
       ? prevConfig.background.secondary
-      : hslToHex(baseHue, isDark ? 20 : 15, isDark ? 15 : 90);
+      : hslToHex((baseHue + Math.floor(Math.random() * 60 - 30) + 360) % 360, saturateCard, lightCard);
 
-    // Text
+    // Text (ensure exact opposite lightness for contrast)
+    const textHue = (baseHue + Math.floor(Math.random() * 180)) % 360;
+    const textLightnessPrimary = isDark ? Math.floor(Math.random() * 15) + 85 : Math.floor(Math.random() * 15);
+    const textLightnessSecondary = isDark ? Math.floor(Math.random() * 20) + 65 : Math.floor(Math.random() * 20) + 20;
+
     const textPrimary = locks.text && prevConfig
       ? prevConfig.text.primary
-      : (isDark ? "#ffffff" : "#111827");
+      : hslToHex(textHue, Math.floor(Math.random() * 40), textLightnessPrimary);
     
     const textSecondary = locks.text && prevConfig
       ? prevConfig.text.secondary
-      : (isDark ? "#9ca3af" : "#4b5563");
+      : hslToHex(textHue, Math.floor(Math.random() * 40), textLightnessSecondary);
 
-    // Accents & Links (Shifted Hue)
+    // Accents & Links
+    const accentHue = Math.floor(Math.random() * 360);
     const accent = locks.links && prevConfig
       ? prevConfig.button.accent
-      : hslToHex((baseHue + 40) % 360, 60, isDark ? 60 : 50);
+      : hslToHex(accentHue, Math.floor(Math.random() * 60) + 40, isDark ? Math.floor(Math.random() * 30) + 50 : Math.floor(Math.random() * 30) + 30);
 
     config = {
       background: { primary: bgPrimary, secondary: bgSecondary },
@@ -257,7 +271,7 @@ export function generateRandomThemeConfig(
     };
 
     attempts++;
-  } while (!isValidTheme(config) && attempts < 10);
+  } while (!isValidTheme(config) && attempts < 50);
 
   return config;
 }

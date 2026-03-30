@@ -53,20 +53,20 @@ export default function PageInfoCard({
                 value={editPageTitle}
                 onChange={(e) => setEditPageTitle(e.target.value)}
                 placeholder="Page Name"
-                className="w-full bg-bg-main border-border-main focus:border-text-secondary h-10 transition-all font-semibold text-lg"
+                className="w-full min-w-0 bg-bg-main border-border-main focus:border-text-secondary h-10 transition-all font-semibold text-lg"
                 autoFocus
               />
             </div>
             
             <div className="space-y-1">
               <label className="text-[10px] uppercase tracking-wider text-text-secondary font-bold ml-1">Page URL</label>
-              <div className="flex items-center bg-bg-main rounded-md border border-border-main focus-within:border-text-secondary overflow-hidden flex-1 transition-all h-10">
-                <span className="px-3 text-text-secondary text-sm bg-muted/30 border-r border-border-main h-full flex items-center">/</span>
+              <div className="flex items-center w-full min-w-0 bg-bg-main rounded-md border border-border-main focus-within:border-text-secondary overflow-hidden flex-1 transition-all h-10">
+                <span className="px-3 text-text-secondary text-sm bg-muted/30 border-r border-border-main shrink-0 h-full flex items-center">/</span>
                 <Input
                   type="text"
                   value={editPageSlug}
                   onChange={(e) => setEditPageSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                  className="flex-1 border-0 shadow-none focus-visible:ring-0 rounded-none h-full bg-transparent text-text-main"
+                  className="flex-1 min-w-0 w-full border-0 shadow-none focus-visible:ring-0 rounded-none h-full bg-transparent text-text-main"
                 />
               </div>
             </div>

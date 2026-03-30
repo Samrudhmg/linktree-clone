@@ -37,7 +37,7 @@ export default function LinkThumbnail({
     switch (s) {
       case 'circle': return 'rounded-full';
       case 'rounded': return 'rounded-lg';
-      case 'square': return 'rounded-none';
+      case 'square': return 'rounded-none';  
       case 'full': return 'rounded-none w-full h-auto';
       default: return 'rounded-full';
     }
@@ -47,7 +47,22 @@ export default function LinkThumbnail({
   const finalSizeClass = pixels ? "" : size;
   const radiusClass = getRadiusClass(shape);
 
-  if (thumbnailUrl && !imageError) {
+  const isUrlValid = (url: string | undefined): boolean => {
+    if (!url) return false;
+    // Allow local paths and data URIs
+    if (url.startsWith('/')) return true;
+    if (url.startsWith('data:')) return true;
+    
+    // Check if it's a valid remote URL
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  if (isUrlValid(thumbnailUrl) && !imageError && thumbnailUrl) {
     return (
       <div 
         className={`${finalSizeClass} relative shrink-0 overflow-hidden ${radiusClass} ${className}`}

@@ -34,7 +34,6 @@ export default function ProfileHeader({
   const [bio, setBio] = useState(page?.bio || "");
   const [avatarUrl, setAvatarUrl] = useState(page?.avatar_url || "");
   const [showAvatarMenu, setShowAvatarMenu] = useState(false);
-  const [avatarUrlInput, setAvatarUrlInput] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [imageError, setImageError] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -70,18 +69,6 @@ export default function ProfileHeader({
     setDisplayName(page?.display_name || "");
     setBio(page?.bio || "");
     onEditComplete?.();
-  };
-
-  const handleAvatarUrlSave = async () => {
-    if (avatarUrlInput.trim()) {
-      setAvatarUrl(avatarUrlInput.trim());
-      const result = await updatePage({ avatar_url: avatarUrlInput.trim() });
-      if (result?.error) {
-        alert("Failed to save avatar URL. Please try again.");
-      }
-    }
-    setShowAvatarMenu(false);
-    setAvatarUrlInput("");
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,19 +163,39 @@ export default function ProfileHeader({
             }}
             className="w-12 h-12 sm:w-16 sm:h-16 bg-muted flex items-center justify-center text-text-main shrink-0 overflow-hidden hover:ring-2 hover:ring-text-secondary transition-all group border border-border-main transform translate-z-0 rounded-full"
           >
-            {(avatarUrl || page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url) && !imageError ? (
-              <Image
-                src={avatarUrl || page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || ""}
-                alt="Avatar"
-                fill
-                className="object-cover"
-                onError={() => setImageError(true)}
-              />
-            ) : (
-              <span className="text-xl sm:text-2xl font-bold">
-                {(displayName || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase()}
-              </span>
-            )}
+            {(() => {
+              const src = avatarUrl || page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url;
+              
+              let isValidSrc = false;
+              if (typeof src === 'string' && src.trim() !== '' && !imageError) {
+                if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('/')) {
+                  try {
+                    new URL(src, 'http://localhost');
+                    isValidSrc = true;
+                  } catch {
+                    isValidSrc = false;
+                  }
+                }
+              }
+
+              if (isValidSrc && src) {
+                return (
+                  <Image
+                    src={src}
+                    alt="Avatar"
+                    fill
+                    className="object-cover"
+                    onError={() => setImageError(true)}
+                  />
+                );
+              }
+
+              return (
+                <span className="text-xl sm:text-2xl font-bold">
+                  {(displayName || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase()}
+                </span>
+              );
+            })()}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-5 h-5 text-white" />
             </div>
@@ -196,7 +203,7 @@ export default function ProfileHeader({
 
           {/* Avatar Menu Dropdown */}
           {showAvatarMenu && (
-            <div className="absolute top-full left-0 mt-2 w-64 bg-bg-main rounded-radius-main shadow-main border border-border-main z-50 overflow-hidden transition-colors">
+            <div className="absolute top-full left-0 mt-2 w-64 bg-bg-main rounded-xl shadow-main border border-border-main z-50 overflow-hidden transition-colors animate-in fade-in slide-in-from-top-2 zoom-in-95 duration-200">
               <div className="p-3 space-y-3">
                 <p className="text-text-main text-sm font-medium">Update Avatar</p>
 
@@ -225,29 +232,6 @@ export default function ProfileHeader({
                   onChange={handleFileUpload}
                   className="hidden"
                 />
-
-                {/* URL Input */}
-                <div className="space-y-2">
-                  <p className="text-muted-foreground text-xs">Or paste image URL:</p>
-                  <div className="flex gap-2">
-                    <Input
-                      type="url"
-                      value={avatarUrlInput}
-                      onChange={(e) => setAvatarUrlInput(e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1 h-9"
-                    />
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={handleAvatarUrlSave}
-                      disabled={!avatarUrlInput.trim()}
-                      className="h-9"
-                    >
-                      Set
-                    </Button>
-                  </div>
-                </div>
 
                 {/* Sync Button */}
                 <Button

@@ -16,7 +16,6 @@ import PageInfoCard from "@/components/dashboard/PageInfoCard";
 import {
   X,
   Plus,
-  Pencil,
   ExternalLink,
   User as UserIcon,
   Loader2,
@@ -28,7 +27,7 @@ import { DBTheme } from "@/lib/theme-utils";
 import { uploadLinkImage } from "@/lib/themes";
 import { User } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function Dashboard() {
   const supabase = createClient();
@@ -60,7 +59,6 @@ export default function Dashboard() {
   const [editPageSlug, setEditPageSlug] = useState("");
   // Auto-edit profile for new pages
   const [autoEditProfile, setAutoEditProfile] = useState(false);
-  const [imageError, setImageError] = useState(false);
   const [editPageTitle, setEditPageTitle] = useState("");
 
 
@@ -569,7 +567,7 @@ export default function Dashboard() {
 
     const { error } = await supabase
       .from("link_pages")
-      .update({ 
+      .update({
         slug: editPageSlug,
         title: editPageTitle
       })
@@ -661,21 +659,20 @@ export default function Dashboard() {
           onEditProfile={() => {
             setEditDisplayName(profile?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "");
             setEditAvatarUrl(profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || "");
-            setImageError(false);
             setShowEditProfile(true);
           }}
         />
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row bg-transparent transition-colors lg:pl-64">
+      <div className="flex-1 min-w-0 flex flex-col lg:flex-row bg-transparent transition-colors lg:pl-64">
         {/* Editor Area */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex-1 p-4 sm:p-6 overflow-y-auto"
+          className="flex-1 min-w-0 p-4 sm:p-6 overflow-y-auto overflow-x-hidden"
         >
-          <div className="max-w-2xl mx-auto">
+          <div className="w-full max-w-2xl mx-auto">
             {/* Dashboard Header */}
             <DashboardHeader
               showCreatePage={showCreatePage}
