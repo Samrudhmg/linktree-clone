@@ -147,3 +147,52 @@ body::before {
   color: var(--text-main);
   border-radius: 12px;
 }
+
+@keyframes spin-gradient {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.btn-running-border {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  border: none !important;
+}
+
+.btn-running-border::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 500%;
+  background: conic-gradient(
+    from 0deg,
+    #ff0000,
+    #ff7f00,
+    #ffff00,
+    #00ff00,
+    #0000ff,
+    #4b0082,
+    #9400d3,
+    #ff0000
+  );
+  transform-origin: center;
+  animation: spin-gradient 3s linear infinite;
+  z-index: -2;
+}
+
+.btn-running-border::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background-color: #0f172a;
+  z-index: -1;
+  transition: background-color 0.2s ease;
+}
+
+.btn-running-border:hover::after {
+  background-color: #000000;
+}

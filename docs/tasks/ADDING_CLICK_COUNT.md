@@ -1,6 +1,7 @@
 # ADDING_CLICK_COUNT
 
 ## Status
+
 COMPLETED – ADDING_CLICK_COUNT
 
 ---
@@ -15,6 +16,9 @@ The system should record how many times each link is clicked and allow this info
 
 ## Context
 
+> [!IMPORTANT]
+> hello
+
 This project is a **Linktree clone built with Next.js and Supabase**.
 
 Current database structure includes tables such as:
@@ -27,6 +31,7 @@ The click tracking feature should integrate cleanly with the existing architectu
 The Supabase CLI migrations may not run locally due to environment limitations. Because of this, the schema changes must also be provided separately so they can be applied manually in the Supabase SQL editor if needed.
 
 ---
+
 ---
 
 ## Requirements
@@ -38,9 +43,9 @@ agent should implement a solution that:
 3. Allows the click count to be displayed in the dashboard or link management UI.
 4. Follows the current project standards (TypeScript, modular structure, Supabase usage).
 5. Keeps the implementation simple and maintainable.
-1. When a user clicks a link, the application should record the click in the database.
-2. The user should then be redirected to the destination URL normally.
-3. The public URL structure must remain unchanged.
+6. When a user clicks a link, the application should record the click in the database.
+7. The user should then be redirected to the destination URL normally.
+8. The public URL structure must remain unchanged.
 
 ---
 
@@ -50,8 +55,6 @@ agent should implement a solution that:
 - The API should accept the `linkId`.
 - Insert a record into a `click_events` table (or increment a click counter if that approach is used).
 - Modify the public link component so that it first calls the API to record the click and then redirects the user to the actual URL.
-
-
 
 ## Database Changes
 
@@ -63,7 +66,7 @@ If a new table is required (for example `click_events`), agent must:
 
 Example structure (agent may adjust if necessary):
 
-```sql
+````sql
 create table click_events (
   id uuid primary key default gen_random_uuid(),
   link_id uuid references links(id) on delete cascade,
@@ -162,4 +165,4 @@ CREATE POLICY "Allow owners to select" ON click_events FOR SELECT USING (
     AND links.user_id = auth.uid()
   )
 );
-```
+````

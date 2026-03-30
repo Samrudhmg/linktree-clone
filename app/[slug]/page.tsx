@@ -112,10 +112,10 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
                     <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-10">
                         {/* Profile Header */}
-                        <div className="text-center mb-6 sm:mb-8 flex flex-col items-center">
+                        <div className="text-center mb-4 flex flex-col items-center">
                             {/* Avatar */}
                             {linkPage.avatar_url && (
-                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-6 border-b border-white/10" : "flex justify-center mb-6"}`}>
+                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4 border-b border-white/10" : "flex justify-center mb-3"}`}>
                                     <LinkThumbnail
                                         thumbnailUrl={linkPage.avatar_url}
                                         shape={activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle'}
@@ -125,7 +125,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                                 </div>
                             )}
                             <h1
-                                className="wrap-break-word px-2"
+                                className="wrap-break-word px-2 mb-1 leading-tight"
                                 style={{
                                     color: 'var(--theme-title-color)',
                                     fontSize: 'var(--theme-title-size)',
@@ -136,7 +136,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                             </h1>
                             {linkPage.bio && (
                                 <p
-                                    className="max-w-xs mx-auto wrap-break-word px-4 mt-2"
+                                    className="w-full mx-auto wrap-break-word px-5 leading-snug opacity-90"
                                     style={{
                                         color: 'var(--theme-bio-color)',
                                         fontSize: 'var(--theme-bio-size)',

@@ -265,24 +265,24 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showOverlay={false} className="w-full sm:max-w-2xl lg:left-[calc(50%-72px)] lg:translate-x-[-50%] max-h-[90vh] overflow-y-auto pb-0 p-0 bg-muted border-border-main text-text-main rounded-radius-main shadow-main overflow-hidden group">
+      <DialogContent showOverlay={false} className="w-full sm:max-w-2xl lg:left-[calc(50%-72px)] lg:translate-x-[-50%] max-h-[96vh] sm:max-h-[90vh] overflow-y-auto pb-0 p-0 bg-muted border-border-main text-text-main rounded-radius-main shadow-main overflow-hidden group">
         {/* Grain Overlay for Dialog */}
         <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml,%3Csvg_viewBox=%220_0_200_200%22_xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter_id=%22noiseFilter%22%3E%3CfeTurbulence_type=%22fractalNoise%22_baseFrequency=%220.65%22_numOctaves=%223%22_stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect_width=%22100%25%22_height=%22100%25%22_filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
 
-        <div className="relative z-10 flex flex-col h-full max-h-[90vh] bg-muted/50">
-          <DialogHeader className="p-6 pb-4 border-b border-border-main bg-muted/30 backdrop-blur-md sticky top-0 z-20">
-            <div className="flex items-center justify-between">
+        <div className="relative z-10 flex flex-col h-full max-h-[96vh] sm:max-h-[90vh] bg-muted/50">
+          <DialogHeader className="p-4 sm:p-6 sm:pb-4 border-b border-border-main bg-muted/30 backdrop-blur-md sticky top-0 z-20">
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
               <DialogTitle className="text-text-main text-xl font-bold tracking-tight">
                 {isDefaultTheme ? "Customize Theme" : editingTheme ? "Edit Theme" : "Create Custom Theme"}
               </DialogTitle>
 
-              <div className="flex gap-2 items-center">
+              <div className="flex flex-wrap gap-2 items-center">
 
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleGenerateTheme}
-                  className="h-9 px-4 text-xs gap-2 font-bold uppercase tracking-widest text-purple-600 border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 hover:border-purple-500 transition-all rounded-full shadow-sm"
+                  className="h-9 px-4 text-xs gap-2 font-bold uppercase tracking-widest text-white btn-running-border rounded-full shadow-sm"
                 >
                   <Shuffle className="w-3.5 h-3.5" />
                   Generate Theme
@@ -327,11 +327,11 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
                 )}
               </div>
             </div>
-            {!editingTheme && hasCopiedStyles && (
+            {/* {!editingTheme && hasCopiedStyles && (
               <p className="text-[10px] font-bold text-green-500/70 uppercase tracking-widest mt-1 ml-1 animate-pulse">
                 Copied theme ready to paste
               </p>
-            )}
+            )} */}
             <DialogDescription className="text-text-secondary mt-1">
               {isDefaultTheme
                 ? "This is a preset theme. Saving will create a custom copy for your page."
@@ -455,7 +455,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
 
                     <div className="space-y-2">
                       <Label className="text-xs font-bold text-text-secondary uppercase">Link Corner Style</Label>
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         {(['rounded-none', 'rounded-2xl', 'rounded-full'] as const).map(radius => (
                           <Button
                             key={radius}
@@ -478,7 +478,7 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
               {/* Right Column: Typography & Style */}
               <div className="space-y-8">
                 <section className="space-y-4">
-                  <div className="flex items-center justify-between text-text-main">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center justify-between text-text-main">
                     <div className="flex items-center gap-2">
                       <FileText className="w-4 h-4 text-text-secondary" />
                       <h3 className="font-bold text-sm tracking-wide uppercase">Typography</h3>
@@ -729,18 +729,20 @@ export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTh
             </div>
           </div>
 
-          <DialogFooter className="p-6 border-t border-border-main bg-muted/30 backdrop-blur-md sticky bottom-0 z-20 flex flex-row gap-3 sm:justify-end items-center">
+          <DialogFooter className="p-4 sm:p-5 border-t border-border-main bg-muted/30 backdrop-blur-md sticky bottom-0 z-20 flex flex-row gap-3 justify-end items-center">
             <Button
               variant="outline"
+              size="sm"
               onClick={() => onOpenChange(false)}
-              className="flex-1 sm:flex-none h-11 px-8 rounded-full border-border-main bg-bg-main text-text-secondary hover:bg-btn-hover hover:text-btn-text transition-all font-semibold"
+              className="h-9 px-5 text-sm rounded-full border-border-main bg-bg-main text-text-secondary hover:bg-btn-hover hover:text-btn-text transition-all font-semibold"
             >
               Cancel
             </Button>
             <Button
+              size="sm"
               onClick={handleSave}
               disabled={saving}
-              className="flex-1 sm:flex-none bg-btn-bg hover:bg-btn-hover text-btn-text shadow-main rounded-full border border-border-main gap-2 h-11 px-8 font-bold transition-all"
+              className="h-9 px-5 text-sm bg-btn-bg hover:bg-btn-hover text-btn-text shadow-main rounded-full border border-border-main gap-2 font-bold transition-all"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {isUpdating ? "Update Theme" : "Save as New"}

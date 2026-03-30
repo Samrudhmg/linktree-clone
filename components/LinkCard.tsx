@@ -227,8 +227,8 @@ export default function LinkCard({ link, isEditing, setEditing, updateLink, dele
       </div>
 
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center p-4 z-50">
-          <Card className="p-6 w-full max-w-sm space-y-4 shadow-2xl border-border-main rounded-2xl bg-bg-main">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <Card className="p-6 w-full max-w-sm space-y-4 shadow-2xl border-border-main rounded-2xl bg-bg-main animate-in zoom-in-95 slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
                 <AlertCircle className="w-5 h-5 text-red-500" />
