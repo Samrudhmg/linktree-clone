@@ -140,7 +140,7 @@ export default function LivePreview({
               className={`w-full h-full rounded-[2.8rem] overflow-hidden flex flex-col relative ${fontClass}`}
               style={dynamicStyles}
             >
-              <div className="flex-1 overflow-y-auto p-6 pt-12 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+              <div className="flex-1 overflow-y-auto p-4 pt-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {/* Avatar */}
                   <motion.div
@@ -168,7 +168,7 @@ export default function LivePreview({
                     className="mb-1 text-center break-words px-4 leading-tight"
                     style={{
                       color: 'var(--theme-title-color)',
-                      fontSize: 'var(--theme-title-size)',
+                      fontSize: 'calc(var(--theme-title-size) * 0.75)',
                       fontWeight: 'var(--theme-title-weight)'
                     }}
                   >
@@ -181,10 +181,10 @@ export default function LivePreview({
                     layout
                     initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 text-center px-4 break-words uppercase tracking-wide opacity-80 leading-snug"
+                    className="mb-4 text-center px-4 break-words tracking-wide opacity-80 leading-snug"
                     style={{
                       color: 'var(--theme-bio-color)',
-                      fontSize: 'calc(var(--theme-bio-size) * 0.75)',
+                      fontSize: 'calc(var(--theme-bio-size) * 0.65)',
                       fontWeight: 'var(--theme-bio-weight)'
                     }}
                   >
@@ -215,7 +215,7 @@ export default function LivePreview({
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`block py-3 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
+                            className={`block py-2.5 px-3 transition-transform hover:scale-[1.02] ${getCardClasses()}`}
                             style={getCardStyle()}
                             onClick={(e) => {
                               if (onLinkClick) {
@@ -237,8 +237,8 @@ export default function LivePreview({
 
                               {/* Center: Title & Subtext */}
                               <div className="flex-1 text-center min-w-0 flex flex-col justify-center">
-                                <span className="font-semibold text-sm block truncate" style={{ color: 'var(--theme-link-text)' }}>{link.title}</span>
-                                {link.subtext && <span className="text-[10px] opacity-80 block truncate mt-0.5" style={{ color: 'var(--theme-link-subtext)' }}>{link.subtext}</span>}
+                                <span className="font-semibold text-xs block truncate" style={{ color: 'var(--theme-link-text)' }}>{link.title}</span>
+                                {link.subtext && <span className="text-[9px] opacity-80 block truncate mt-0.5" style={{ color: 'var(--theme-link-subtext)' }}>{link.subtext}</span>}
                               </div>
 
                               {/* Right Side: Three dots menu */}

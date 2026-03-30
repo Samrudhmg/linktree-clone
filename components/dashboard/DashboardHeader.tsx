@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Eye, ExternalLink } from "lucide-react";
+import { Menu, Eye, ExternalLink, QrCode } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LinkPage } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ interface DashboardHeaderProps {
   activePage: LinkPage | null;
   onShowSidebar: () => void;
   onShowPreview: () => void;
+  onShowQR: () => void;
 }
 
 export default function DashboardHeader({
@@ -17,6 +18,7 @@ export default function DashboardHeader({
   activePage,
   onShowSidebar,
   onShowPreview,
+  onShowQR,
 }: DashboardHeaderProps) {
   return (
     <div className="flex items-center justify-between mb-6">
@@ -58,6 +60,17 @@ export default function DashboardHeader({
                 <ExternalLink className="w-4 h-4 ml-2" />
               </a>
             </Button>
+            
+            <Button
+              onClick={onShowQR}
+              variant="outline"
+              size="sm"
+              className="flex rounded-full text-muted-foreground hover:text-foreground bg-background shrink-0 gap-1.5 px-3"
+            >
+              <QrCode className="w-4 h-4" />
+              <span className="hidden sm:inline">QR</span>
+            </Button>
+            
             <div className="flex items-center gap-1">
               <ThemeToggle />
             </div>
