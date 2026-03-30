@@ -6,6 +6,7 @@ import Image from "next/image";
 import LinkThumbnail from "@/components/ui/LinkThumbnail";
 import ShareTrigger from "@/components/shareTrigger";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
+import FloatingQR from "@/components/FloatingQR";
 import {
     getThemeStyles,
     DBTheme
@@ -96,7 +97,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
             >
                 {/* Main Content Card - Uses Primary BG */}
                 <div
-                    className="w-full sm:max-w-lg min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
+                    className="w-full max-w-md mx-auto min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
                     style={{ backgroundColor: 'var(--theme-bg-primary)' }}
                 >
                     <div className="absolute top-4 right-4 z-20">
@@ -165,6 +166,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                     </div>
                 </div>
             </div>
+            <FloatingQR slug={linkPage.slug} />
         </AnimatedContainer>
     );
 }

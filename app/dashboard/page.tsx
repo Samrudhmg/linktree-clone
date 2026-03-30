@@ -13,6 +13,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import CreatePageForm from "@/components/dashboard/CreatePageForm";
 import PageList from "@/components/dashboard/PageList";
 import PageInfoCard from "@/components/dashboard/PageInfoCard";
+import ShareQRModal from "@/components/ShareQRModal";
 import {
   X,
   Plus,
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("links");
   const [showSidebar, setShowSidebar] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [showCreatePage, setShowCreatePage] = useState(false);
   const [newPageTitle, setNewPageTitle] = useState("");
   const [newPageSlug, setNewPageSlug] = useState("");
@@ -679,7 +681,16 @@ export default function Dashboard() {
               activePage={activePage}
               onShowSidebar={() => setShowSidebar(true)}
               onShowPreview={() => setShowPreview(true)}
+              onShowQR={() => setShowQR(true)}
             />
+
+            {showQR && activePage && (
+              <ShareQRModal
+                url={typeof window !== "undefined" ? `${window.location.origin}/${activePage.slug}` : `https://yourdomain.com/${activePage.slug}`}
+                isOpen={showQR}
+                onOpenChange={setShowQR}
+              />
+            )}
 
             {/* Mobile Link to Profile */}
             {activePage && (
