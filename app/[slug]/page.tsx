@@ -6,7 +6,7 @@ import Image from "next/image";
 import LinkThumbnail from "@/components/ui/LinkThumbnail";
 import ShareTrigger from "@/components/shareTrigger";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
-import FloatingQR from "@/components/FloatingQR";
+import { ScrollHide } from "@/components/animated/ScrollHide";
 import {
     getThemeStyles,
     DBTheme
@@ -34,7 +34,8 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
     if (pageError || !linkPage) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0f0f1a]">
+            <div className="min-h-screen flex items-center justify-center bg-
+            [#0f0f1a]">
                 <div className="text-center text-white">
                     <h1 className="text-4xl font-bold mb-4">404</h1>
                     <p className="text-white/70">This page doesn&apos;t exist</p>
@@ -92,31 +93,33 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     return (
         <AnimatedContainer>
             <div
-                className={`min-h-dvh flex items-start sm:items-center justify-center px-0 sm:px-4 py-0 sm:py-8 ${fontClass}`}
+                className={`min-h-dvh flex flex-col items-center px-0 sm:px-4 pt-0 sm:pt-12 ${fontClass}`}
                 style={{ ...themeStyles, backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text-primary)' }}
             >
                 {/* Main Content Card - Uses Primary BG */}
                 <div
-                    className="w-full max-w-md mx-auto min-h-dvh sm:min-h-0 sm:rounded-3xl relative animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-clip shadow-2xl"
+                    className="w-full flex-1 sm:max-w-[560px] min-h-[105vh] sm:rounded-t-3xl sm:rounded-b-none relative animate-in fade-in slide-in-from-bottom-4 duration-500 shadow-2xl"
                     style={{ backgroundColor: 'var(--theme-bg-primary)' }}
                 >
                     <div className="absolute top-4 right-4 z-20">
-                        <ShareTrigger
-                            link={{
-                                url: typeof window !== "undefined" ? window.location.href : "",
-                                title: linkPage.display_name || "My links",
-                                thumbnail_url: linkPage.avatar_url || undefined
-                            }}
-                        />
+                        <ScrollHide>
+                            <ShareTrigger
+                                link={{
+                                    url: typeof window !== "undefined" ? window.location.href : "",
+                                    title: linkPage.display_name || "My links",
+                                    thumbnail_url: linkPage.avatar_url || undefined
+                                }}
+                            />
+                        </ScrollHide>
                     </div>
                     {/* Gradient overlay has been removed for CSS Var spec */}
 
-                    <div className="relative z-10 px-6 py-8 sm:px-8 sm:py-10">
+                    <div className="relative z-10 px-6 py-8  sm:px-8 sm:py-10">
                         {/* Profile Header */}
-                        <div className="text-center mb-4 flex flex-col items-center">
+                        <div className="text-center mb-8 flex flex-col items-center">
                             {/* Avatar */}
                             {linkPage.avatar_url && (
-                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4 border-b border-white/10" : "flex justify-center mb-3"}`}>
+                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4 border-b border-white/10" : "flex justify-center mb-6"}`}>
                                     <LinkThumbnail
                                         thumbnailUrl={linkPage.avatar_url}
                                         shape={activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle'}
@@ -126,7 +129,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                                 </div>
                             )}
                             <h1
-                                className="wrap-break-word px-2 mb-1 leading-tight"
+                                className="wrap-break-word px-2 mb-3 leading-tight"
                                 style={{
                                     color: 'var(--theme-title-color)',
                                     fontSize: 'var(--theme-title-size)',
@@ -166,7 +169,6 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                     </div>
                 </div>
             </div>
-            <FloatingQR slug={linkPage.slug} />
         </AnimatedContainer>
     );
 }
