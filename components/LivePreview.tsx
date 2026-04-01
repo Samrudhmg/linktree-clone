@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { LinkIcon } from "./LinkIcon";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import {
   getThemeStyles
@@ -47,7 +45,7 @@ export default function LivePreview({
 
   // For avatar shapes and fonts, we can use simple defaults since they aren't fully migrated yet 
   // or we can remove them if they aren't part of the new Theme spec
-  const avatarShapeClass = "rounded-full"; // Defaulting back to rounded full
+  // or we can remove them if they aren't part of the new Theme spec
   const fontClass = "font-sans"; // Defaulting back to sans until font integration is specified
 
   // Helper for component dynamic styles
@@ -67,7 +65,7 @@ export default function LivePreview({
         color: '#000000',
         '--theme-link-text': '#000000',
         '--theme-link-subtext': '#666666'
-      } as any;
+      } as React.CSSProperties;
     } else {
       // Simple robust accent style (Solid with subtle gradient for depth)
       baseStyle = {

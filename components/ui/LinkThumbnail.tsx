@@ -30,6 +30,7 @@ export default function LinkThumbnail({
 
   // Reset error state when URL changes to allow retrying/instantly showing new uploads
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setImageError(false);
   }, [thumbnailUrl]);
 

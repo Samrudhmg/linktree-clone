@@ -37,7 +37,7 @@ export interface LinkPage {
   created_at?: string;
   updated_at?: string;
   // Joined/Virtual data
-  theme?: any; // To hold joined theme data from themes table
+  theme?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 export interface Link {
@@ -69,7 +69,7 @@ export interface Theme {
   type: "default" | "user";
   user_id?: string | null;
   page_id?: string | null;
-  config: any; // Using any for now to match joined data, ideally DBTheme
+  config: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   created_at: string;
   updated_at: string;
 }

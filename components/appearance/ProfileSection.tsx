@@ -36,7 +36,7 @@ export default function ProfileSection({ profile, updateProfile }: ProfileSectio
         <div className="relative group">
           <div
             className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-muted ring-4 ring-border-main transform translate-z-0"
-            style={{ isolation: 'isolate' as any }}
+            style={{ isolation: 'isolate' } as React.CSSProperties}
           >
             {profile?.avatar_url ? (
               <Image

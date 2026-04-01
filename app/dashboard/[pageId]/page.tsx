@@ -14,6 +14,7 @@ import CreatePageForm from "@/components/dashboard/CreatePageForm";
 import PageList from "@/components/dashboard/PageList";
 import PageInfoCard from "@/components/dashboard/PageInfoCard";
 import DashboardSkeleton from "@/components/skeletons/DashboardSkeleton";
+import ShareQRModal from "@/components/ShareQRModal";
 import {
   X,
   Plus,
@@ -64,6 +65,7 @@ export default function Dashboard() {
   const [autoEditProfile, setAutoEditProfile] = useState(false);
   // Stable theme to prevent flickering
   const [stableTheme, setStableTheme] = useState<DBTheme | null>(null);
+  const [showQR, setShowQR] = useState(false);
 
 
   useEffect(() => {
@@ -147,7 +149,7 @@ export default function Dashboard() {
     }
   };
 
-  const fetchThemes = async (userId: string, pageId?: string) => {
+  const fetchThemes = async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from("themes")
@@ -220,13 +222,13 @@ export default function Dashboard() {
         setActivePage(defaultPage);
         await Promise.all([
           fetchLinks(defaultPage.id),
-          fetchThemes(userId, defaultPage.id)
+          fetchThemes(userId)
         ]);
       } else if (activePage) {
         // Refresh the active page data
         const updatedPage = data?.find(p => p.id === activePage.id);
         if (updatedPage) setActivePage(updatedPage);
-        await fetchThemes(userId, activePage.id);
+        await fetchThemes(userId);
       }
     } catch (err) {
       console.error("Unexpected error fetching pages:", err);
@@ -694,6 +696,7 @@ export default function Dashboard() {
               activePage={activePage}
               onShowSidebar={() => setShowSidebar(true)}
               onShowPreview={() => setShowPreview(true)}
+              onShowQR={() => setShowQR(true)}
             />
 
             {/* Mobile Link to Profile */}
@@ -778,7 +781,7 @@ export default function Dashboard() {
                       themes={themes}
                       pages={pages}
                       user={user!}
-                      refreshThemes={async () => { if (user) await fetchThemes(user.id, activePage.id); }}
+                      refreshThemes={async () => { if (user) await fetchThemes(user.id); }}
                       onPreviewChange={setEditingThemePreview}
                     />
 
@@ -945,6 +948,12 @@ export default function Dashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <ShareQRModal 
+        url={typeof window !== "undefined" && activePage ? `${window.location.protocol}//${window.location.host}/${activePage.slug}` : ""}
+        isOpen={showQR}
+        onOpenChange={setShowQR}
+      />
     </div>
   );
 }
