@@ -5,7 +5,7 @@ import { DBTheme } from "@/lib/theme-utils";
 import { MoreVertical } from "lucide-react";
 import LinkThumbnail from "./ui/LinkThumbnail";
 import ShareModal from "./ShareModal";
-import { Link, LinkPage } from "@/lib/types";
+import { Link } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
 export default function PublicLinkItem({
@@ -47,7 +47,7 @@ export default function PublicLinkItem({
         color: '#000000',
         '--theme-link-text': '#000000',
         '--theme-link-subtext': '#666666'
-      } as any;
+      } as React.CSSProperties;
     } else {
       // Simple robust accent style (Solid with subtle gradient for depth)
       baseStyle = {

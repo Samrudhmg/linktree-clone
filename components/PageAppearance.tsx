@@ -3,8 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Palette, ChevronDown, Check, Loader2 } from "lucide-react";
 import ThemeSection from "./appearance/ThemeSection";
-import AvatarSection from "./appearance/AvatarSection";
-import { LinkPage, AvatarStyle } from "@/lib/types";
+import { LinkPage } from "@/lib/types";
 import { DBTheme } from "@/lib/theme-utils";
 import { User } from "@supabase/supabase-js";
 import { Card } from "@/components/ui/card";
@@ -33,6 +32,7 @@ export default function PageAppearance({ page, updatePage, onAppearanceChange, t
   // Sync optimistic state when page.theme_id updates from DB
   useEffect(() => {
     if (page?.theme_id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setOptimisticThemeId(page.theme_id);
     }
   }, [page?.theme_id]);

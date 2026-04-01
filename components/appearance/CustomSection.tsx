@@ -3,7 +3,7 @@ import { Palette, Type, User as UserIcon, Upload, Loader2, X, LayoutGrid } from 
 import ColorPicker from "../ui/ColorPicker";
 import { FONT_OPTIONS, uploadLinkImage } from "@/lib/themes";
 import { createClient } from "@/lib/supabase-browser";
-import { LinkPage } from "@/lib/types";
+import { LinkPage, AvatarStyle } from "@/lib/types";
 
 interface CustomSectionProps {
   profile: LinkPage;
@@ -187,9 +187,9 @@ export default function CustomSection({ profile, updateProfile }: CustomSectionP
             <button
               key={opt.value}
               onClick={() => {
-                setAvatarStyle(opt.value as any);
+                setAvatarStyle(opt.value as AvatarStyle);
                 updateProfile({
-                  avatar_style: opt.value as any,
+                  avatar_style: opt.value as AvatarStyle,
                   theme_id: null
                 });
               }}

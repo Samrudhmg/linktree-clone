@@ -4,9 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { createClient } from "@/lib/supabase-browser";
 import Image from "next/image";
 import { Camera, Loader2, Upload, Trash2, Pencil, Check, X, RefreshCw } from "lucide-react";
-import { LinkPage, AvatarStyle, Profile } from "@/lib/types";
+import { LinkPage, Profile } from "@/lib/types";
 import { User } from "@supabase/supabase-js";
-import { DBTheme } from "@/lib/theme-utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,16 +17,14 @@ export default function ProfileHeader({
   page, 
   updatePage, 
   autoEdit, 
-  onEditComplete,
-  theme 
+  onEditComplete
 }: { 
-  user: User,
-  profile: Profile | null,
-  page: LinkPage | null, 
-  updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>, 
-  autoEdit?: boolean, 
-  onEditComplete?: () => void,
-  theme?: DBTheme | null 
+  user: User;
+  profile: Profile | null;
+  page: LinkPage | null; 
+  updatePage: (data: Partial<LinkPage>) => Promise<{ success?: boolean; error?: unknown }>; 
+  autoEdit?: boolean; 
+  onEditComplete?: () => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState(page?.display_name || "");

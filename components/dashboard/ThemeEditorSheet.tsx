@@ -10,16 +10,9 @@ import ColorPicker from "@/components/ui/ColorPicker";
 import { createClient } from "@/lib/supabase-browser";
 import { Copy, Save, Smartphone, Palette, Check, Loader2, ClipboardCopy, ClipboardPaste, FileText, Lock, Unlock, Shuffle } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { LinkPage, AvatarStyle } from "@/lib/types";
+import { LinkPage } from "@/lib/types";
 import { generateRandomThemeConfig } from "@/lib/theme-utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 
 interface ThemeEditorSheetProps {
   open: boolean;
@@ -43,7 +36,7 @@ const DEFAULT_CONFIG: ThemeConfig = {
   link_thumbnails: { style: "circle", size: 40 }
 };
 
-export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTheme, pages, onSuccess, onPreviewChange, pageId }: ThemeEditorSheetProps) {
+export default function ThemeEditorSheet({ open, onOpenChange, userId, editingTheme, onSuccess, onPreviewChange, pageId }: ThemeEditorSheetProps) {
   const [name, setName] = useState("");
   const [config, setConfig] = useState<ThemeConfig>(DEFAULT_CONFIG);
   const [saving, setSaving] = useState(false);

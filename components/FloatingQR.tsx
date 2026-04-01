@@ -5,14 +5,14 @@ import QRCode from "react-qr-code";
 
 interface FloatingQRProps {
   initialUrl?: string;
-  slug: string;
 }
 
-export default function FloatingQR({ initialUrl, slug }: FloatingQRProps) {
+export default function FloatingQR({ initialUrl }: FloatingQRProps) {
   const [url, setUrl] = useState(initialUrl || "");
 
   useEffect(() => {
     if (typeof window !== "undefined" && !url) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUrl(window.location.href);
     }
   }, [url]);

@@ -252,8 +252,8 @@ export function generateRandomThemeConfig(
       background: { primary: bgPrimary, secondary: bgSecondary },
       text: { primary: textPrimary, secondary: textSecondary },
       links: {
-        style: (locks.links && prevConfig ? prevConfig.links.style : ["outline", "flat", "white", "glass"][Math.floor(Math.random() * 4)]) as any,
-        radius: (locks.links && prevConfig ? prevConfig.links.radius : ["rounded-none", "rounded-2xl", "rounded-full"][Math.floor(Math.random() * 3)]) as any,
+        style: (locks.links && prevConfig ? prevConfig.links.style : ["outline", "flat", "white", "glass"][Math.floor(Math.random() * 4)]) as ThemeLinkConfig["style"],
+        radius: (locks.links && prevConfig ? prevConfig.links.radius : ["rounded-none", "rounded-2xl", "rounded-full"][Math.floor(Math.random() * 3)]),
       },
       button: { variant: "solid", accent },
       title: { 

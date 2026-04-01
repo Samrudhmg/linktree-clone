@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import { AvatarStyle } from "@/lib/types";
 
 interface AvatarSectionProps {

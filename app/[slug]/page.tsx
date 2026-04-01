@@ -2,7 +2,6 @@ import { supabase } from "@/lib/supabase";
 import type { PostgrestError } from "@supabase/supabase-js";
 import PublicLinkItem from "@/components/PublicLinkItem";
 import { unstable_noStore as noStore } from 'next/cache';
-import Image from "next/image";
 import LinkThumbnail from "@/components/ui/LinkThumbnail";
 import ShareTrigger from "@/components/shareTrigger";
 import { AnimatedContainer } from "@/components/animated/AnimatedContainer";
@@ -57,7 +56,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
     // Normalize and filter enabled links (matching dashboard's logic for NULL/undefined)
     const links = (allLinks || []).filter(link => 
-        link.enabled === true || link.enabled === null || (link.enabled as any) === undefined
+        link.enabled === true || link.enabled === null || (link.enabled as unknown) === undefined
     );
 
     // Fetch the active theme (New system: theme_id only)

@@ -1,7 +1,7 @@
 "use client";
 
 import LinkItemSkeleton from "./LinkItemSkeleton";
-import { Plus, Pencil, ExternalLink, Globe, Layout, Palette, Settings, LogOut, Moon, Sun } from "lucide-react";
+import { Plus, Pencil, Palette } from "lucide-react";
 
 export default function DashboardSkeleton() {
   return (

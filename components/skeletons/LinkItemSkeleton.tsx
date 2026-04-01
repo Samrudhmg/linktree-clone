@@ -1,7 +1,6 @@
 "use client";
 
-import { GripVertical, Pencil, Trash2, MoreVertical } from "lucide-react";
-import { cn } from "@/utils/cn";
+import { GripVertical, Pencil, Trash2 } from "lucide-react";
 
 export default function LinkItemSkeleton() {
   return (
