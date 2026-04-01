@@ -141,21 +141,25 @@ export default function LivePreview({
               <div className="flex-1 overflow-y-auto p-4 pt-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <AnimatePresence mode="popLayout" initial={false}>
                   {/* Avatar */}
-                  <motion.div
-                    key="avatar"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="flex justify-center mb-3 mt-4"
-                  >
-                    <LinkThumbnail
-                      thumbnailUrl={page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || undefined}
-                      shape={theme?.config.avatar?.style || page?.avatar_style || 'circle'}
-                      pixels={theme?.config.avatar?.size || page?.avatar_size || 64}
-                      className="border-2 border-white/20 shadow-sm"
-                      fallback={(page?.display_name || page?.title || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase() || "U"}
-                    />
-                  </motion.div>
+                  {(() => {
+                    const avatarStyle = theme?.config?.avatar?.style || page?.avatar_style || 'circle';
+                    return (
+                      <motion.div
+                        key="avatar"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className={avatarStyle === 'full' ? "-mx-4 -mt-6 mb-4" : "flex justify-center mb-3 mt-4"}
+                      >
+                        <LinkThumbnail
+                          thumbnailUrl={page?.avatar_url || profile?.avatar_url || user?.user_metadata?.picture || user?.user_metadata?.avatar_url || undefined}
+                          shape={avatarStyle}
+                          pixels={avatarStyle === 'full' ? undefined : (theme?.config?.avatar?.size ?? page?.avatar_size ?? 64)}
+                          fallback={(page?.display_name || page?.title || user?.user_metadata?.full_name || user?.email?.split('@')[0] || "U")[0]?.toUpperCase() || "U"}
+                        />
+                      </motion.div>
+                    );
+                  })()}
 
                   {/* Name */}
                   <motion.h2

@@ -117,16 +117,18 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                         {/* Profile Header */}
                         <div className="text-center mb-8 flex flex-col items-center">
                             {/* Avatar */}
-                            {linkPage.avatar_url && (
-                                <div className={`${linkPage.avatar_style === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4 border-b border-white/10" : "flex justify-center mb-6"}`}>
+                            {linkPage.avatar_url && (() => {
+                                const avatarStyle = activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle';
+                                return (
+                                <div className={`${avatarStyle === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4" : "flex justify-center mb-6"}`}>
                                     <LinkThumbnail
                                         thumbnailUrl={linkPage.avatar_url}
-                                        shape={activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle'}
-                                        pixels={activeTheme?.config.avatar?.size || linkPage.avatar_size || 96}
-                                        className="border-2 border-white/20 shadow-main"
+                                        shape={avatarStyle}
+                                        pixels={avatarStyle === 'full' ? undefined : (activeTheme?.config.avatar?.size ?? linkPage.avatar_size ?? 96)}
                                     />
                                 </div>
-                            )}
+                                );
+                            })()}
                             <h1
                                 className="wrap-break-word px-2 mb-3 leading-tight"
                                 style={{
