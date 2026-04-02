@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 // Allowed email domain - only @eltglobal.in users can sign in
-// const ALLOWED_DOMAIN = "eltglobal.in";
+const ALLOWED_DOMAIN = "eltglobal.in";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      Get the user's email to validate domain
+      // Get the user's email to validate domain
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user?.email) {
