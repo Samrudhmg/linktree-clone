@@ -770,7 +770,6 @@ export default function Dashboard() {
                       updatePage={updatePage}
                       autoEdit={autoEditProfile}
                       onEditComplete={() => setAutoEditProfile(false)}
-                      theme={deriveActiveTheme()}
                     />
 
                     {/* Page Appearance (collapsible, inline) */}

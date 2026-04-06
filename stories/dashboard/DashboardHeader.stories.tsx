@@ -25,6 +25,7 @@ const meta = {
   args: {
     onShowSidebar: fn(),
     onShowPreview: fn(),
+    onShowQR: fn(),
   },
 } satisfies Meta<typeof DashboardHeader>;
 
