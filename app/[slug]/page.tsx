@@ -37,7 +37,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
             [#0f0f1a]">
                 <div className="text-center text-white">
                     <h1 className="text-4xl font-bold mb-4">404</h1>
-                    <p className="text-white/70">This page doesn&apos;t exist</p>
+                    <p className="text-white/70">This page doesn&apos;t exist in DB</p>
                 </div>
             </div>
         );
