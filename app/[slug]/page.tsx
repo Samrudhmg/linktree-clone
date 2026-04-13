@@ -55,7 +55,7 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
     }
 
     // Normalize and filter enabled links (matching dashboard's logic for NULL/undefined)
-    const links = (allLinks || []).filter(link => 
+    const links = (allLinks || []).filter(link =>
         link.enabled === true || link.enabled === null || (link.enabled as unknown) === undefined
     );
 
@@ -120,13 +120,13 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
                             {linkPage.avatar_url && (() => {
                                 const avatarStyle = activeTheme?.config.avatar?.style || linkPage.avatar_style || 'circle';
                                 return (
-                                <div className={`${avatarStyle === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4" : "flex justify-center mb-6"}`}>
-                                    <LinkThumbnail
-                                        thumbnailUrl={linkPage.avatar_url}
-                                        shape={avatarStyle}
-                                        pixels={avatarStyle === 'full' ? undefined : (activeTheme?.config.avatar?.size ?? linkPage.avatar_size ?? 96)}
-                                    />
-                                </div>
+                                    <div className={`${avatarStyle === "full" ? "-mx-6 sm:-mx-8 -mt-8 sm:-mt-10 mb-4" : "flex justify-center mb-6"}`}>
+                                        <LinkThumbnail
+                                            thumbnailUrl={linkPage.avatar_url}
+                                            shape={avatarStyle}
+                                            pixels={avatarStyle === 'full' ? undefined : (activeTheme?.config.avatar?.size ?? linkPage.avatar_size ?? 96)}
+                                        />
+                                    </div>
                                 );
                             })()}
                             <h1
