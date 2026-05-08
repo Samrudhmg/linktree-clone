@@ -79,7 +79,7 @@ function LoginContent() {
       </motion.div>
     </div>
   )
-}
+};
 
 export default function Login() {
   return (
