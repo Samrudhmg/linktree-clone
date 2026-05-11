@@ -87,7 +87,7 @@ export default function Login() {
       <div className="min-h-screen flex items-center justify-center bg-bg-main">
         <div className="text-text-main text-xl">Loading....</div>
       </div>
-    }>;
+    }>
       <LoginContent />
     </Suspense>
   )
