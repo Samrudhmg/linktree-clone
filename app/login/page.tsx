@@ -78,7 +78,7 @@ function LoginContent() {
         </Card>
       </motion.div>
     </div>
-  );
+  )
 }
 
 export default function Login() {
