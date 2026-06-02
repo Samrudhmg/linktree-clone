@@ -72,9 +72,9 @@ function LoginContent() {
         </Button>
 
         {/* Footer */}
-        <p className="mt-8 text-sm text-text-secondary">
+        {/* <p className="mt-8 text-sm text-text-secondary">
           Only @eltglobal.in emails allowed
-        </p>
+        </p> */}
         </Card>
       </motion.div>
     </div>
